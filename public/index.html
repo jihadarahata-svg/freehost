@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free HTML Hosting</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; min-height: 100vh; }
+    .box { max-width: 600px; margin: 0 auto; background: #151515; border: 1px solid #222; border-radius: 16px; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 6px; }
+    p.sub { color: #888; font-size: 13px; margin-bottom: 20px; }
+    label { font-size: 12px; color: #aaa; display: block; margin-bottom: 4px; margin-top: 12px; }
+    textarea, input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; }
+    textarea { height: 180px; resize: vertical; font-family: monospace; }
+    button { width: 100%; padding: 14px; background: #fff; color: #000; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; margin-top: 16px; cursor: pointer; }
+    button:disabled { opacity: 0.5; }
+    .result { margin-top: 16px; padding: 14px; background: #0a0a0a; border: 1px solid #1a4d1a; border-radius: 8px; display: none; }
+    .result.show { display: block; }
+    .result a { color: #4ade80; word-break: break-all; font-size: 13px; }
+    .copy { margin-top: 8px; padding: 8px 14px; background: #222; color: #fff; font-size: 13px; width: auto; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>🚀 Free HTML Hosting</h1>
+    <p class="sub">HTML পেস্ট করো → সাথে সাথে লিংক পাও</p>
+
+    <label>HTML Code</label>
+    <textarea id="html" placeholder="&lt;h1&gt;Hello World&lt;/h1&gt;"></textarea>
+
+    <label>Title (ঐচ্ছিক)</label>
+    <input id="title" placeholder="My Page">
+
+    <label>Custom Slug (ঐচ্ছিক)</label>
+    <input id="slug" placeholder="my-page">
+
+    <label>Password (ঐচ্ছিক)</label>
+    <input id="password" type="password" placeholder="••••••">
+
+    <button id="btn" onclick="create()">Host Now 🚀</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    async function create() {
+      const btn = document.getElementById('btn');
+      const result = document.getElementById('result');
+      btn.disabled = true;
+      btn.textContent = 'Uploading...';
+
+      try {
+        const res = await fetch('/api/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            html: document.getElementById('html').value,
+            title: document.getElementById('title').value,
+            slug: document.getElementById('slug').value,
+            password: document.getElementById('password').value
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        result.innerHTML =
+          '<div>✅ লিংক তৈরি হয়েছে:</div>' +
+          '<a href="' + data.url + '" target="_blank">' + data.url + '</a><br>' +
+          '<button class="copy" onclick="navigator.clipboard.writeText(\'' + data.url + '\'); this.textContent=\'Copied ✓\'">Copy Link</button>';
+        result.classList.add('show');
+      } catch (e) {
+        result.innerHTML = '❌ ' + e.message;
+        result.classList.add('show');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Host Now 🚀';
+    }
+  </script>
+</body>
+</html>
