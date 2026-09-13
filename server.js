@@ -89,6 +89,14 @@ app.get('/api/admin/list', adminAuth, async (req, res) => {
   res.json(list);
 });
 
+app.get('/api/admin/list-full', adminAuth, async (req, res) => {
+  const list = await pages
+    .find({}, { projection: { password: 0 } })
+    .sort({ createdAt: -1 })
+    .toArray();
+  res.json(list);
+});
+
 app.delete('/api/admin/delete/:id', adminAuth, async (req, res) => {
   await pages.deleteOne({ _id: req.params.id });
   res.json({ success: true });
