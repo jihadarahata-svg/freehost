@@ -28,6 +28,7 @@ function adminAuth(req, res, next) {
   next();
 }
 
+// নতুন page বানানো
 app.post('/api/create', async (req, res) => {
   try {
     const { html, slug, password, title } = req.body;
@@ -51,27 +52,81 @@ app.post('/api/create', async (req, res) => {
   }
 });
 
+// ===== Password check helper =====
+async function checkPassword(page, req) {
+  if (!page.password) return true;
+  const pass = req.query.pass;
+  if (!pass) return false;
+  return await bcrypt.compare(pass, page.password);
+}
+
+function passwordForm(id) {
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>Protected</title></head>' +
+    '<body style="font-family:sans-serif;text-align:center;padding:50px;background:#0a0a0a;color:#fff">' +
+    '<h2>🔒 Password Protected</h2>' +
+    '<form method="GET" action="/p/' + id + '">' +
+    '<input type="password" name="pass" placeholder="Password" ' +
+    'style="padding:12px;font-size:16px;border-radius:8px;border:1px solid #333;background:#151515;color:#fff;margin-top:20px"/>' +
+    '<br><button style="padding:12px 24px;font-size:16px;margin-top:12px;border-radius:8px;border:none;background:#fff;color:#000;font-weight:700;cursor:pointer">Enter</button>' +
+    '</form></body></html>';
+}
+
+// ===== Main view - শুধু iframe পাঠায় =====
 app.get('/p/:id', async (req, res) => {
-  const page = await pages.findOne({ _id: req.params.id });
-  if (!page) return res.status(404).send('<h1>404 Not Found</h1>');
+  try {
+    const page = await pages.findOne({ _id: req.params.id });
+    if (!page) return res.status(404).send('<h1>404 Not Found</h1>');
 
-  if (page.password) {
-    const pass = req.query.pass;
-    if (!pass || !(await bcrypt.compare(pass, page.password))) {
-      return res.send(
-        '<body style="font-family:sans-serif;text-align:center;padding:50px">' +
-        '<h2>🔒 Password Protected</h2>' +
-        '<form method="GET">' +
-        '<input type="password" name="pass" placeholder="Password" style="padding:10px;font-size:16px"/>' +
-        '<button style="padding:10px 20px;font-size:16px">Enter</button>' +
-        '</form></body>'
-      );
+    if (!(await checkPassword(page, req))) {
+      return res.send(passwordForm(req.params.id));
     }
-  }
 
-  await pages.updateOne({ _id: req.params.id }, { $inc: { views: 1 } });
-  res.send(page.html);
+    await pages.updateOne({ _id: req.params.id }, { $inc: { views: 1 } });
+
+    const embedUrl = '/embed/' + req.params.id + (req.query.pass ? '?pass=' + encodeURIComponent(req.query.pass) : '');
+
+    res.send(
+      '<!DOCTYPE html>' +
+      '<html>' +
+      '<head>' +
+        '<meta charset="UTF-8">' +
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+        '<title>' + (page.title || 'Page') + '</title>' +
+        '<style>' +
+          '*{margin:0;padding:0;box-sizing:border-box}' +
+          'html,body{width:100%;height:100%;overflow:hidden;background:#fff}' +
+          'iframe{width:100%;height:100vh;border:none;display:block}' +
+        '</style>' +
+      '</head>' +
+      '<body>' +
+        '<iframe src="' + embedUrl + '" sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"></iframe>' +
+      '</body>' +
+      '</html>'
+    );
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
 });
+
+// ===== Embed route - আসল HTML এখানে =====
+app.get('/embed/:id', async (req, res) => {
+  try {
+    const page = await pages.findOne({ _id: req.params.id });
+    if (!page) return res.status(404).send('<h1>404 Not Found</h1>');
+
+    if (!(await checkPassword(page, req))) {
+      return res.status(403).send('Forbidden');
+    }
+
+    res.send(page.html);
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
+});
+
+// ===== Admin routes =====
 
 app.post('/api/admin/login', (req, res) => {
   if (req.body.password === ADMIN_PASSWORD) {
