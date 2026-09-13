@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; padding: 16px; }
+    .login { max-width: 400px; margin: 80px auto; background: #151515; border: 1px solid #222; border-radius: 16px; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 16px; }
+    input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; }
+    button { padding: 12px 18px; background: #fff; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 12px; }
+    button.full { width: 100%; }
+    button.red { background: #dc2626; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
+    button.sm { padding: 6px 10px; font-size: 12px; margin: 0; }
+    button.green { background: #16a34a; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
+    #dash { display: none; }
+    #dash.show { display: block; }
+    .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+    .stats { display: flex; gap: 12px; margin-bottom: 16px; }
+    .card { flex: 1; background: #151515; border: 1px solid #222; border-radius: 12px; padding: 16px; }
+    .num { font-size: 26px; font-weight: 700; color: #4ade80; }
+    .lbl { font-size: 11px; color: #888; margin-top: 2px; }
+    .page-item { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+    .page-item h3 { font-size: 15px; margin-bottom: 6px; }
+    .page-item .link { color: #4ade80; font-size: 12px; word-break: break-all; display: block; margin-bottom: 8px; }
+    .page-item .meta { font-size: 11px; color: #888; margin-bottom: 10px; }
+    .page-item .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .empty { text-align: center; color: #666; padding: 40px; font-size: 14px; }
+    .code-box {
+      display: none;
+      margin-top: 12px;
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 12px;
+      max-height: 400px;
+      overflow: auto;
+    }
+    .code-box.show { display: block; }
+    .code-box pre {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #4ade80;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login" id="login">
+    <h1>🔐 Admin Login</h1>
+    <input id="pass" type="password" placeholder="Password" onkeypress="if(event.key==='Enter') doLogin()">
+    <button class="full" onclick="doLogin()">Login</button>
+    <p id="err" style="color:#f87171;font-size:13px;margin-top:10px"></p>
+  </div>
+
+  <div id="dash">
+    <div class="head">
+      <h1 style="font-size:20px">📊 Admin Panel</h1>
+      <div>
+        <button class="sm" onclick="load()">🔄 Refresh</button>
+        <button class="sm" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="card"><div class="num" id="tp">0</div><div class="lbl">Total Pages</div></div>
+      <div class="card"><div class="num" id="tv">0</div><div class="lbl">Total Views</div></div>
+    </div>
+
+    <div id="list"><div class="empty">Loading...</div></div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('adm_token');
+    let allPages = [];
+    if (token) showDash();
+
+    async function doLogin() {
+      const password = document.getElementById('pass').value;
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        token = data.token;
+        localStorage.setItem('adm_token', token);
+        showDash();
+      } else {
+        document.getElementById('err').textContent = '❌ ভুল পাসওয়ার্ড';
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('adm_token');
+      location.reload();
+    }
+
+    function showDash() {
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('dash').classList.add('show');
+      load();
+    }
+
+    async function load() {
+      const h = { 'x-admin-token': token };
+      const pRes = await fetch('/api/admin/list-full', { headers: h });
+      const sRes = await fetch('/api/admin/stats', { headers: h });
+
+      if (pRes.status === 401) return logout();
+
+      allPages = await pRes.json();
+      const stats = await sRes.json();
+
+      document.getElementById('tp').textContent = stats.totalPages;
+      document.getElementById('tv').textContent = stats.totalViews;
+
+      const list = document.getElementById('list');
+      if (!allPages.length) {
+        list.innerHTML = '<div class="empty">এখনো কিছু host হয়নি</div>';
+        return;
+      }
+
+      list.innerHTML = allPages.map(function(p) {
+        const safeHtml = esc(p.html || '');
+        return '<div class="page-item">' +
+          '<h3>' + esc(p.title) + '</h3>' +
+          '<a class="link" href="/p/' + p._id + '" target="_blank">/p/' + p._id + '</a>' +
+          '<div class="meta">👁 ' + p.views + ' views · ' + new Date(p.createdAt).toLocaleString('bn-BD') + (p.password ? ' · 🔒 Locked' : '') + '</div>' +
+          '<div class="btns">' +
+            '<button class="green" onclick="toggleCode(\'' + p._id + '\')">📄 View Code</button>' +
+            '<button class="sm" onclick="copy(\'' + p._id + '\')">🔗 Copy Link</button>' +
+            '<button class="sm" onclick="copyCode(\'' + p._id + '\')">📋 Copy Code</button>' +
+            '<button class="red" onclick="del(\'' + p._id + '\', \'' + esc(p.title) + '\')">🗑 Delete</button>' +
+          '</div>' +
+          '<div class="code-box" id="code-' + p._id + '">' +
+            '<pre>' + safeHtml + '</pre>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function toggleCode(id) {
+      const box = document.getElementById('code-' + id);
+      box.classList.toggle('show');
+    }
+
+    function copy(id) {
+      const url = location.origin + '/p/' + id;
+      navigator.clipboard.writeText(url);
+      alert('✅ Link কপি হয়েছে:\n' + url);
+    }
+
+    function copyCode(id) {
+      const page = allPages.find(function(p) { return p._id === id; });
+      if (page && page.html) {
+        navigator.clipboard.writeText(page.html);
+        alert('✅ HTML code কপি হয়েছে!');
+      }
+    }
+
+    async function del(id, title) {
+      if (!confirm('"' + title + '" ডিলিট করবে?')) return;
+      await fetch('/api/admin/delete/' + id, {
+        method: 'DELETE',
+        headers: { 'x-admin-token': token }
+      });
+      load();
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/[&<>"]/g, function(c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+  </script>
+</body>
+</html>
