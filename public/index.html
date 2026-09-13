@@ -1,80 +1,799 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Free HTML Hosting</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; min-height: 100vh; }
-    .box { max-width: 600px; margin: 0 auto; background: #151515; border: 1px solid #222; border-radius: 16px; padding: 24px; }
-    h1 { font-size: 24px; margin-bottom: 6px; }
-    p.sub { color: #888; font-size: 13px; margin-bottom: 20px; }
-    label { font-size: 12px; color: #aaa; display: block; margin-bottom: 4px; margin-top: 12px; }
-    textarea, input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; }
-    textarea { height: 180px; resize: vertical; font-family: monospace; }
-    button { width: 100%; padding: 14px; background: #fff; color: #000; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; margin-top: 16px; cursor: pointer; }
-    button:disabled { opacity: 0.5; }
-    .result { margin-top: 16px; padding: 14px; background: #0a0a0a; border: 1px solid #1a4d1a; border-radius: 8px; display: none; }
-    .result.show { display: block; }
-    .result a { color: #4ade80; word-break: break-all; font-size: 13px; }
-    .copy { margin-top: 8px; padding: 8px 14px; background: #222; color: #fff; font-size: 13px; width: auto; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free HTML Hosting</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0a0f;
+    color: #fff;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  
+  .glow {
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1000px;
+    height: 800px;
+    background: radial-gradient(ellipse at center, rgba(139,92,246,0.2), rgba(59,130,246,0.1) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 24px 24px 100px;
+  }
+  
+  /* Nav */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    margin-bottom: 60px;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+  }
+  .nav-brand-mark {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 5px 20px rgba(139,92,246,0.5);
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    font-size: 14px;
+  }
+  .nav-links a {
+    color: #a1a1aa;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.2s;
+  }
+  .nav-links a:hover { color: #fff; }
+  .nav-cta {
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #fff !important;
+  }
+  .nav-cta:hover { background: rgba(255,255,255,0.1) !important; }
+  @media (max-width: 700px) { .nav-links a:not(.nav-cta) { display: none; } }
+  
+  /* Hero */
+  .hero {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(139,92,246,0.1);
+    border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 30px;
+    font-size: 12px;
+    color: #c4b5fd;
+    font-weight: 600;
+    margin-bottom: 24px;
+    letter-spacing: 0.2px;
+  }
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    background: #a78bfa;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #a78bfa;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  h1 {
+    font-size: clamp(38px, 7vw, 68px);
+    font-weight: 900;
+    letter-spacing: -2.5px;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  h1 .shimmer {
+    background: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 30%, #ec4899 70%, #f59e0b 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: #a1a1aa;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  
+  /* Main Card */
+  .card {
+    background: linear-gradient(180deg, #101018 0%, #0d0d14 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 
+      0 0 0 1px rgba(139,92,246,0.05),
+      0 40px 80px -20px rgba(0,0,0,0.9),
+      0 0 100px -50px rgba(139,92,246,0.5);
+  }
+  
+  /* Editor */
+  .editor {
+    background: #05050a;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    transition: 0.2s;
+  }
+  .editor:focus-within {
+    border-color: rgba(139,92,246,0.4);
+    box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
+  }
+  .editor-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .editor-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .dots { display: flex; gap: 6px; }
+  .dot-c {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+  }
+  .dot-c.r { background: #ff5f57; }
+  .dot-c.y { background: #febc2e; }
+  .dot-c.g { background: #28c840; }
+  .editor-tab {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 12px;
+    color: #c4b5fd;
+    padding: 4px 10px;
+    background: rgba(139,92,246,0.1);
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .editor-meta {
+    font-size: 11px;
+    color: #52525b;
+    font-family: 'SF Mono', monospace;
+  }
+  #html {
+    width: 100%;
+    min-height: 220px;
+    padding: 18px;
+    background: transparent;
+    border: none;
+    color: #e4e4e7;
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    outline: none;
+    resize: vertical;
+    tab-size: 2;
+  }
+  #html::placeholder { color: #3f3f46; }
+
+  /* ============ OPTIONS SECTION ============ */
+  .options-section {
+    background: rgba(255,255,255,0.015);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .options-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  
+  .options-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e4e4e7;
+    letter-spacing: -0.1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .options-title-icon {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(99,102,241,0.3));
+    border: 1px solid rgba(139,92,246,0.4);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  
+  .options-subtitle {
+    font-size: 11px;
+    color: #71717a;
+    font-weight: 500;
+  }
+  
+  /* Field rows */
+  .field-row {
+    margin-bottom: 16px;
+  }
+  .field-row:last-child { margin-bottom: 0; }
+  
+  .field-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #e4e4e7;
+    margin-bottom: 8px;
+    font-weight: 600;
+    letter-spacing: -0.1px;
+  }
+  
+  .field-label-icon {
+    width: 18px;
+    height: 18px;
+    background: rgba(139,92,246,0.15);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+  }
+  
+  .field-label .optional-tag {
+    font-size: 10px;
+    color: #71717a;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 2px 7px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px;
+    margin-left: 4px;
+  }
+  
+  .field-input-wrap {
+    position: relative;
+  }
+  
+  .field-input-wrap input {
+    width: 100%;
+    padding: 14px 16px 14px 42px;
+    background: rgba(0,0,0,0.4);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 11px;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+    transition: 0.2s;
+  }
+  
+  .field-input-wrap input:focus {
+    border-color: rgba(139,92,246,0.6);
+    background: rgba(139,92,246,0.06);
+    box-shadow: 0 0 0 4px rgba(139,92,246,0.12);
+  }
+  
+  .field-input-wrap input::placeholder { color: #52525b; }
+  
+  .field-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  
+  .field-hint {
+    font-size: 11.5px;
+    color: #71717a;
+    margin-top: 6px;
+    padding-left: 4px;
+    line-height: 1.5;
+  }
+  
+  .field-hint code {
+    background: rgba(139,92,246,0.12);
+    color: #c4b5fd;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: 'SF Mono', monospace;
+  }
+  
+  /* Two-column grid */
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 540px) {
+    .fields-grid { grid-template-columns: 1fr; }
+  }
+  
+  /* Preview of slug */
+  .slug-preview {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #71717a;
+    margin-top: 6px;
+    padding-left: 4px;
+    font-family: 'SF Mono', monospace;
+  }
+  .slug-preview .domain {
+    color: #52525b;
+  }
+  .slug-preview .val {
+    color: #c4b5fd;
+    background: rgba(139,92,246,0.1);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  
+  /* Button */
+  .btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: -0.2px;
+    box-shadow: 
+      0 12px 30px -8px rgba(139,92,246,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 20px 45px -8px rgba(139,92,246,0.7),
+      inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .btn:active:not(:disabled) { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn .kbd {
+    background: rgba(0,0,0,0.25);
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-family: monospace;
+    font-weight: 600;
+  }
+  
+  /* Result */
+  .result {
+    margin-top: 20px;
+    padding: 18px;
+    background: rgba(139,92,246,0.08);
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 12px;
+    display: none;
+  }
+  .result.show {
+    display: block;
+    animation: dropIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .result-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #a78bfa;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .result-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .result-row a {
+    flex: 1;
+    color: #c4b5fd;
+    font-size: 13px;
+    font-family: 'SF Mono', monospace;
+    text-decoration: none;
+    word-break: break-all;
+  }
+  .result-row a:hover { text-decoration: underline; }
+  .mini-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #d4d4d8;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .mini-btn:hover {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+    color: #fff;
+  }
+  
+  /* Features */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 40px;
+  }
+  @media (max-width: 700px) { .features { grid-template-columns: 1fr; } }
+  .feature {
+    padding: 24px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    transition: all 0.25s;
+  }
+  .feature:hover {
+    border-color: rgba(139,92,246,0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px -20px rgba(139,92,246,0.5);
+  }
+  .feature-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(99,102,241,0.2));
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+  .feature-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.2px;
+  }
+  .feature-desc {
+    font-size: 13px;
+    color: #a1a1aa;
+    line-height: 1.6;
+  }
+  
+  /* Footer */
+  footer {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: #71717a;
+  }
+  footer a {
+    color: #a1a1aa;
+    text-decoration: none;
+    margin-left: 24px;
+    transition: 0.15s;
+  }
+  footer a:hover { color: #fff; }
+</style>
 </head>
 <body>
-  <div class="box">
-    <h1>🚀 Free HTML Hosting</h1>
-    <p class="sub">HTML পেস্ট করো → সাথে সাথে লিংক পাও</p>
 
-    <label>HTML Code</label>
-    <textarea id="html" placeholder="&lt;h1&gt;Hello World&lt;/h1&gt;"></textarea>
+  <div class="glow"></div>
 
-    <label>Title (ঐচ্ছিক)</label>
-    <input id="title" placeholder="My Page">
+  <div class="wrap">
 
-    <label>Custom Slug (ঐচ্ছিক)</label>
-    <input id="slug" placeholder="my-page">
+    <nav class="nav">
+      <div class="nav-brand">
+        <div class="nav-brand-mark">◆</div>
+        <span>HTML Hosting</span>
+      </div>
+      <div class="nav-links">
+        <a href="#">Features</a>
+        <a href="#">Pricing</a>
+        <a href="#">Docs</a>
+        <a href="#" class="nav-cta">Sign in</a>
+      </div>
+    </nav>
 
-    <label>Password (ঐচ্ছিক)</label>
-    <input id="password" type="password" placeholder="••••••">
+    <div class="hero">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        New · Edge Network v2 is live
+      </div>
+      <h1>Full safety,<br><span class="shimmer">free hosting.</span></h1>
+      <p class="hero-sub">Deploy HTML pages to a global edge network in seconds. No signup, no credit card, no limits.</p>
+    </div>
 
-    <button id="btn" onclick="create()">Host Now 🚀</button>
-    <div class="result" id="result"></div>
+    <div class="card">
+      
+      <!-- Code Editor -->
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-left">
+            <div class="dots">
+              <span class="dot-c r"></span>
+              <span class="dot-c y"></span>
+              <span class="dot-c g"></span>
+            </div>
+            <span class="editor-tab">index.html</span>
+          </div>
+          <div class="editor-meta" id="meta">0 B · 1 line</div>
+        </div>
+        <textarea id="html" placeholder="<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello World</title>
+  </head>
+  <body>
+    <h1>Hello, world.</h1>
+  </body>
+</html>"></textarea>
+      </div>
+
+      <!-- OPTIONS SECTION -->
+      <div class="options-section">
+        
+        <div class="options-header">
+          <div class="options-title">
+            <span class="options-title-icon">⚙</span>
+            Page Options
+          </div>
+          <span class="options-subtitle">All optional</span>
+        </div>
+
+        <!-- Title & Slug -->
+        <div class="fields-grid">
+          
+          <!-- Title -->
+          <div class="field-row">
+            <label class="field-label">
+              <span class="field-label-icon">📝</span>
+              Page Title
+            </label>
+            <div class="field-input-wrap">
+              <span class="field-input-icon">📄</span>
+              <input id="title" placeholder="e.g. My Page" maxlength="60">
+            </div>
+            <div class="field-hint">Shown in browser tab & admin panel</div>
+          </div>
+          
+          <!-- Slug -->
+          <div class="field-row">
+            <label class="field-label">
+              <span class="field-label-icon">🔗</span>
+              Custom URL
+            </label>
+            <div class="field-input-wrap">
+              <span class="field-input-icon">/</span>
+              <input id="slug" placeholder="e.g. my-url" maxlength="40">
+            </div>
+            <div class="slug-preview">
+              <span class="domain">your-site.com/p/</span><span class="val" id="slug-preview-val">custom-name</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Password -->
+        <div class="field-row">
+          <label class="field-label">
+            <span class="field-label-icon">🔒</span>
+            Password Protection
+            <span class="optional-tag">Optional</span>
+          </label>
+          <div class="field-input-wrap">
+            <span class="field-input-icon">🔑</span>
+            <input id="password" type="password" placeholder="optional url locked password">
+          </div>
+          <div class="field-hint">Visitors must enter this password to view the page</div>
+        </div>
+
+      </div>
+
+      <button class="btn" id="btn" onclick="create()">
+        <span id="btn-text">Generate Link</span>
+        <span class="kbd">⌘↵</span>
+      </button>
+
+      <div class="result" id="result"></div>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Edge Deploy</div>
+        <div class="feature-desc">Your pages go live in under a second on our global network.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛡</div>
+        <div class="feature-title">Password Protected</div>
+        <div class="feature-desc">Lock any page behind a simple password. Perfect for private work.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">∞</div>
+        <div class="feature-title">Free Forever</div>
+        <div class="feature-desc">No trials. No credit cards. No hidden fees. Ever.</div>
+      </div>
+    </div>
+
+    <footer>
+      <div>© 2025 HTML Hosting — Built with care</div>
+      <div>
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+        <a href="#">Status</a>
+        <a href="#">Contact</a>
+      </div>
+    </footer>
+
   </div>
 
   <script>
+    const htmlEl = document.getElementById('html');
+    const meta = document.getElementById('meta');
+    const slugInput = document.getElementById('slug');
+    const slugPreview = document.getElementById('slug-preview-val');
+
+    function updateMeta() {
+      const v = htmlEl.value;
+      const bytes = new Blob([v]).size;
+      const lines = v.split('\n').length;
+      let size = bytes + ' B';
+      if (bytes >= 1024) size = (bytes / 1024).toFixed(1) + ' KB';
+      meta.textContent = size + ' · ' + lines + (lines === 1 ? ' line' : ' lines');
+    }
+    htmlEl.addEventListener('input', updateMeta);
+    updateMeta();
+
+    // Live slug preview
+    slugInput.addEventListener('input', () => {
+      const v = slugInput.value.trim();
+      slugPreview.textContent = v || 'custom-name';
+    });
+
+    // Ctrl+Enter to submit
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') create();
+    });
+
     async function create() {
       const btn = document.getElementById('btn');
+      const txt = document.getElementById('btn-text');
       const result = document.getElementById('result');
+      const html = htmlEl.value.trim();
+      
+      if (!html) {
+        htmlEl.focus();
+        htmlEl.style.borderColor = '#ef4444';
+        setTimeout(() => htmlEl.style.borderColor = '', 1500);
+        return;
+      }
+
       btn.disabled = true;
-      btn.textContent = 'Uploading...';
+      txt.textContent = 'Deploying...';
 
       try {
         const res = await fetch('/api/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            html: document.getElementById('html').value,
-            title: document.getElementById('title').value,
-            slug: document.getElementById('slug').value,
+            html,
+            title: document.getElementById('title').value || 'Untitled',
+            slug: slugInput.value,
             password: document.getElementById('password').value
           })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
+        result.className = 'result show';
         result.innerHTML =
-          '<div>✅ লিংক তৈরি হয়েছে:</div>' +
-          '<a href="' + data.url + '" target="_blank">' + data.url + '</a><br>' +
-          '<button class="copy" onclick="navigator.clipboard.writeText(\'' + data.url + '\'); this.textContent=\'Copied ✓\'">Copy Link</button>';
-        result.classList.add('show');
+          '<div class="result-head">✓ Deployment successful</div>' +
+          '<div class="result-row">' +
+            '<a href="' + data.url + '" target="_blank">' + data.url + '</a>' +
+            '<button class="mini-btn" onclick="copyUrl(\'' + data.url + '\', this)">Copy</button>' +
+            '<button class="mini-btn" onclick="window.open(\'' + data.url + '\', \'_blank\')">Visit</button>' +
+          '</div>';
       } catch (e) {
-        result.innerHTML = '❌ ' + e.message;
-        result.classList.add('show');
+        result.className = 'result show';
+        result.style.background = 'rgba(239,68,68,0.08)';
+        result.style.borderColor = 'rgba(239,68,68,0.3)';
+        result.innerHTML = '<div class="result-head" style="color:#f87171">✗ ' + e.message + '</div>';
       }
       btn.disabled = false;
-      btn.textContent = 'Host Now 🚀';
+      txt.textContent = 'Generate Link';
+    }
+
+    function copyUrl(url, btn) {
+      navigator.clipboard.writeText(url);
+      const old = btn.textContent;
+      btn.textContent = '✓ Copied';
+      setTimeout(() => btn.textContent = old, 1500);
     }
   </script>
 </body>
-</html>
+  </html>
