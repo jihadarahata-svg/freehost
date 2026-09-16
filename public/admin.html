@@ -59,6 +59,47 @@
   .user-photo-placeholder { width: 40px; height: 40px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 18px; }
   .user-name { font-weight: 600; font-size: 14px; }
   .user-email { font-size: 12px; color: #888; }
+  
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 16px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #151515; border: 1px solid #333;
+    border-radius: 16px; padding: 24px;
+    width: 100%; max-width: 800px;
+    max-height: 90vh; overflow: auto;
+  }
+  .modal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px; padding-bottom: 16px;
+    border-bottom: 1px solid #222;
+  }
+  .modal-head h2 { font-size: 18px; font-weight: 700; }
+  .modal-close { background: transparent; color: #888; border: none; font-size: 24px; cursor: pointer; padding: 4px 12px; margin: 0; border-radius: 6px; }
+  .modal-close:hover { background: #222; color: #fff; }
+  .modal-field { margin-bottom: 14px; }
+  .modal-field label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .modal-field input, .modal-field textarea {
+    width: 100%; padding: 12px;
+    background: #0a0a0a; border: 1px solid #333;
+    border-radius: 8px; color: #fff;
+    font-size: 14px; font-family: inherit; outline: none;
+  }
+  .modal-field input:focus, .modal-field textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+  .modal-field textarea {
+    font-family: 'Courier New', monospace;
+    font-size: 13px; min-height: 300px; resize: vertical;
+  }
+  .modal-btns { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #222; }
+  .modal-btns button { flex: 1; margin: 0; }
 </style>
 </head>
 <body>
@@ -89,20 +130,44 @@
       <div class="card"><div class="num" id="tu">0</div><div class="lbl">Total Users</div></div>
     </div>
 
-    <!-- PAGES TAB -->
     <div id="pagesTab">
       <div class="search-bar">
-        <input id="searchInput" type="text" placeholder="🔍 Search pages by title or slug..." oninput="filterPages()">
+        <input id="searchInput" type="text" placeholder="🔍 Search pages..." oninput="filterPages()">
       </div>
       <div id="list"><div class="empty">Loading...</div></div>
     </div>
 
-    <!-- USERS TAB -->
     <div id="usersTab" style="display:none;">
       <div class="search-bar">
-        <input id="userSearchInput" type="text" placeholder="🔍 Search users by email or name..." oninput="filterUsers()">
+        <input id="userSearchInput" type="text" placeholder="🔍 Search users..." oninput="filterUsers()">
       </div>
       <div id="userList"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>📝 Edit Page</h2>
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+      <div class="modal-field">
+        <label>Page Title</label>
+        <input id="editTitle" placeholder="My Page">
+      </div>
+      <div class="modal-field">
+        <label>HTML Code</label>
+        <textarea id="editHtml" placeholder="<h1>Hello World</h1>"></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Password (leave empty to remove)</label>
+        <input id="editPassword" type="password" placeholder="Optional">
+      </div>
+      <div class="modal-btns">
+        <button class="sm" onclick="closeEditModal()">Cancel</button>
+        <button class="blue" onclick="saveEdit()" id="saveEditBtn">💾 Save Changes</button>
+      </div>
     </div>
   </div>
 
@@ -113,6 +178,7 @@
     let allPages = [];
     let allUsers = [];
     let currentTab = 'pages';
+    let editingId = null;
 
     if (token) showDash();
 
@@ -158,17 +224,13 @@
       document.getElementById('usersTab').style.display = tab === 'users' ? 'block' : 'none';
       document.getElementById('tabPages').style.background = tab === 'pages' ? '#2563eb' : '#222';
       document.getElementById('tabUsers').style.background = tab === 'users' ? '#2563eb' : '#222';
-      
-      if (tab === 'users' && allUsers.length === 0) {
-        loadUsers();
-      }
+      if (tab === 'users' && allUsers.length === 0) loadUsers();
     }
 
     async function load() {
       const h = { 'x-admin-token': token };
       const pRes = await fetch('/api/admin/list-full', { headers: h });
       const sRes = await fetch('/api/admin/stats', { headers: h });
-
       if (pRes.status === 401) return logout();
 
       allPages = await pRes.json();
@@ -190,18 +252,17 @@
         allUsers = await res.json();
         renderUsers(allUsers);
       } catch (e) {
-        document.getElementById('userList').innerHTML = '<div class="empty">Failed to load users</div>';
+        document.getElementById('userList').innerHTML = '<div class="empty">Failed to load</div>';
       }
     }
 
     function filterPages() {
       const q = document.getElementById('searchInput').value.toLowerCase().trim();
       if (!q) return renderPages(allPages);
-      const filtered = allPages.filter(p => {
-        const title = (p.title || '').toLowerCase();
-        const id = (p._id || '').toLowerCase();
-        return title.includes(q) || id.includes(q);
-      });
+      const filtered = allPages.filter(p =>
+        (p.title || '').toLowerCase().includes(q) ||
+        (p._id || '').toLowerCase().includes(q)
+      );
       renderPages(filtered);
     }
 
@@ -218,10 +279,9 @@
     function renderPages(pages) {
       const list = document.getElementById('list');
       if (!pages.length) {
-        list.innerHTML = '<div class="empty">কোনো page পাওয়া যায়নি</div>';
+        list.innerHTML = '<div class="empty">কোনো page নেই</div>';
         return;
       }
-
       list.innerHTML = pages.map(function(p) {
         const safeHtml = esc(p.html || '');
         const bannedBadge = p.banned ? ' · ⛔ BANNED' : '';
@@ -230,6 +290,7 @@
           '<a class="link" href="/p/' + p._id + '" target="_blank">/p/' + p._id + '</a>' +
           '<div class="meta">👁 ' + p.views + ' views · ' + new Date(p.createdAt).toLocaleString('bn-BD') + (p.password ? ' · 🔒 Locked' : '') + bannedBadge + '</div>' +
           '<div class="btns">' +
+            '<button class="blue" onclick="openEditModal(\'' + p._id + '\')">📝 Edit</button>' +
             '<button class="green" onclick="toggleCode(\'' + p._id + '\')">📄 View Code</button>' +
             '<button class="sm" onclick="copy(\'' + p._id + '\')">🔗 Copy Link</button>' +
             '<button class="sm" onclick="copyCode(\'' + p._id + '\')">📋 Copy Code</button>' +
@@ -249,7 +310,6 @@
         list.innerHTML = '<div class="empty">কোনো user নেই</div>';
         return;
       }
-      
       list.innerHTML = users.map(function(u) {
         const banned = u.banned ? '<span style="color:#f87171;font-weight:600;">⛔ BANNED</span>' : '<span style="color:#4ade80;">● Active</span>';
         const photo = u.photo 
@@ -260,16 +320,14 @@
           : '<button class="red" onclick="banUser(\'' + u._id + '\', true)">🚫 Ban</button>';
         
         return '<div class="user-card">' +
-          '<div class="user-head">' +
-            photo +
+          '<div class="user-head">' + photo +
             '<div>' +
               '<div class="user-name">' + esc(u.name || 'User') + '</div>' +
               '<div class="user-email">' + esc(u.email) + '</div>' +
             '</div>' +
           '</div>' +
-          '<div class="meta" style="margin-bottom:10px;">' + banned + ' · Joined ' + new Date(u.createdAt).toLocaleDateString() + '</div>' +
-          '<div class="btns">' +
-            banBtn +
+          '<div style="font-size:11px;color:#888;margin-bottom:10px;">' + banned + ' · Joined ' + new Date(u.createdAt).toLocaleDateString() + '</div>' +
+          '<div class="btns">' + banBtn +
             '<button class="red" onclick="deleteUser(\'' + u._id + '\', \'' + esc(u.email) + '\')">🗑 Delete</button>' +
           '</div>' +
         '</div>';
@@ -291,14 +349,13 @@
       const page = allPages.find(function(p) { return p._id === id; });
       if (page && page.html) {
         navigator.clipboard.writeText(page.html);
-        showToast('✅ HTML code copied!');
+        showToast('✅ HTML copied!');
       }
     }
 
     function downloadCode(id, title) {
       const page = allPages.find(function(p) { return p._id === id; });
-      if (!page || !page.html) return showToast('❌ No code found', '#dc2626');
-      
+      if (!page || !page.html) return showToast('❌ No code', '#dc2626');
       const blob = new Blob([page.html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -309,6 +366,65 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showToast('✅ Downloaded!');
+    }
+
+    // ✏️ EDIT FUNCTIONS
+    function openEditModal(id) {
+      const page = allPages.find(function(p) { return p._id === id; });
+      if (!page) return showToast('❌ Page not found', '#dc2626');
+      
+      editingId = id;
+      document.getElementById('editTitle').value = page.title || '';
+      document.getElementById('editHtml').value = page.html || '';
+      document.getElementById('editPassword').value = '';
+      document.getElementById('editModal').classList.add('show');
+    }
+
+    function closeEditModal() {
+      editingId = null;
+      document.getElementById('editModal').classList.remove('show');
+    }
+
+    async function saveEdit() {
+      if (!editingId) return;
+      
+      const btn = document.getElementById('saveEditBtn');
+      const title = document.getElementById('editTitle').value;
+      const html = document.getElementById('editHtml').value;
+      const password = document.getElementById('editPassword').value;
+      
+      if (!html.trim()) {
+        showToast('❌ HTML required', '#dc2626');
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.textContent = '💾 Saving...';
+      
+      try {
+        const body = { title: title || 'Untitled', html: html };
+        if (password) body.password = password;
+        
+        const res = await fetch('/api/admin/page/' + editingId, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-token': token
+          },
+          body: JSON.stringify(body)
+        });
+        
+        if (!res.ok) throw new Error('Failed');
+        
+        showToast('✅ Saved! Link updated.');
+        closeEditModal();
+        load();
+      } catch (e) {
+        showToast('❌ Save failed', '#dc2626');
+      }
+      
+      btn.disabled = false;
+      btn.textContent = '💾 Save Changes';
     }
 
     async function banUser(id, ban) {
@@ -331,7 +447,7 @@
     }
 
     async function deleteUser(id, email) {
-      if (!confirm('"' + email + '" এর account এবং তার সব page ডিলিট করবে? এটা ফেরানো যাবে না!')) return;
+      if (!confirm('"' + email + '" এর account ডিলিট করবে?')) return;
       try {
         const res = await fetch('/api/admin/user/' + id, {
           method: 'DELETE',
