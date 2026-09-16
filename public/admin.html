@@ -27,15 +27,8 @@
   .num { font-size: 26px; font-weight: 700; color: #4ade80; }
   .lbl { font-size: 11px; color: #888; margin-top: 2px; }
   
-  .search-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .search-bar input {
-    flex: 1;
-    padding: 12px;
-  }
+  .search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+  .search-bar input { flex: 1; padding: 12px; }
   
   .page-item { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
   .page-item h3 { font-size: 15px; margin-bottom: 6px; }
@@ -45,44 +38,27 @@
   .page-item .btns { display: flex; gap: 6px; flex-wrap: wrap; }
   .empty { text-align: center; color: #666; padding: 40px; font-size: 14px; }
   
-  .code-box {
-    display: none;
-    margin-top: 12px;
-    background: #000;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 12px;
-    max-height: 400px;
-    overflow: auto;
-  }
+  .code-box { display: none; margin-top: 12px; background: #000; border: 1px solid #333; border-radius: 8px; padding: 12px; max-height: 400px; overflow: auto; }
   .code-box.show { display: block; }
-  .code-box pre {
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    color: #4ade80;
-    white-space: pre-wrap;
-    word-break: break-all;
-    margin: 0;
-  }
+  .code-box pre { font-family: 'Courier New', monospace; font-size: 11px; color: #4ade80; white-space: pre-wrap; word-break: break-all; margin: 0; }
   
   .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
+    position: fixed; bottom: 24px; left: 50%;
     transform: translateX(-50%) translateY(100px);
-    background: #16a34a;
-    color: #fff;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
+    background: #16a34a; color: #fff;
+    padding: 12px 24px; border-radius: 10px;
+    font-size: 14px; font-weight: 600;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    transition: transform 0.3s ease;
-    z-index: 9999;
+    transition: transform 0.3s ease; z-index: 9999;
   }
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
-  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  
+  .user-card { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .user-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .user-photo { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #333; }
+  .user-photo-placeholder { width: 40px; height: 40px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .user-name { font-weight: 600; font-size: 14px; }
+  .user-email { font-size: 12px; color: #888; }
 </style>
 </head>
 <body>
@@ -100,6 +76,8 @@
     <div class="head">
       <h1 style="font-size:20px">📊 Admin Panel</h1>
       <div>
+        <button class="sm" onclick="showTab('pages')" id="tabPages" style="background:#2563eb;">📄 Pages</button>
+        <button class="sm" onclick="showTab('users')" id="tabUsers">👥 Users</button>
         <button class="sm" onclick="load()">🔄 Refresh</button>
         <button class="sm" onclick="logout()">Logout</button>
       </div>
@@ -108,13 +86,24 @@
     <div class="stats">
       <div class="card"><div class="num" id="tp">0</div><div class="lbl">Total Pages</div></div>
       <div class="card"><div class="num" id="tv">0</div><div class="lbl">Total Views</div></div>
+      <div class="card"><div class="num" id="tu">0</div><div class="lbl">Total Users</div></div>
     </div>
 
-    <div class="search-bar">
-      <input id="searchInput" type="text" placeholder="🔍 Search by title or slug..." oninput="filterPages()">
+    <!-- PAGES TAB -->
+    <div id="pagesTab">
+      <div class="search-bar">
+        <input id="searchInput" type="text" placeholder="🔍 Search pages by title or slug..." oninput="filterPages()">
+      </div>
+      <div id="list"><div class="empty">Loading...</div></div>
     </div>
 
-    <div id="list"><div class="empty">Loading...</div></div>
+    <!-- USERS TAB -->
+    <div id="usersTab" style="display:none;">
+      <div class="search-bar">
+        <input id="userSearchInput" type="text" placeholder="🔍 Search users by email or name..." oninput="filterUsers()">
+      </div>
+      <div id="userList"><div class="empty">Loading...</div></div>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -122,6 +111,8 @@
   <script>
     let token = localStorage.getItem('adm_token');
     let allPages = [];
+    let allUsers = [];
+    let currentTab = 'pages';
 
     if (token) showDash();
 
@@ -161,6 +152,18 @@
       setTimeout(() => t.classList.remove('show'), 2000);
     }
 
+    function showTab(tab) {
+      currentTab = tab;
+      document.getElementById('pagesTab').style.display = tab === 'pages' ? 'block' : 'none';
+      document.getElementById('usersTab').style.display = tab === 'users' ? 'block' : 'none';
+      document.getElementById('tabPages').style.background = tab === 'pages' ? '#2563eb' : '#222';
+      document.getElementById('tabUsers').style.background = tab === 'users' ? '#2563eb' : '#222';
+      
+      if (tab === 'users' && allUsers.length === 0) {
+        loadUsers();
+      }
+    }
+
     async function load() {
       const h = { 'x-admin-token': token };
       const pRes = await fetch('/api/admin/list-full', { headers: h });
@@ -173,14 +176,27 @@
 
       document.getElementById('tp').textContent = stats.totalPages;
       document.getElementById('tv').textContent = stats.totalViews;
+      document.getElementById('tu').textContent = stats.totalUsers || 0;
 
       renderPages(allPages);
+    }
+
+    async function loadUsers() {
+      try {
+        const res = await fetch('/api/admin/list-users', {
+          headers: { 'x-admin-token': token }
+        });
+        if (res.status === 401) return logout();
+        allUsers = await res.json();
+        renderUsers(allUsers);
+      } catch (e) {
+        document.getElementById('userList').innerHTML = '<div class="empty">Failed to load users</div>';
+      }
     }
 
     function filterPages() {
       const q = document.getElementById('searchInput').value.toLowerCase().trim();
       if (!q) return renderPages(allPages);
-      
       const filtered = allPages.filter(p => {
         const title = (p.title || '').toLowerCase();
         const id = (p._id || '').toLowerCase();
@@ -189,9 +205,18 @@
       renderPages(filtered);
     }
 
+    function filterUsers() {
+      const q = document.getElementById('userSearchInput').value.toLowerCase().trim();
+      if (!q) return renderUsers(allUsers);
+      const filtered = allUsers.filter(u =>
+        (u.email || '').toLowerCase().includes(q) ||
+        (u.name || '').toLowerCase().includes(q)
+      );
+      renderUsers(filtered);
+    }
+
     function renderPages(pages) {
       const list = document.getElementById('list');
-      
       if (!pages.length) {
         list.innerHTML = '<div class="empty">কোনো page পাওয়া যায়নি</div>';
         return;
@@ -199,10 +224,11 @@
 
       list.innerHTML = pages.map(function(p) {
         const safeHtml = esc(p.html || '');
+        const bannedBadge = p.banned ? ' · ⛔ BANNED' : '';
         return '<div class="page-item">' +
           '<h3>' + esc(p.title) + '</h3>' +
           '<a class="link" href="/p/' + p._id + '" target="_blank">/p/' + p._id + '</a>' +
-          '<div class="meta">👁 ' + p.views + ' views · ' + new Date(p.createdAt).toLocaleString('bn-BD') + (p.password ? ' · 🔒 Locked' : '') + '</div>' +
+          '<div class="meta">👁 ' + p.views + ' views · ' + new Date(p.createdAt).toLocaleString('bn-BD') + (p.password ? ' · 🔒 Locked' : '') + bannedBadge + '</div>' +
           '<div class="btns">' +
             '<button class="green" onclick="toggleCode(\'' + p._id + '\')">📄 View Code</button>' +
             '<button class="sm" onclick="copy(\'' + p._id + '\')">🔗 Copy Link</button>' +
@@ -212,6 +238,39 @@
           '</div>' +
           '<div class="code-box" id="code-' + p._id + '">' +
             '<pre>' + safeHtml + '</pre>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderUsers(users) {
+      const list = document.getElementById('userList');
+      if (!users.length) {
+        list.innerHTML = '<div class="empty">কোনো user নেই</div>';
+        return;
+      }
+      
+      list.innerHTML = users.map(function(u) {
+        const banned = u.banned ? '<span style="color:#f87171;font-weight:600;">⛔ BANNED</span>' : '<span style="color:#4ade80;">● Active</span>';
+        const photo = u.photo 
+          ? '<img src="' + esc(u.photo) + '" class="user-photo" onerror="this.style.display=\'none\'">' 
+          : '<div class="user-photo-placeholder">👤</div>';
+        const banBtn = u.banned 
+          ? '<button class="green" onclick="banUser(\'' + u._id + '\', false)">✅ Unban</button>'
+          : '<button class="red" onclick="banUser(\'' + u._id + '\', true)">🚫 Ban</button>';
+        
+        return '<div class="user-card">' +
+          '<div class="user-head">' +
+            photo +
+            '<div>' +
+              '<div class="user-name">' + esc(u.name || 'User') + '</div>' +
+              '<div class="user-email">' + esc(u.email) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="meta" style="margin-bottom:10px;">' + banned + ' · Joined ' + new Date(u.createdAt).toLocaleDateString() + '</div>' +
+          '<div class="btns">' +
+            banBtn +
+            '<button class="red" onclick="deleteUser(\'' + u._id + '\', \'' + esc(u.email) + '\')">🗑 Delete</button>' +
           '</div>' +
         '</div>';
       }).join('');
@@ -250,6 +309,40 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showToast('✅ Downloaded!');
+    }
+
+    async function banUser(id, ban) {
+      if (ban && !confirm('এই user কে ban করলে তার সব page বন্ধ হবে। Ban করবে?')) return;
+      try {
+        const res = await fetch('/api/admin/user/' + id + '/ban', {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-admin-token': token 
+          },
+          body: JSON.stringify({ banned: ban })
+        });
+        if (!res.ok) throw new Error('Failed');
+        showToast(ban ? '🚫 User banned' : '✅ User unbanned');
+        loadUsers();
+      } catch (e) {
+        showToast('❌ Failed', '#dc2626');
+      }
+    }
+
+    async function deleteUser(id, email) {
+      if (!confirm('"' + email + '" এর account এবং তার সব page ডিলিট করবে? এটা ফেরানো যাবে না!')) return;
+      try {
+        const res = await fetch('/api/admin/user/' + id, {
+          method: 'DELETE',
+          headers: { 'x-admin-token': token }
+        });
+        if (!res.ok) throw new Error('Failed');
+        showToast('🗑 User deleted');
+        loadUsers();
+      } catch (e) {
+        showToast('❌ Failed', '#dc2626');
+      }
     }
 
     async function del(id, title) {
