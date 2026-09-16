@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const passport = require('passport');
@@ -17,7 +17,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-please';
-const BASE_URL = process.env.BASE_URL || 'https://freehost-f01d.onrender.com';
+const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 
 let pages;
 let users;
@@ -39,7 +39,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: MONGO_URI, dbName: 'freehost' }),
-  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
+  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }
 }));
 
 app.use(passport.initialize());
@@ -52,8 +52,10 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const { ObjectId } = require('mongodb');
     const user = await users.findOne({ _id: new ObjectId(id) });
+    if (user && user.banned) {
+      return done(null, false);
+    }
     done(null, user);
   } catch (err) {
     done(err, null);
@@ -71,19 +73,24 @@ passport.use(new GoogleStrategy({
     if (!email) return done(new Error('No email found'), null);
 
     let user = await users.findOne({ email });
-    
+
+    // 🔴 Ban check
+    if (user && user.banned) {
+      return done(new Error('Account has been banned'), null);
+    }
+
     if (!user) {
       const result = await users.insertOne({
         email,
         name: profile.displayName || email.split('@')[0],
         photo: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
         googleId: profile.id,
+        banned: false,
         createdAt: new Date(),
-        banned: false
+        lastLogin: new Date()
       });
       user = await users.findOne({ _id: result.insertedId });
     } else {
-      // Update profile
       await users.updateOne({ _id: user._id }, {
         $set: {
           name: profile.displayName || user.name,
@@ -103,6 +110,9 @@ passport.use(new GoogleStrategy({
 // Auth middleware
 function requireAuth(req, res, next) {
   if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+    if (req.user.banned) {
+      return res.status(403).json({ error: 'Account banned' });
+    }
     return next();
   }
   res.redirect('/login');
@@ -136,6 +146,9 @@ app.get('/auth/logout', (req, res) => {
 
 app.get('/api/me', (req, res) => {
   if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+    if (req.user.banned) {
+      return res.status(403).json({ error: 'Account banned' });
+    }
     res.json({
       email: req.user.email,
       name: req.user.name,
@@ -155,6 +168,9 @@ app.post('/api/create', async (req, res) => {
 
     let userId = null;
     if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+      if (req.user.banned) {
+        return res.status(403).json({ error: 'Account banned' });
+      }
       userId = req.user._id.toString();
     }
 
@@ -253,6 +269,9 @@ app.get('/embed/:id', async (req, res) => {
 // ============ USER ROUTES ============
 
 app.get('/api/my-pages', requireAuth, async (req, res) => {
+  if (req.user.banned) {
+    return res.status(403).json({ error: 'Account banned' });
+  }
   const userId = req.user._id.toString();
   const list = await pages.find(
     { userId: userId },
@@ -306,6 +325,42 @@ app.put('/api/admin/page/:id', adminAuth, async (req, res) => {
 app.delete('/api/admin/delete/:id', adminAuth, async (req, res) => {
   await pages.deleteOne({ _id: req.params.id });
   res.json({ success: true });
+});
+
+// 🚫 Ban/Unban User
+app.put('/api/admin/user/:id/ban', adminAuth, async (req, res) => {
+  try {
+    const { banned } = req.body;
+    const userId = req.params.id;
+
+    await users.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { banned: !!banned } }
+    );
+
+    await pages.updateMany(
+      { userId: userId },
+      { $set: { banned: !!banned } }
+    );
+
+    res.json({ success: true, banned: !!banned });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 🗑 Delete User
+app.delete('/api/admin/user/:id', adminAuth, async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    await users.deleteOne({ _id: new ObjectId(userId) });
+    await pages.deleteMany({ userId: userId });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get('/api/admin/stats', adminAuth, async (req, res) => {
