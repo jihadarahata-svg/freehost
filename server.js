@@ -2,6 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const { MongoClient } = require('mongodb');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const app = express();
 app.use(cors());
@@ -10,15 +14,98 @@ app.use(express.static('public'));
 
 const MONGO_URI = process.env.MONGO_URI;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-please';
+const BASE_URL = process.env.BASE_URL || 'https://freehost-f01d.onrender.com';
 
 let pages;
+let users;
+let db;
 
 async function connectDB() {
   const client = new MongoClient(MONGO_URI);
   await client.connect();
-  const db = client.db('freehost');
+  db = client.db('freehost');
   pages = db.collection('pages');
+  users = db.collection('users');
+  await users.createIndex({ email: 1 }, { unique: true });
   console.log('DB connected');
+}
+
+// Session setup
+app.use(session({
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: MONGO_URI, dbName: 'freehost' }),
+  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Passport serialize
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const { ObjectId } = require('mongodb');
+    const user = await users.findOne({ _id: new ObjectId(id) });
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
+
+// Google Strategy
+passport.use(new GoogleStrategy({
+  clientID: GOOGLE_CLIENT_ID,
+  clientSecret: GOOGLE_CLIENT_SECRET,
+  callbackURL: BASE_URL + '/auth/google/callback'
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+    if (!email) return done(new Error('No email found'), null);
+
+    let user = await users.findOne({ email });
+    
+    if (!user) {
+      const result = await users.insertOne({
+        email,
+        name: profile.displayName || email.split('@')[0],
+        photo: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
+        googleId: profile.id,
+        createdAt: new Date(),
+        banned: false
+      });
+      user = await users.findOne({ _id: result.insertedId });
+    } else {
+      // Update profile
+      await users.updateOne({ _id: user._id }, {
+        $set: {
+          name: profile.displayName || user.name,
+          photo: profile.photos && profile.photos[0] ? profile.photos[0].value : user.photo,
+          lastLogin: new Date()
+        }
+      });
+      user = await users.findOne({ _id: user._id });
+    }
+
+    return done(null, user);
+  } catch (err) {
+    return done(err, null);
+  }
+}));
+
+// Auth middleware
+function requireAuth(req, res, next) {
+  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+    return next();
+  }
+  res.redirect('/login');
 }
 
 function adminAuth(req, res, next) {
@@ -28,11 +115,48 @@ function adminAuth(req, res, next) {
   next();
 }
 
-// নতুন page বানানো
+// ============ GOOGLE AUTH ROUTES ============
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login?error=1' }),
+  (req, res) => {
+    res.redirect('/dashboard');
+  }
+);
+
+app.get('/auth/logout', (req, res) => {
+  req.logout(() => {
+    res.redirect('/');
+  });
+});
+
+app.get('/api/me', (req, res) => {
+  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+    res.json({
+      email: req.user.email,
+      name: req.user.name,
+      photo: req.user.photo
+    });
+  } else {
+    res.status(401).json({ error: 'Not logged in' });
+  }
+});
+
+// ============ PAGE ROUTES ============
+
 app.post('/api/create', async (req, res) => {
   try {
     const { html, slug, password, title } = req.body;
     if (!html) return res.status(400).json({ error: 'HTML required' });
+
+    let userId = null;
+    if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+      userId = req.user._id.toString();
+    }
 
     const id = slug ? slug.trim() : Math.random().toString(36).slice(2, 10);
     const hash = password ? await bcrypt.hash(password, 10) : null;
@@ -43,16 +167,17 @@ app.post('/api/create', async (req, res) => {
       html,
       password: hash,
       views: 0,
+      userId: userId,
+      banned: false,
       createdAt: new Date(),
     });
 
-    res.json({ url: req.protocol + '://' + req.get('host') + '/p/' + id, id });
+    res.json({ url: BASE_URL + '/p/' + id, id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== Password check helper =====
 async function checkPassword(page, req) {
   if (!page.password) return true;
   const pass = req.query.pass;
@@ -73,11 +198,14 @@ function passwordForm(id) {
     '</form></body></html>';
 }
 
-// ===== Main view - শুধু iframe পাঠায় =====
 app.get('/p/:id', async (req, res) => {
   try {
     const page = await pages.findOne({ _id: req.params.id });
     if (!page) return res.status(404).send('<h1>404 Not Found</h1>');
+
+    if (page.banned) {
+      return res.status(403).send('<h1>⛔ This page has been suspended</h1>');
+    }
 
     if (!(await checkPassword(page, req))) {
       return res.send(passwordForm(req.params.id));
@@ -110,23 +238,39 @@ app.get('/p/:id', async (req, res) => {
   }
 });
 
-// ===== Embed route - আসল HTML এখানে =====
 app.get('/embed/:id', async (req, res) => {
   try {
     const page = await pages.findOne({ _id: req.params.id });
     if (!page) return res.status(404).send('<h1>404 Not Found</h1>');
-
-    if (!(await checkPassword(page, req))) {
-      return res.status(403).send('Forbidden');
-    }
-
+    if (page.banned) return res.status(403).send('Suspended');
+    if (!(await checkPassword(page, req))) return res.status(403).send('Forbidden');
     res.send(page.html);
   } catch (err) {
     res.status(500).send('Server error');
   }
 });
 
-// ===== Admin routes =====
+// ============ USER ROUTES ============
+
+app.get('/api/my-pages', requireAuth, async (req, res) => {
+  const userId = req.user._id.toString();
+  const list = await pages.find(
+    { userId: userId },
+    { projection: { html: 0, password: 0 } }
+  ).sort({ createdAt: -1 }).toArray();
+  res.json(list);
+});
+
+app.delete('/api/my-pages/:id', requireAuth, async (req, res) => {
+  const userId = req.user._id.toString();
+  const page = await pages.findOne({ _id: req.params.id });
+  if (!page) return res.status(404).json({ error: 'Not found' });
+  if (page.userId !== userId) return res.status(403).json({ error: 'Not yours' });
+  await pages.deleteOne({ _id: req.params.id });
+  res.json({ success: true });
+});
+
+// ============ ADMIN ROUTES ============
 
 app.post('/api/admin/login', (req, res) => {
   if (req.body.password === ADMIN_PASSWORD) {
@@ -136,20 +280,27 @@ app.post('/api/admin/login', (req, res) => {
   }
 });
 
-app.get('/api/admin/list', adminAuth, async (req, res) => {
-  const list = await pages
-    .find({}, { projection: { html: 0, password: 0 } })
-    .sort({ createdAt: -1 })
-    .toArray();
+app.get('/api/admin/list-full', adminAuth, async (req, res) => {
+  const list = await pages.find({}, { projection: { password: 0 } })
+    .sort({ createdAt: -1 }).toArray();
   res.json(list);
 });
 
-app.get('/api/admin/list-full', adminAuth, async (req, res) => {
-  const list = await pages
-    .find({}, { projection: { password: 0 } })
-    .sort({ createdAt: -1 })
-    .toArray();
+app.get('/api/admin/list-users', adminAuth, async (req, res) => {
+  const list = await users.find({}, { projection: { googleId: 0 } })
+    .sort({ createdAt: -1 }).toArray();
   res.json(list);
+});
+
+app.put('/api/admin/page/:id', adminAuth, async (req, res) => {
+  const { html, title, banned } = req.body;
+  const update = {};
+  if (html !== undefined) update.html = html;
+  if (title !== undefined) update.title = title;
+  if (banned !== undefined) update.banned = banned;
+
+  await pages.updateOne({ _id: req.params.id }, { $set: update });
+  res.json({ success: true });
 });
 
 app.delete('/api/admin/delete/:id', adminAuth, async (req, res) => {
@@ -159,11 +310,17 @@ app.delete('/api/admin/delete/:id', adminAuth, async (req, res) => {
 
 app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const totalPages = await pages.countDocuments();
-  const r = await pages
-    .aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }])
-    .toArray();
-  res.json({ totalPages, totalViews: r[0]?.v || 0 });
+  const totalUsers = await users.countDocuments();
+  const r = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
+  res.json({ totalPages, totalUsers, totalViews: r[0]?.v || 0 });
 });
+
+// ============ PAGE ROUTES (HTML pages) ============
+
+app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
+app.get('/dashboard', requireAuth, (req, res) => res.sendFile(__dirname + '/public/dashboard.html'));
+
+// ============ START ============
 
 connectDB().then(() => {
   const PORT = process.env.PORT || 3000;
