@@ -1,56 +1,93 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; padding: 16px; }
-    .login { max-width: 400px; margin: 80px auto; background: #151515; border: 1px solid #222; border-radius: 16px; padding: 24px; }
-    h1 { font-size: 22px; margin-bottom: 16px; }
-    input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; }
-    button { padding: 12px 18px; background: #fff; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 12px; }
-    button.full { width: 100%; }
-    button.red { background: #dc2626; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
-    button.sm { padding: 6px 10px; font-size: 12px; margin: 0; }
-    button.green { background: #16a34a; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
-    #dash { display: none; }
-    #dash.show { display: block; }
-    .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
-    .stats { display: flex; gap: 12px; margin-bottom: 16px; }
-    .card { flex: 1; background: #151515; border: 1px solid #222; border-radius: 12px; padding: 16px; }
-    .num { font-size: 26px; font-weight: 700; color: #4ade80; }
-    .lbl { font-size: 11px; color: #888; margin-top: 2px; }
-    .page-item { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
-    .page-item h3 { font-size: 15px; margin-bottom: 6px; }
-    .page-item .link { color: #4ade80; font-size: 12px; word-break: break-all; display: block; margin-bottom: 8px; }
-    .page-item .meta { font-size: 11px; color: #888; margin-bottom: 10px; }
-    .page-item .btns { display: flex; gap: 8px; flex-wrap: wrap; }
-    .empty { text-align: center; color: #666; padding: 40px; font-size: 14px; }
-    .code-box {
-      display: none;
-      margin-top: 12px;
-      background: #000;
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 12px;
-      max-height: 400px;
-      overflow: auto;
-    }
-    .code-box.show { display: block; }
-    .code-box pre {
-      font-family: 'Courier New', monospace;
-      font-size: 11px;
-      color: #4ade80;
-      white-space: pre-wrap;
-      word-break: break-all;
-      margin: 0;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — FreeHost</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0f; color: #fff; padding: 16px; min-height: 100vh; }
+  
+  .login { max-width: 400px; margin: 80px auto; background: #151515; border: 1px solid #222; border-radius: 16px; padding: 24px; }
+  h1 { font-size: 22px; margin-bottom: 16px; }
+  input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; }
+  button { padding: 12px 18px; background: #fff; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 12px; font-family: inherit; }
+  button.full { width: 100%; }
+  button.red { background: #dc2626; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
+  button.sm { padding: 6px 10px; font-size: 12px; margin: 0; background: #222; color: #fff; }
+  button.green { background: #16a34a; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
+  button.blue { background: #2563eb; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
+  
+  #dash { display: none; }
+  #dash.show { display: block; }
+  
+  .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+  .stats { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .card { flex: 1; min-width: 120px; background: #151515; border: 1px solid #222; border-radius: 12px; padding: 16px; }
+  .num { font-size: 26px; font-weight: 700; color: #4ade80; }
+  .lbl { font-size: 11px; color: #888; margin-top: 2px; }
+  
+  .search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .search-bar input {
+    flex: 1;
+    padding: 12px;
+  }
+  
+  .page-item { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .page-item h3 { font-size: 15px; margin-bottom: 6px; }
+  .page-item .link { color: #4ade80; font-size: 12px; word-break: break-all; display: block; margin-bottom: 8px; text-decoration: none; }
+  .page-item .link:hover { text-decoration: underline; }
+  .page-item .meta { font-size: 11px; color: #888; margin-bottom: 10px; }
+  .page-item .btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .empty { text-align: center; color: #666; padding: 40px; font-size: 14px; }
+  
+  .code-box {
+    display: none;
+    margin-top: 12px;
+    background: #000;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px;
+    max-height: 400px;
+    overflow: auto;
+  }
+  .code-box.show { display: block; }
+  .code-box pre {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #4ade80;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+  }
+  
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #16a34a;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+    z-index: 9999;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
 </head>
 <body>
 
+  <!-- LOGIN -->
   <div class="login" id="login">
     <h1>🔐 Admin Login</h1>
     <input id="pass" type="password" placeholder="Password" onkeypress="if(event.key==='Enter') doLogin()">
@@ -58,6 +95,7 @@
     <p id="err" style="color:#f87171;font-size:13px;margin-top:10px"></p>
   </div>
 
+  <!-- DASHBOARD -->
   <div id="dash">
     <div class="head">
       <h1 style="font-size:20px">📊 Admin Panel</h1>
@@ -72,12 +110,19 @@
       <div class="card"><div class="num" id="tv">0</div><div class="lbl">Total Views</div></div>
     </div>
 
+    <div class="search-bar">
+      <input id="searchInput" type="text" placeholder="🔍 Search by title or slug..." oninput="filterPages()">
+    </div>
+
     <div id="list"><div class="empty">Loading...</div></div>
   </div>
+
+  <div class="toast" id="toast"></div>
 
   <script>
     let token = localStorage.getItem('adm_token');
     let allPages = [];
+
     if (token) showDash();
 
     async function doLogin() {
@@ -108,6 +153,14 @@
       load();
     }
 
+    function showToast(msg, color) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = color || '#16a34a';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
     async function load() {
       const h = { 'x-admin-token': token };
       const pRes = await fetch('/api/admin/list-full', { headers: h });
@@ -121,13 +174,30 @@
       document.getElementById('tp').textContent = stats.totalPages;
       document.getElementById('tv').textContent = stats.totalViews;
 
+      renderPages(allPages);
+    }
+
+    function filterPages() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      if (!q) return renderPages(allPages);
+      
+      const filtered = allPages.filter(p => {
+        const title = (p.title || '').toLowerCase();
+        const id = (p._id || '').toLowerCase();
+        return title.includes(q) || id.includes(q);
+      });
+      renderPages(filtered);
+    }
+
+    function renderPages(pages) {
       const list = document.getElementById('list');
-      if (!allPages.length) {
-        list.innerHTML = '<div class="empty">এখনো কিছু host হয়নি</div>';
+      
+      if (!pages.length) {
+        list.innerHTML = '<div class="empty">কোনো page পাওয়া যায়নি</div>';
         return;
       }
 
-      list.innerHTML = allPages.map(function(p) {
+      list.innerHTML = pages.map(function(p) {
         const safeHtml = esc(p.html || '');
         return '<div class="page-item">' +
           '<h3>' + esc(p.title) + '</h3>' +
@@ -137,6 +207,7 @@
             '<button class="green" onclick="toggleCode(\'' + p._id + '\')">📄 View Code</button>' +
             '<button class="sm" onclick="copy(\'' + p._id + '\')">🔗 Copy Link</button>' +
             '<button class="sm" onclick="copyCode(\'' + p._id + '\')">📋 Copy Code</button>' +
+            '<button class="blue" onclick="downloadCode(\'' + p._id + '\', \'' + esc(p.title) + '\')">📥 Download</button>' +
             '<button class="red" onclick="del(\'' + p._id + '\', \'' + esc(p.title) + '\')">🗑 Delete</button>' +
           '</div>' +
           '<div class="code-box" id="code-' + p._id + '">' +
@@ -154,15 +225,31 @@
     function copy(id) {
       const url = location.origin + '/p/' + id;
       navigator.clipboard.writeText(url);
-      alert('✅ Link কপি হয়েছে:\n' + url);
+      showToast('✅ Link copied!');
     }
 
     function copyCode(id) {
       const page = allPages.find(function(p) { return p._id === id; });
       if (page && page.html) {
         navigator.clipboard.writeText(page.html);
-        alert('✅ HTML code কপি হয়েছে!');
+        showToast('✅ HTML code copied!');
       }
+    }
+
+    function downloadCode(id, title) {
+      const page = allPages.find(function(p) { return p._id === id; });
+      if (!page || !page.html) return showToast('❌ No code found', '#dc2626');
+      
+      const blob = new Blob([page.html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (title || id).replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('✅ Downloaded!');
     }
 
     async function del(id, title) {
@@ -171,6 +258,7 @@
         method: 'DELETE',
         headers: { 'x-admin-token': token }
       });
+      showToast('🗑 Deleted');
       load();
     }
 
