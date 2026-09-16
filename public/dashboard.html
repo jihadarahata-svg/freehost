@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — FreeHost</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0a0f;
+    color: #fff;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  
+  .glow {
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1000px;
+    height: 700px;
+    background: radial-gradient(ellipse at center, rgba(139,92,246,0.2), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+  }
+  
+  /* Nav */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    margin-bottom: 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding-bottom: 20px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+  .brand-mark {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .user-photo {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 2px solid rgba(139,92,246,0.4);
+    object-fit: cover;
+  }
+  .user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e4e4e7;
+  }
+  .user-email {
+    font-size: 11px;
+    color: #71717a;
+  }
+  .logout-btn {
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #a1a1aa;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.15s;
+  }
+  .logout-btn:hover {
+    background: rgba(239,68,68,0.1);
+    color: #f87171;
+    border-color: rgba(239,68,68,0.3);
+  }
+  @media (max-width: 500px) {
+    .user-name, .user-email { display: none; }
+  }
+  
+  /* Header */
+  .page-header {
+    margin-bottom: 32px;
+  }
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: #a1a1aa;
+    font-size: 15px;
+  }
+  
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 500px) {
+    .stats { grid-template-columns: 1fr; }
+  }
+  .stat {
+    background: linear-gradient(180deg, #101018 0%, #0d0d14 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: #71717a;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #c4b5fd, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Action buttons */
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    flex: 1;
+    min-width: 200px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 12px 30px -8px rgba(139,92,246,0.5);
+    transition: 0.2s;
+    font-family: inherit;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -8px rgba(139,92,246,0.7);
+  }
+  
+  /* Pages list */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #71717a;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  
+  .page-card {
+    background: linear-gradient(180deg, #101018 0%, #0d0d14 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 12px;
+    transition: 0.2s;
+  }
+  .page-card:hover {
+    border-color: rgba(139,92,246,0.3);
+  }
+  .page-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .page-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.2px;
+  }
+  .page-url {
+    color: #c4b5fd;
+    font-size: 12px;
+    font-family: 'SF Mono', monospace;
+    text-decoration: none;
+    word-break: break-all;
+  }
+  .page-url:hover { text-decoration: underline; }
+  .page-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #71717a;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .page-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge.live {
+    background: rgba(16,185,129,0.15);
+    color: #34d399;
+    border: 1px solid rgba(16,185,129,0.3);
+  }
+  .badge.banned {
+    background: rgba(239,68,68,0.15);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .badge.locked {
+    background: rgba(251,191,36,0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251,191,36,0.3);
+  }
+  
+  .page-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .mini-btn {
+    padding: 7px 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #d4d4d8;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .mini-btn:hover {
+    background: rgba(139,92,246,0.2);
+    color: #c4b5fd;
+    border-color: rgba(139,92,246,0.4);
+  }
+  .mini-btn.danger:hover {
+    background: rgba(239,68,68,0.15);
+    color: #f87171;
+    border-color: rgba(239,68,68,0.3);
+  }
+  
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(180deg, #101018 0%, #0d0d14 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+  }
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
+  .empty-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .empty-desc {
+    color: #71717a;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #71717a;
+  }
+  .spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(139,92,246,0.2);
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="glow"></div>
+
+  <div class="wrap">
+    
+    <!-- Nav -->
+    <nav class="nav">
+      <div class="brand">
+        <div class="brand-mark">◆</div>
+        <span>FreeHost</span>
+      </div>
+      <div class="user-info">
+        <img id="userPhoto" class="user-photo" src="" alt="" onerror="this.style.display='none'">
+        <div>
+          <div class="user-name" id="userName">Loading...</div>
+          <div class="user-email" id="userEmail"></div>
+        </div>
+        <a href="/auth/logout" class="logout-btn">Logout</a>
+      </div>
+    </nav>
+    
+    <!-- Header -->
+    <div class="page-header">
+      <h1>My Dashboard</h1>
+      <p>Manage all your hosted pages in one place</p>
+    </div>
+    
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Pages</div>
+        <div class="stat-value" id="statPages">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Total Views</div>
+        <div class="stat-value" id="statViews">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Live Now</div>
+        <div class="stat-value" id="statLive">0</div>
+      </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="actions">
+      <a href="/" class="btn-primary">
+        <span>+</span> Host New Page
+      </a>
+    </div>
+    
+    <!-- Pages -->
+    <div class="section-title">Your Pages</div>
+    <div id="pagesContainer">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div>Loading your pages...</div>
+      </div>
+    </div>
+    
+  </div>
+  
+  <script>
+    let allPages = [];
+    
+    async function loadUser() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) {
+          window.location.href = '/login';
+          return;
+        }
+        const user = await res.json();
+        document.getElementById('userName').textContent = user.name || 'User';
+        document.getElementById('userEmail').textContent = user.email || '';
+        if (user.photo) {
+          document.getElementById('userPhoto').src = user.photo;
+        }
+      } catch (e) {
+        window.location.href = '/login';
+      }
+    }
+    
+    async function loadPages() {
+      try {
+        const res = await fetch('/api/my-pages');
+        if (!res.ok) throw new Error('Failed');
+        allPages = await res.json();
+        
+        // Stats
+        document.getElementById('statPages').textContent = allPages.length;
+        const totalViews = allPages.reduce((sum, p) => sum + (p.views || 0), 0);
+        document.getElementById('statViews').textContent = totalViews;
+        const live = allPages.filter(p => !p.banned).length;
+        document.getElementById('statLive').textContent = live;
+        
+        renderPages();
+      } catch (e) {
+        document.getElementById('pagesContainer').innerHTML =
+          '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Failed to load</div><div class="empty-desc">Please refresh the page</div></div>';
+      }
+    }
+    
+    function renderPages() {
+      const container = document.getElementById('pagesContainer');
+      
+      if (allPages.length === 0) {
+        container.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">📄</div>
+            <div class="empty-title">No pages yet</div>
+            <div class="empty-desc">Host your first HTML page to get started</div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = allPages.map(p => {
+        const url = 'https://freehost-f01d.onrender.com/p/' + p._id;
+        const badge = p.banned
+          ? '<span class="badge banned">⛔ Banned</span>'
+          : (p.password ? '<span class="badge locked">🔒 Locked</span>' : '<span class="badge live">● Live</span>');
+        
+        return `
+          <div class="page-card">
+            <div class="page-card-head">
+              <div>
+                <div class="page-title">${escapeHtml(p.title || 'Untitled')}</div>
+                <a href="${url}" target="_blank" class="page-url">${url}</a>
+                ${badge}
+              </div>
+            </div>
+            <div class="page-meta">
+              <span>👁 ${p.views || 0} views</span>
+              <span>📅 ${new Date(p.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div class="page-actions" style="margin-top: 12px;">
+              <a href="${url}" target="_blank" class="mini-btn">🔗 Open</a>
+              <button class="mini-btn" onclick="copyLink('${url}', this)">📋 Copy Link</button>
+              <button class="mini-btn danger" onclick="deletePage('${p._id}', '${escapeHtml(p.title || 'Untitled')}')">🗑 Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function copyLink(url, btn) {
+      navigator.clipboard.writeText(url);
+      const old = btn.textContent;
+      btn.textContent = '✓ Copied';
+      setTimeout(() => btn.textContent = old, 1500);
+    }
+    
+    async function deletePage(id, title) {
+      if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+      try {
+        const res = await fetch('/api/my-pages/' + id, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed');
+        loadPages();
+      } catch (e) {
+        alert('Failed to delete. Please try again.');
+      }
+    }
+    
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"]/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
+      }[c]));
+    }
+    
+    // Load
+    loadUser();
+    loadPages();
+  </script>
+
+</body>
+</html>
