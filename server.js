@@ -33,7 +33,6 @@ async function connectDB() {
   console.log('DB connected');
 }
 
-// Session setup
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
@@ -45,7 +44,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Passport serialize
 passport.serializeUser((user, done) => {
   done(null, user._id);
 });
@@ -53,16 +51,13 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await users.findOne({ _id: new ObjectId(id) });
-    if (user && user.banned) {
-      return done(null, false);
-    }
+    if (user && user.banned) return done(null, false);
     done(null, user);
   } catch (err) {
     done(err, null);
   }
 });
 
-// Google Strategy
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
@@ -74,7 +69,6 @@ passport.use(new GoogleStrategy({
 
     let user = await users.findOne({ email });
 
-    // 🔴 Ban check
     if (user && user.banned) {
       return done(new Error('Account has been banned'), null);
     }
@@ -107,7 +101,6 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-// Auth middleware
 function requireAuth(req, res, next) {
   if (req.isAuthenticated && req.isAuthenticated() && req.user) {
     if (req.user.banned) {
@@ -125,7 +118,7 @@ function adminAuth(req, res, next) {
   next();
 }
 
-// ============ GOOGLE AUTH ROUTES ============
+// ============ GOOGLE AUTH ============
 
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
@@ -133,22 +126,16 @@ app.get('/auth/google',
 
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login?error=1' }),
-  (req, res) => {
-    res.redirect('/dashboard');
-  }
+  (req, res) => res.redirect('/dashboard')
 );
 
 app.get('/auth/logout', (req, res) => {
-  req.logout(() => {
-    res.redirect('/');
-  });
+  req.logout(() => res.redirect('/'));
 });
 
 app.get('/api/me', (req, res) => {
   if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-    if (req.user.banned) {
-      return res.status(403).json({ error: 'Account banned' });
-    }
+    if (req.user.banned) return res.status(403).json({ error: 'Account banned' });
     res.json({
       email: req.user.email,
       name: req.user.name,
@@ -168,9 +155,7 @@ app.post('/api/create', async (req, res) => {
 
     let userId = null;
     if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-      if (req.user.banned) {
-        return res.status(403).json({ error: 'Account banned' });
-      }
+      if (req.user.banned) return res.status(403).json({ error: 'Account banned' });
       userId = req.user._id.toString();
     }
 
@@ -218,36 +203,23 @@ app.get('/p/:id', async (req, res) => {
   try {
     const page = await pages.findOne({ _id: req.params.id });
     if (!page) return res.status(404).send('<h1>404 Not Found</h1>');
-
-    if (page.banned) {
-      return res.status(403).send('<h1>⛔ This page has been suspended</h1>');
-    }
-
-    if (!(await checkPassword(page, req))) {
-      return res.send(passwordForm(req.params.id));
-    }
+    if (page.banned) return res.status(403).send('<h1>⛔ This page has been suspended</h1>');
+    if (!(await checkPassword(page, req))) return res.send(passwordForm(req.params.id));
 
     await pages.updateOne({ _id: req.params.id }, { $inc: { views: 1 } });
 
     const embedUrl = '/embed/' + req.params.id + (req.query.pass ? '?pass=' + encodeURIComponent(req.query.pass) : '');
 
     res.send(
-      '<!DOCTYPE html>' +
-      '<html>' +
-      '<head>' +
-        '<meta charset="UTF-8">' +
-        '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-        '<title>' + (page.title || 'Page') + '</title>' +
-        '<style>' +
-          '*{margin:0;padding:0;box-sizing:border-box}' +
-          'html,body{width:100%;height:100%;overflow:hidden;background:#fff}' +
-          'iframe{width:100%;height:100vh;border:none;display:block}' +
-        '</style>' +
-      '</head>' +
-      '<body>' +
-        '<iframe src="' + embedUrl + '" sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"></iframe>' +
-      '</body>' +
-      '</html>'
+      '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+      '<title>' + (page.title || 'Page') + '</title>' +
+      '<style>*{margin:0;padding:0;box-sizing:border-box}' +
+      'html,body{width:100%;height:100%;overflow:hidden;background:#fff}' +
+      'iframe{width:100%;height:100vh;border:none;display:block}</style>' +
+      '</head><body>' +
+      '<iframe src="' + embedUrl + '" sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"></iframe>' +
+      '</body></html>'
     );
   } catch (err) {
     res.status(500).send('Server error');
@@ -269,9 +241,7 @@ app.get('/embed/:id', async (req, res) => {
 // ============ USER ROUTES ============
 
 app.get('/api/my-pages', requireAuth, async (req, res) => {
-  if (req.user.banned) {
-    return res.status(403).json({ error: 'Account banned' });
-  }
+  if (req.user.banned) return res.status(403).json({ error: 'Account banned' });
   const userId = req.user._id.toString();
   const list = await pages.find(
     { userId: userId },
@@ -311,15 +281,25 @@ app.get('/api/admin/list-users', adminAuth, async (req, res) => {
   res.json(list);
 });
 
+// ✏️ EDIT PAGE ROUTE — এটাই নতুন
 app.put('/api/admin/page/:id', adminAuth, async (req, res) => {
-  const { html, title, banned } = req.body;
-  const update = {};
-  if (html !== undefined) update.html = html;
-  if (title !== undefined) update.title = title;
-  if (banned !== undefined) update.banned = banned;
+  try {
+    const { html, title, banned, password } = req.body;
+    const update = { updatedAt: new Date() };
+    
+    if (html !== undefined) update.html = html;
+    if (title !== undefined) update.title = title;
+    if (banned !== undefined) update.banned = banned;
+    
+    if (password !== undefined) {
+      update.password = password ? await bcrypt.hash(password, 10) : null;
+    }
 
-  await pages.updateOne({ _id: req.params.id }, { $set: update });
-  res.json({ success: true });
+    await pages.updateOne({ _id: req.params.id }, { $set: update });
+    res.json({ success: true, updatedAt: update.updatedAt });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.delete('/api/admin/delete/:id', adminAuth, async (req, res) => {
@@ -327,21 +307,14 @@ app.delete('/api/admin/delete/:id', adminAuth, async (req, res) => {
   res.json({ success: true });
 });
 
-// 🚫 Ban/Unban User
+// 🚫 BAN USER
 app.put('/api/admin/user/:id/ban', adminAuth, async (req, res) => {
   try {
     const { banned } = req.body;
     const userId = req.params.id;
 
-    await users.updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { banned: !!banned } }
-    );
-
-    await pages.updateMany(
-      { userId: userId },
-      { $set: { banned: !!banned } }
-    );
+    await users.updateOne({ _id: new ObjectId(userId) }, { $set: { banned: !!banned } });
+    await pages.updateMany({ userId: userId }, { $set: { banned: !!banned } });
 
     res.json({ success: true, banned: !!banned });
   } catch (err) {
@@ -349,14 +322,12 @@ app.put('/api/admin/user/:id/ban', adminAuth, async (req, res) => {
   }
 });
 
-// 🗑 Delete User
+// 🗑 DELETE USER
 app.delete('/api/admin/user/:id', adminAuth, async (req, res) => {
   try {
     const userId = req.params.id;
-
     await users.deleteOne({ _id: new ObjectId(userId) });
     await pages.deleteMany({ userId: userId });
-
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -370,12 +341,8 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   res.json({ totalPages, totalUsers, totalViews: r[0]?.v || 0 });
 });
 
-// ============ PAGE ROUTES (HTML pages) ============
-
 app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
 app.get('/dashboard', requireAuth, (req, res) => res.sendFile(__dirname + '/public/dashboard.html'));
-
-// ============ START ============
 
 connectDB().then(() => {
   const PORT = process.env.PORT || 3000;
