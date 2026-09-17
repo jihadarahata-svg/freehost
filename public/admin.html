@@ -10,22 +10,28 @@
   
   .login { max-width: 400px; margin: 80px auto; background: #151515; border: 1px solid #222; border-radius: 16px; padding: 24px; }
   h1 { font-size: 22px; margin-bottom: 16px; }
-  input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; }
-  button { padding: 12px 18px; background: #fff; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 12px; font-family: inherit; }
+  input, textarea, select { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; font-family: inherit; }
+  textarea { resize: vertical; min-height: 100px; }
+  button { padding: 12px 18px; background: #fff; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 12px; font-family: inherit; font-size: 13px; }
   button.full { width: 100%; }
   button.red { background: #dc2626; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
   button.sm { padding: 6px 10px; font-size: 12px; margin: 0; background: #222; color: #fff; }
   button.green { background: #16a34a; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
   button.blue { background: #2563eb; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
+  button.orange { background: #ea580c; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
   
   #dash { display: none; }
   #dash.show { display: block; }
   
   .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
-  .stats { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-  .card { flex: 1; min-width: 120px; background: #151515; border: 1px solid #222; border-radius: 12px; padding: 16px; }
-  .num { font-size: 26px; font-weight: 700; color: #4ade80; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .card { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; }
+  .num { font-size: 24px; font-weight: 700; color: #4ade80; }
   .lbl { font-size: 11px; color: #888; margin-top: 2px; }
+  
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { padding: 10px 16px; background: #1a1a1a; border: 1px solid #222; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: #a1a1aa; }
+  .tab.active { background: #2563eb; color: #fff; border-color: #2563eb; }
   
   .search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
   .search-bar input { flex: 1; padding: 12px; }
@@ -33,7 +39,6 @@
   .page-item { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
   .page-item h3 { font-size: 15px; margin-bottom: 6px; }
   .page-item .link { color: #4ade80; font-size: 12px; word-break: break-all; display: block; margin-bottom: 8px; text-decoration: none; }
-  .page-item .link:hover { text-decoration: underline; }
   .page-item .meta { font-size: 11px; color: #888; margin-bottom: 10px; }
   .page-item .btns { display: flex; gap: 6px; flex-wrap: wrap; }
   .empty { text-align: center; color: #666; padding: 40px; font-size: 14px; }
@@ -48,63 +53,46 @@
     background: #16a34a; color: #fff;
     padding: 12px 24px; border-radius: 10px;
     font-size: 14px; font-weight: 600;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    transition: transform 0.3s ease; z-index: 9999;
+    transition: transform 0.3s; z-index: 9999;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
   
-  .user-card { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
-  .user-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-  .user-photo { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #333; }
-  .user-photo-placeholder { width: 40px; height: 40px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-  .user-name { font-weight: 600; font-size: 14px; }
-  .user-email { font-size: 12px; color: #888; }
-  
   .modal-overlay {
     position: fixed; inset: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0,0,0,0.85);
     display: none; align-items: center; justify-content: center;
     z-index: 1000; padding: 16px;
-    backdrop-filter: blur(4px);
   }
   .modal-overlay.show { display: flex; }
   .modal {
     background: #151515; border: 1px solid #333;
     border-radius: 16px; padding: 24px;
-    width: 100%; max-width: 800px;
+    width: 100%; max-width: 700px;
     max-height: 90vh; overflow: auto;
   }
-  .modal-head {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 16px; padding-bottom: 16px;
-    border-bottom: 1px solid #222;
-  }
-  .modal-head h2 { font-size: 18px; font-weight: 700; }
-  .modal-close { background: transparent; color: #888; border: none; font-size: 24px; cursor: pointer; padding: 4px 12px; margin: 0; border-radius: 6px; }
-  .modal-close:hover { background: #222; color: #fff; }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #222; }
+  .modal-head h2 { font-size: 18px; }
+  .modal-close { background: transparent; color: #888; border: none; font-size: 24px; cursor: pointer; padding: 4px 12px; margin: 0; }
   .modal-field { margin-bottom: 14px; }
-  .modal-field label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-  .modal-field input, .modal-field textarea {
-    width: 100%; padding: 12px;
-    background: #0a0a0a; border: 1px solid #333;
-    border-radius: 8px; color: #fff;
-    font-size: 14px; font-family: inherit; outline: none;
-  }
-  .modal-field input:focus, .modal-field textarea:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-  }
-  .modal-field textarea {
-    font-family: 'Courier New', monospace;
-    font-size: 13px; min-height: 300px; resize: vertical;
-  }
+  .modal-field label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; text-transform: uppercase; font-weight: 600; }
   .modal-btns { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #222; }
   .modal-btns button { flex: 1; margin: 0; }
+  
+  .product-card { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; }
+  .product-photo { width: 60px; height: 60px; border-radius: 8px; background: #222; object-fit: cover; flex-shrink: 0; }
+  .product-info { flex: 1; min-width: 0; }
+  .product-info h4 { font-size: 14px; margin-bottom: 4px; }
+  .product-info p { font-size: 11px; color: #888; }
+  .product-price { font-size: 16px; font-weight: 700; color: #4ade80; }
+  
+  .deposit-card { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .badge-pending { background: #ea580c; color: #fff; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+  .badge-approved { background: #16a34a; color: #fff; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+  .badge-rejected { background: #dc2626; color: #fff; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
 </style>
 </head>
 <body>
 
-  <!-- LOGIN -->
   <div class="login" id="login">
     <h1>🔐 Admin Login</h1>
     <input id="pass" type="password" placeholder="Password" onkeypress="if(event.key==='Enter') doLogin()">
@@ -112,40 +100,136 @@
     <p id="err" style="color:#f87171;font-size:13px;margin-top:10px"></p>
   </div>
 
-  <!-- DASHBOARD -->
   <div id="dash">
     <div class="head">
       <h1 style="font-size:20px">📊 Admin Panel</h1>
       <div>
-        <button class="sm" onclick="showTab('pages')" id="tabPages" style="background:#2563eb;">📄 Pages</button>
-        <button class="sm" onclick="showTab('users')" id="tabUsers">👥 Users</button>
         <button class="sm" onclick="load()">🔄 Refresh</button>
         <button class="sm" onclick="logout()">Logout</button>
       </div>
     </div>
 
     <div class="stats">
-      <div class="card"><div class="num" id="tp">0</div><div class="lbl">Total Pages</div></div>
-      <div class="card"><div class="num" id="tv">0</div><div class="lbl">Total Views</div></div>
-      <div class="card"><div class="num" id="tu">0</div><div class="lbl">Total Users</div></div>
+      <div class="card"><div class="num" id="tp">0</div><div class="lbl">Pages</div></div>
+      <div class="card"><div class="num" id="tv">0</div><div class="lbl">Views</div></div>
+      <div class="card"><div class="num" id="tu">0</div><div class="lbl">Users</div></div>
+      <div class="card"><div class="num" id="tprod">0</div><div class="lbl">Products</div></div>
+      <div class="card"><div class="num" id="tpend">0</div><div class="lbl">Pending 💰</div></div>
+      <div class="card"><div class="num" id="trev">0</div><div class="lbl">Revenue ৳</div></div>
     </div>
 
-    <div id="pagesTab">
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('pages')" id="tab-pages">📄 Pages</div>
+      <div class="tab" onclick="showTab('users')" id="tab-users">👥 Users</div>
+      <div class="tab" onclick="showTab('products')" id="tab-products">🛍 Products</div>
+      <div class="tab" onclick="showTab('deposits')" id="tab-deposits">💰 Deposits</div>
+      <div class="tab" onclick="showTab('orders')" id="tab-orders">📦 Orders</div>
+      <div class="tab" onclick="showTab('settings')" id="tab-settings">⚙️ Settings</div>
+    </div>
+
+    <!-- PAGES TAB -->
+    <div id="tab-content-pages">
       <div class="search-bar">
-        <input id="searchInput" type="text" placeholder="🔍 Search pages..." oninput="filterPages()">
+        <input id="searchInput" placeholder="🔍 Search pages..." oninput="filterPages()">
       </div>
       <div id="list"><div class="empty">Loading...</div></div>
     </div>
 
-    <div id="usersTab" style="display:none;">
+    <!-- USERS TAB -->
+    <div id="tab-content-users" style="display:none;">
       <div class="search-bar">
-        <input id="userSearchInput" type="text" placeholder="🔍 Search users..." oninput="filterUsers()">
+        <input id="userSearchInput" placeholder="🔍 Search users..." oninput="filterUsers()">
       </div>
       <div id="userList"><div class="empty">Loading...</div></div>
     </div>
+
+    <!-- PRODUCTS TAB -->
+    <div id="tab-content-products" style="display:none;">
+      <button class="blue" style="width:100%; margin-bottom:16px;" onclick="openProductModal()">➕ Add New Product</button>
+      <div id="productList"><div class="empty">Loading...</div></div>
+    </div>
+
+    <!-- DEPOSITS TAB -->
+    <div id="tab-content-deposits" style="display:none;">
+      <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+        <button class="sm" onclick="loadDeposits('pending')">⏳ Pending</button>
+        <button class="sm" onclick="loadDeposits('approved')">✅ Approved</button>
+        <button class="sm" onclick="loadDeposits('rejected')">❌ Rejected</button>
+        <button class="sm" onclick="loadDeposits('all')">📋 All</button>
+      </div>
+      <div id="depositList"><div class="empty">Loading...</div></div>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div id="tab-content-orders" style="display:none;">
+      <div id="orderList"><div class="empty">Loading...</div></div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="tab-content-settings" style="display:none;">
+      <div class="page-item">
+        <h3>💳 bKash Settings</h3>
+        <div class="modal-field">
+          <label>bKash Number</label>
+          <input id="setBkash" placeholder="01XXXXXXXXX">
+        </div>
+        <div class="modal-field">
+          <label>bKash Type</label>
+          <select id="setBkashType">
+            <option value="Personal">Personal</option>
+            <option value="Merchant">Merchant</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="page-item">
+        <h3>💳 Nagad Settings</h3>
+        <div class="modal-field">
+          <label>Nagad Number (খালি রাখলে দেখাবে না)</label>
+          <input id="setNagad" placeholder="01XXXXXXXXX">
+        </div>
+        <div class="modal-field">
+          <label>Nagad Active</label>
+          <select id="setNagadActive">
+            <option value="false">❌ No</option>
+            <option value="true">✅ Yes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="page-item">
+        <h3>💵 Deposit Limits</h3>
+        <div class="modal-field">
+          <label>Minimum Deposit (৳)</label>
+          <input id="setMin" type="number" placeholder="50">
+        </div>
+        <div class="modal-field">
+          <label>Maximum Deposit (৳)</label>
+          <input id="setMax" type="number" placeholder="10000">
+        </div>
+      </div>
+
+      <div class="page-item">
+        <h3>📞 Support Contact</h3>
+        <div class="modal-field">
+          <label>Email</label>
+          <input id="setEmail" placeholder="support@freehost.com">
+        </div>
+        <div class="modal-field">
+          <label>WhatsApp</label>
+          <input id="setWhatsapp" placeholder="+880 16XXXXXXXX">
+        </div>
+        <div class="modal-field">
+          <label>Telegram</label>
+          <input id="setTelegram" placeholder="@freehost_support">
+        </div>
+      </div>
+
+      <button class="blue" style="width:100%;" onclick="saveSettings()">💾 Save Settings</button>
+    </div>
   </div>
 
-  <!-- EDIT MODAL -->
+  <!-- EDIT PAGE MODAL -->
   <div class="modal-overlay" id="editModal">
     <div class="modal">
       <div class="modal-head">
@@ -154,19 +238,73 @@
       </div>
       <div class="modal-field">
         <label>Page Title</label>
-        <input id="editTitle" placeholder="My Page">
+        <input id="editTitle">
       </div>
       <div class="modal-field">
         <label>HTML Code</label>
-        <textarea id="editHtml" placeholder="<h1>Hello World</h1>"></textarea>
+        <textarea id="editHtml" style="min-height:300px; font-family:monospace;"></textarea>
       </div>
       <div class="modal-field">
-        <label>Password (leave empty to remove)</label>
-        <input id="editPassword" type="password" placeholder="Optional">
+        <label>Password (খালি = remove)</label>
+        <input id="editPassword" type="password">
       </div>
       <div class="modal-btns">
         <button class="sm" onclick="closeEditModal()">Cancel</button>
-        <button class="blue" onclick="saveEdit()" id="saveEditBtn">💾 Save Changes</button>
+        <button class="blue" onclick="saveEdit()">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT MODAL -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="productModalTitle">➕ Add Product</h2>
+        <button class="modal-close" onclick="closeProductModal()">✕</button>
+      </div>
+      <div class="modal-field">
+        <label>Product Title *</label>
+        <input id="pTitle" placeholder="HTML Templates Pack">
+      </div>
+      <div class="modal-field">
+        <label>Description</label>
+        <textarea id="pDesc" placeholder="Product এর description..."></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Category</label>
+        <input id="pCategory" placeholder="Templates, Code, Design...">
+      </div>
+      <div class="modal-field">
+        <label>Price (৳) *</label>
+        <input id="pPrice" type="number" placeholder="100">
+      </div>
+      <div class="modal-field">
+        <label>Discount Price (৳) — optional</label>
+        <input id="pDiscount" type="number" placeholder="80">
+      </div>
+      <div class="modal-field">
+        <label>Photo URL</label>
+        <input id="pPhoto" placeholder="https://photo-url.jpg">
+      </div>
+      <div class="modal-field">
+        <label>Delivery Type *</label>
+        <select id="pDeliveryType">
+          <option value="link">🔗 Link</option>
+          <option value="file">📁 File</option>
+          <option value="code">💻 Code</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Delivery Data * (Link/File URL/Code)</label>
+        <textarea id="pDeliveryData" placeholder="https://drive.google.com/... অথবা Code"></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Stock</label>
+        <input id="pStock" type="number" placeholder="999">
+      </div>
+      <div class="modal-btns">
+        <button class="sm" onclick="closeProductModal()">Cancel</button>
+        <button class="blue" onclick="saveProduct()" id="saveProductBtn">💾 Save</button>
       </div>
     </div>
   </div>
@@ -175,10 +313,9 @@
 
   <script>
     let token = localStorage.getItem('adm_token');
-    let allPages = [];
-    let allUsers = [];
+    let allPages = [], allUsers = [], allProducts = [], allDeposits = [], allOrders = [];
     let currentTab = 'pages';
-    let editingId = null;
+    let editingId = null, editingProductId = null;
 
     if (token) showDash();
 
@@ -220,261 +357,322 @@
 
     function showTab(tab) {
       currentTab = tab;
-      document.getElementById('pagesTab').style.display = tab === 'pages' ? 'block' : 'none';
-      document.getElementById('usersTab').style.display = tab === 'users' ? 'block' : 'none';
-      document.getElementById('tabPages').style.background = tab === 'pages' ? '#2563eb' : '#222';
-      document.getElementById('tabUsers').style.background = tab === 'users' ? '#2563eb' : '#222';
-      if (tab === 'users' && allUsers.length === 0) loadUsers();
+      ['pages','users','products','deposits','orders','settings'].forEach(t => {
+        document.getElementById('tab-content-' + t).style.display = t === tab ? 'block' : 'none';
+        document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+      });
+      
+      if (tab === 'users' && !allUsers.length) loadUsers();
+      if (tab === 'products' && !allProducts.length) loadProducts();
+      if (tab === 'deposits' && !allDeposits.length) loadDeposits('pending');
+      if (tab === 'orders' && !allOrders.length) loadOrders();
+      if (tab === 'settings') loadSettings();
     }
 
     async function load() {
       const h = { 'x-admin-token': token };
-      const pRes = await fetch('/api/admin/list-full', { headers: h });
-      const sRes = await fetch('/api/admin/stats', { headers: h });
+      const [pRes, sRes] = await Promise.all([
+        fetch('/api/admin/list-full', { headers: h }),
+        fetch('/api/admin/stats', { headers: h })
+      ]);
       if (pRes.status === 401) return logout();
-
+      
       allPages = await pRes.json();
       const stats = await sRes.json();
-
-      document.getElementById('tp').textContent = stats.totalPages;
-      document.getElementById('tv').textContent = stats.totalViews;
+      
+      document.getElementById('tp').textContent = stats.totalPages || 0;
+      document.getElementById('tv').textContent = stats.totalViews || 0;
       document.getElementById('tu').textContent = stats.totalUsers || 0;
-
+      document.getElementById('tprod').textContent = stats.totalProducts || 0;
+      document.getElementById('tpend').textContent = stats.pendingDeposits || 0;
+      document.getElementById('trev').textContent = stats.totalRevenue || 0;
+      
       renderPages(allPages);
     }
 
-    async function loadUsers() {
-      try {
-        const res = await fetch('/api/admin/list-users', {
-          headers: { 'x-admin-token': token }
-        });
-        if (res.status === 401) return logout();
-        allUsers = await res.json();
-        renderUsers(allUsers);
-      } catch (e) {
-        document.getElementById('userList').innerHTML = '<div class="empty">Failed to load</div>';
-      }
-    }
-
+    // ===== PAGES =====
     function filterPages() {
-      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const q = document.getElementById('searchInput').value.toLowerCase();
       if (!q) return renderPages(allPages);
-      const filtered = allPages.filter(p =>
-        (p.title || '').toLowerCase().includes(q) ||
-        (p._id || '').toLowerCase().includes(q)
-      );
-      renderPages(filtered);
-    }
-
-    function filterUsers() {
-      const q = document.getElementById('userSearchInput').value.toLowerCase().trim();
-      if (!q) return renderUsers(allUsers);
-      const filtered = allUsers.filter(u =>
-        (u.email || '').toLowerCase().includes(q) ||
-        (u.name || '').toLowerCase().includes(q)
-      );
-      renderUsers(filtered);
+      renderPages(allPages.filter(p => (p.title||'').toLowerCase().includes(q) || (p._id||'').includes(q)));
     }
 
     function renderPages(pages) {
       const list = document.getElementById('list');
-      if (!pages.length) {
-        list.innerHTML = '<div class="empty">কোনো page নেই</div>';
-        return;
-      }
-      list.innerHTML = pages.map(function(p) {
-        const safeHtml = esc(p.html || '');
-        const bannedBadge = p.banned ? ' · ⛔ BANNED' : '';
-        return '<div class="page-item">' +
+      if (!pages.length) { list.innerHTML = '<div class="empty">কোনো page নেই</div>'; return; }
+      list.innerHTML = pages.map(p => 
+        '<div class="page-item">' +
           '<h3>' + esc(p.title) + '</h3>' +
           '<a class="link" href="/p/' + p._id + '" target="_blank">/p/' + p._id + '</a>' +
-          '<div class="meta">👁 ' + p.views + ' views · ' + new Date(p.createdAt).toLocaleString('bn-BD') + (p.password ? ' · 🔒 Locked' : '') + bannedBadge + '</div>' +
+          '<div class="meta">👁 ' + p.views + ' · ' + new Date(p.createdAt).toLocaleDateString() + (p.password ? ' · 🔒' : '') + (p.banned ? ' · ⛔' : '') + '</div>' +
           '<div class="btns">' +
-            '<button class="blue" onclick="openEditModal(\'' + p._id + '\')">📝 Edit</button>' +
-            '<button class="green" onclick="toggleCode(\'' + p._id + '\')">📄 View Code</button>' +
-            '<button class="sm" onclick="copy(\'' + p._id + '\')">🔗 Copy Link</button>' +
-            '<button class="sm" onclick="copyCode(\'' + p._id + '\')">📋 Copy Code</button>' +
-            '<button class="blue" onclick="downloadCode(\'' + p._id + '\', \'' + esc(p.title) + '\')">📥 Download</button>' +
-            '<button class="red" onclick="del(\'' + p._id + '\', \'' + esc(p.title) + '\')">🗑 Delete</button>' +
+            '<button class="blue" onclick="openEdit(\'' + p._id + '\')">📝 Edit</button>' +
+            '<button class="green" onclick="toggleCode(\'' + p._id + '\')">📄 Code</button>' +
+            '<button class="sm" onclick="copy(\'' + p._id + '\')">🔗 Copy</button>' +
+            '<button class="red" onclick="del(\'' + p._id + '\')">🗑</button>' +
           '</div>' +
-          '<div class="code-box" id="code-' + p._id + '">' +
-            '<pre>' + safeHtml + '</pre>' +
-          '</div>' +
-        '</div>';
-      }).join('');
+          '<div class="code-box" id="code-' + p._id + '"><pre>' + esc(p.html || '') + '</pre></div>' +
+        '</div>'
+      ).join('');
     }
 
-    function renderUsers(users) {
-      const list = document.getElementById('userList');
-      if (!users.length) {
-        list.innerHTML = '<div class="empty">কোনো user নেই</div>';
-        return;
-      }
-      list.innerHTML = users.map(function(u) {
-        const banned = u.banned ? '<span style="color:#f87171;font-weight:600;">⛔ BANNED</span>' : '<span style="color:#4ade80;">● Active</span>';
-        const photo = u.photo 
-          ? '<img src="' + esc(u.photo) + '" class="user-photo" onerror="this.style.display=\'none\'">' 
-          : '<div class="user-photo-placeholder">👤</div>';
-        const banBtn = u.banned 
-          ? '<button class="green" onclick="banUser(\'' + u._id + '\', false)">✅ Unban</button>'
-          : '<button class="red" onclick="banUser(\'' + u._id + '\', true)">🚫 Ban</button>';
-        
-        return '<div class="user-card">' +
-          '<div class="user-head">' + photo +
-            '<div>' +
-              '<div class="user-name">' + esc(u.name || 'User') + '</div>' +
-              '<div class="user-email">' + esc(u.email) + '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div style="font-size:11px;color:#888;margin-bottom:10px;">' + banned + ' · Joined ' + new Date(u.createdAt).toLocaleDateString() + '</div>' +
-          '<div class="btns">' + banBtn +
-            '<button class="red" onclick="deleteUser(\'' + u._id + '\', \'' + esc(u.email) + '\')">🗑 Delete</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-    }
+    function toggleCode(id) { document.getElementById('code-' + id).classList.toggle('show'); }
+    function copy(id) { navigator.clipboard.writeText(location.origin + '/p/' + id); showToast('✅ Copied!'); }
 
-    function toggleCode(id) {
-      const box = document.getElementById('code-' + id);
-      box.classList.toggle('show');
-    }
-
-    function copy(id) {
-      const url = location.origin + '/p/' + id;
-      navigator.clipboard.writeText(url);
-      showToast('✅ Link copied!');
-    }
-
-    function copyCode(id) {
-      const page = allPages.find(function(p) { return p._id === id; });
-      if (page && page.html) {
-        navigator.clipboard.writeText(page.html);
-        showToast('✅ HTML copied!');
-      }
-    }
-
-    function downloadCode(id, title) {
-      const page = allPages.find(function(p) { return p._id === id; });
-      if (!page || !page.html) return showToast('❌ No code', '#dc2626');
-      const blob = new Blob([page.html], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = (title || id).replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('✅ Downloaded!');
-    }
-
-    // ✏️ EDIT FUNCTIONS
-    function openEditModal(id) {
-      const page = allPages.find(function(p) { return p._id === id; });
-      if (!page) return showToast('❌ Page not found', '#dc2626');
-      
+    function openEdit(id) {
+      const p = allPages.find(x => x._id === id);
+      if (!p) return;
       editingId = id;
-      document.getElementById('editTitle').value = page.title || '';
-      document.getElementById('editHtml').value = page.html || '';
+      document.getElementById('editTitle').value = p.title || '';
+      document.getElementById('editHtml').value = p.html || '';
       document.getElementById('editPassword').value = '';
       document.getElementById('editModal').classList.add('show');
     }
-
-    function closeEditModal() {
-      editingId = null;
-      document.getElementById('editModal').classList.remove('show');
-    }
+    function closeEditModal() { editingId = null; document.getElementById('editModal').classList.remove('show'); }
 
     async function saveEdit() {
       if (!editingId) return;
+      const body = {
+        title: document.getElementById('editTitle').value,
+        html: document.getElementById('editHtml').value
+      };
+      const pass = document.getElementById('editPassword').value;
+      if (pass) body.password = pass;
       
-      const btn = document.getElementById('saveEditBtn');
-      const title = document.getElementById('editTitle').value;
-      const html = document.getElementById('editHtml').value;
-      const password = document.getElementById('editPassword').value;
-      
-      if (!html.trim()) {
-        showToast('❌ HTML required', '#dc2626');
-        return;
-      }
-      
-      btn.disabled = true;
-      btn.textContent = '💾 Saving...';
-      
-      try {
-        const body = { title: title || 'Untitled', html: html };
-        if (password) body.password = password;
-        
-        const res = await fetch('/api/admin/page/' + editingId, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-token': token
-          },
-          body: JSON.stringify(body)
-        });
-        
-        if (!res.ok) throw new Error('Failed');
-        
-        showToast('✅ Saved! Link updated.');
-        closeEditModal();
-        load();
-      } catch (e) {
-        showToast('❌ Save failed', '#dc2626');
-      }
-      
-      btn.disabled = false;
-      btn.textContent = '💾 Save Changes';
-    }
-
-    async function banUser(id, ban) {
-      if (ban && !confirm('এই user কে ban করলে তার সব page বন্ধ হবে। Ban করবে?')) return;
-      try {
-        const res = await fetch('/api/admin/user/' + id + '/ban', {
-          method: 'PUT',
-          headers: { 
-            'Content-Type': 'application/json',
-            'x-admin-token': token 
-          },
-          body: JSON.stringify({ banned: ban })
-        });
-        if (!res.ok) throw new Error('Failed');
-        showToast(ban ? '🚫 User banned' : '✅ User unbanned');
-        loadUsers();
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
-    }
-
-    async function deleteUser(id, email) {
-      if (!confirm('"' + email + '" এর account ডিলিট করবে?')) return;
-      try {
-        const res = await fetch('/api/admin/user/' + id, {
-          method: 'DELETE',
-          headers: { 'x-admin-token': token }
-        });
-        if (!res.ok) throw new Error('Failed');
-        showToast('🗑 User deleted');
-        loadUsers();
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
-    }
-
-    async function del(id, title) {
-      if (!confirm('"' + title + '" ডিলিট করবে?')) return;
-      await fetch('/api/admin/delete/' + id, {
-        method: 'DELETE',
-        headers: { 'x-admin-token': token }
+      const res = await fetch('/api/admin/page/' + editingId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify(body)
       });
-      showToast('🗑 Deleted');
-      load();
+      if (res.ok) { showToast('✅ Saved!'); closeEditModal(); load(); }
+      else showToast('❌ Failed', '#dc2626');
+    }
+
+    async function del(id) {
+      if (!confirm('Delete করবে?')) return;
+      await fetch('/api/admin/delete/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
+      showToast('🗑 Deleted'); load();
+    }
+
+    // ===== USERS =====
+    async function loadUsers() {
+      const res = await fetch('/api/admin/list-users', { headers: { 'x-admin-token': token } });
+      allUsers = await res.json();
+      renderUsers(allUsers);
+    }
+    function filterUsers() {
+      const q = document.getElementById('userSearchInput').value.toLowerCase();
+      if (!q) return renderUsers(allUsers);
+      renderUsers(allUsers.filter(u => (u.email||'').toLowerCase().includes(q) || (u.name||'').toLowerCase().includes(q)));
+    }
+    function renderUsers(users) {
+      const list = document.getElementById('userList');
+      if (!users.length) { list.innerHTML = '<div class="empty">No users</div>'; return; }
+      list.innerHTML = users.map(u => 
+        '<div class="page-item">' +
+          '<h3>' + esc(u.name || 'User') + '</h3>' +
+          '<div class="meta">📧 ' + esc(u.email) + '</div>' +
+          '<div class="meta">💰 ৳' + (u.wallet || 0) + ' · Spent: ৳' + (u.totalSpent || 0) + (u.banned ? ' · ⛔ BANNED' : '') + '</div>' +
+          '<div class="btns">' +
+            (u.banned 
+              ? '<button class="green" onclick="banUser(\'' + u._id + '\', false)">✅ Unban</button>'
+              : '<button class="orange" onclick="banUser(\'' + u._id + '\', true)">🚫 Ban</button>') +
+            '<button class="red" onclick="delUser(\'' + u._id + '\', \'' + esc(u.email) + '\')">🗑 Delete</button>' +
+          '</div>' +
+        '</div>'
+      ).join('');
+    }
+    async function banUser(id, ban) {
+      if (ban && !confirm('Ban করবে?')) return;
+      await fetch('/api/admin/user/' + id + '/ban', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({ banned: ban })
+      });
+      showToast(ban ? '🚫 Banned' : '✅ Unbanned'); loadUsers();
+    }
+    async function delUser(id, email) {
+      if (!confirm('"' + email + '" delete করবে?')) return;
+      await fetch('/api/admin/user/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
+      showToast('🗑 Deleted'); loadUsers();
+    }
+
+    // ===== PRODUCTS =====
+    async function loadProducts() {
+      const res = await fetch('/api/admin/products', { headers: { 'x-admin-token': token } });
+      allProducts = await res.json();
+      renderProducts();
+    }
+    function renderProducts() {
+      const list = document.getElementById('productList');
+      if (!allProducts.length) { list.innerHTML = '<div class="empty">কোনো product নেই</div>'; return; }
+      list.innerHTML = allProducts.map(p => 
+        '<div class="product-card">' +
+          (p.photo ? '<img src="' + esc(p.photo) + '" class="product-photo" onerror="this.style.display=\'none\'">' : '<div class="product-photo"></div>') +
+          '<div class="product-info">' +
+            '<h4>' + esc(p.title) + '</h4>' +
+            '<p>📁 ' + esc(p.category || 'Other') + ' · Sold: ' + (p.sold||0) + '</p>' +
+            '<div class="product-price">৳' + (p.discountPrice || p.price) + (p.discountPrice ? ' <span style="color:#888;font-size:12px;text-decoration:line-through;">৳' + p.price + '</span>' : '') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="btns" style="margin-bottom:10px;">' +
+          '<button class="blue" onclick="openProductModal(\'' + p._id + '\')">📝 Edit</button>' +
+          '<button class="red" onclick="delProduct(\'' + p._id + '\')">🗑 Delete</button>' +
+        '</div>'
+      ).join('');
+    }
+    function openProductModal(id) {
+      editingProductId = id || null;
+      document.getElementById('productModalTitle').textContent = id ? '📝 Edit Product' : '➕ Add Product';
+      
+      if (id) {
+        const p = allProducts.find(x => x._id === id);
+        if (p) {
+          document.getElementById('pTitle').value = p.title || '';
+          document.getElementById('pDesc').value = p.description || '';
+          document.getElementById('pCategory').value = p.category || '';
+          document.getElementById('pPrice').value = p.price || '';
+          document.getElementById('pDiscount').value = p.discountPrice || '';
+          document.getElementById('pPhoto').value = p.photo || '';
+          document.getElementById('pDeliveryType').value = p.deliveryType || 'link';
+          document.getElementById('pDeliveryData').value = p.deliveryData || '';
+          document.getElementById('pStock').value = p.stock || '';
+        }
+      } else {
+        ['pTitle','pDesc','pCategory','pPrice','pDiscount','pPhoto','pDeliveryData','pStock'].forEach(i => document.getElementById(i).value = '');
+        document.getElementById('pDeliveryType').value = 'link';
+      }
+      document.getElementById('productModal').classList.add('show');
+    }
+    function closeProductModal() { editingProductId = null; document.getElementById('productModal').classList.remove('show'); }
+    async function saveProduct() {
+      const body = {
+        title: document.getElementById('pTitle').value,
+        description: document.getElementById('pDesc').value,
+        category: document.getElementById('pCategory').value,
+        price: document.getElementById('pPrice').value,
+        discountPrice: document.getElementById('pDiscount').value,
+        photo: document.getElementById('pPhoto').value,
+        deliveryType: document.getElementById('pDeliveryType').value,
+        deliveryData: document.getElementById('pDeliveryData').value,
+        stock: document.getElementById('pStock').value
+      };
+      if (!body.title || !body.price || !body.deliveryData) return showToast('❌ Title, Price, Delivery Data দাও', '#dc2626');
+      
+      const url = editingProductId ? '/api/admin/product/' + editingProductId : '/api/admin/product';
+      const method = editingProductId ? 'PUT' : 'POST';
+      
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) { showToast('✅ Saved!'); closeProductModal(); loadProducts(); }
+      else showToast('❌ Failed', '#dc2626');
+    }
+    async function delProduct(id) {
+      if (!confirm('Delete করবে?')) return;
+      await fetch('/api/admin/product/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
+      showToast('🗑 Deleted'); loadProducts();
+    }
+
+    // ===== DEPOSITS =====
+    async function loadDeposits(status) {
+      const res = await fetch('/api/admin/deposits?status=' + (status || 'pending'), { headers: { 'x-admin-token': token } });
+      allDeposits = await res.json();
+      renderDeposits();
+    }
+    function renderDeposits() {
+      const list = document.getElementById('depositList');
+      if (!allDeposits.length) { list.innerHTML = '<div class="empty">কোনো deposit নেই</div>'; return; }
+      list.innerHTML = allDeposits.map(d => {
+        const badge = d.status === 'pending' ? '<span class="badge-pending">⏳ PENDING</span>' 
+                    : d.status === 'approved' ? '<span class="badge-approved">✅ APPROVED</span>' 
+                    : '<span class="badge-rejected">❌ REJECTED</span>';
+        return '<div class="deposit-card">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+            '<h3 style="font-size:14px;">💰 ৳' + d.amount + '</h3>' +
+            badge +
+          '</div>' +
+          '<div style="font-size:12px;color:#888;margin-bottom:8px;">' +
+            '👤 ' + esc(d.userEmail || '') + '<br>' +
+            '📱 From: ' + esc(d.senderNumber || 'N/A') + '<br>' +
+            (d.transactionId ? '🆔 TRX: ' + esc(d.transactionId) + '<br>' : '') +
+            '🕐 ' + new Date(d.createdAt).toLocaleString() +
+          '</div>' +
+          (d.screenshot ? '<a href="' + esc(d.screenshot) + '" target="_blank" style="color:#4ade80;font-size:12px;">📷 View Screenshot</a><br><br>' : '') +
+          (d.status === 'pending' 
+            ? '<div class="btns">' +
+                '<button class="green" onclick="reviewDeposit(\'' + d._id + '\', \'approve\')">✅ Approve</button>' +
+                '<button class="red" onclick="reviewDeposit(\'' + d._id + '\', \'reject\')">❌ Reject</button>' +
+              '</div>'
+            : '') +
+        '</div>';
+      }).join('');
+    }
+    async function reviewDeposit(id, action) {
+      if (!confirm(action === 'approve' ? 'Approve করলে user এর wallet এ টাকা যোগ হবে। ঠিক আছে?' : 'Reject করবে?')) return;
+      const res = await fetch('/api/admin/deposit/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({ action })
+      });
+      if (res.ok) { showToast(action === 'approve' ? '✅ Approved & Balance Added' : '❌ Rejected'); loadDeposits('pending'); load(); }
+      else showToast('❌ Failed', '#dc2626');
+    }
+
+    // ===== ORDERS =====
+    async function loadOrders() {
+      const res = await fetch('/api/admin/purchases', { headers: { 'x-admin-token': token } });
+      allOrders = await res.json();
+      const list = document.getElementById('orderList');
+      if (!allOrders.length) { list.innerHTML = '<div class="empty">কোনো order নেই</div>'; return; }
+      list.innerHTML = allOrders.map(o => 
+        '<div class="page-item">' +
+          '<h3>📦 ' + esc(o.productTitle) + '</h3>' +
+          '<div class="meta">👤 ' + esc(o.userEmail) + ' · 💰 ৳' + o.price + '</div>' +
+          '<div class="meta">🕐 ' + new Date(o.purchasedAt).toLocaleString() + '</div>' +
+        '</div>'
+      ).join('');
+    }
+
+    // ===== SETTINGS =====
+    async function loadSettings() {
+      const res = await fetch('/api/admin/settings', { headers: { 'x-admin-token': token } });
+      const s = await res.json();
+      document.getElementById('setBkash').value = s.bkashNumber || '';
+      document.getElementById('setBkashType').value = s.bkashType || 'Personal';
+      document.getElementById('setNagad').value = s.nagadNumber || '';
+      document.getElementById('setNagadActive').value = s.nagadActive ? 'true' : 'false';
+      document.getElementById('setMin').value = s.minDeposit || 50;
+      document.getElementById('setMax').value = s.maxDeposit || 10000;
+      document.getElementById('setEmail').value = s.supportEmail || '';
+      document.getElementById('setWhatsapp').value = s.supportWhatsapp || '';
+      document.getElementById('setTelegram').value = s.supportTelegram || '';
+    }
+    async function saveSettings() {
+      const body = {
+        bkashNumber: document.getElementById('setBkash').value,
+        bkashType: document.getElementById('setBkashType').value,
+        nagadNumber: document.getElementById('setNagad').value,
+        nagadActive: document.getElementById('setNagadActive').value === 'true',
+        minDeposit: Number(document.getElementById('setMin').value) || 50,
+        maxDeposit: Number(document.getElementById('setMax').value) || 10000,
+        supportEmail: document.getElementById('setEmail').value,
+        supportWhatsapp: document.getElementById('setWhatsapp').value,
+        supportTelegram: document.getElementById('setTelegram').value
+      };
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) showToast('✅ Settings Saved!');
+      else showToast('❌ Failed', '#dc2626');
     }
 
     function esc(s) {
-      return String(s || '').replace(/[&<>"]/g, function(c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
-      });
+      return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
   </script>
 </body>
