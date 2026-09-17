@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Orders — FreeHost</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0f0f14; color: #fff; min-height: 100vh;
+  }
+  
+  .nav {
+    background: #1a1a22; padding: 14px 20px;
+    display: flex; align-items: center; gap: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .back-btn {
+    background: transparent; border: none; color: #a1a1aa;
+    font-size: 22px; cursor: pointer; padding: 4px 8px;
+    text-decoration: none;
+  }
+  .back-btn:hover { color: #fff; }
+  .nav h1 { font-size: 17px; font-weight: 700; }
+  .wallet-pill {
+    margin-left: auto;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff; padding: 8px 14px;
+    border-radius: 20px; font-size: 13px;
+    font-weight: 700; text-decoration: none;
+  }
+  
+  .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+  
+  .order-card {
+    background: #1a1a22;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 16px;
+    margin-bottom: 12px;
+    display: flex; gap: 14px; align-items: center;
+    transition: 0.2s;
+  }
+  .order-card:hover {
+    border-color: rgba(139,92,246,0.4);
+    transform: translateY(-2px);
+  }
+  .order-icon {
+    width: 54px; height: 54px;
+    background: linear-gradient(135deg, #2a1a4a, #1a1a3e);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; flex-shrink: 0;
+  }
+  .order-info { flex: 1; min-width: 0; }
+  .order-title {
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 4px;
+    white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .order-meta {
+    font-size: 11px; color: #71717a;
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .order-price {
+    font-size: 15px; font-weight: 800;
+    color: #f59e0b; text-align: right;
+    white-space: nowrap;
+  }
+  .order-btn {
+    display: inline-block; margin-top: 6px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #fff; border: none;
+    border-radius: 8px; font-size: 11px;
+    font-weight: 700; cursor: pointer;
+    text-decoration: none;
+    font-family: inherit;
+  }
+  
+  .empty {
+    text-align: center; padding: 80px 20px;
+    color: #71717a;
+  }
+  .empty-icon { font-size: 60px; margin-bottom: 12px; opacity: 0.5; }
+  .empty h3 { font-size: 18px; color: #fff; margin-bottom: 8px; }
+  .empty p { font-size: 14px; margin-bottom: 20px; }
+  .empty-btn {
+    display: inline-block; padding: 12px 24px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #fff; text-decoration: none;
+    border-radius: 10px; font-weight: 700; font-size: 14px;
+  }
+  
+  .stats-bar {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: #1a1a22;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 14px;
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 24px; font-weight: 900;
+    color: #f59e0b;
+  }
+  .stat-lbl { font-size: 11px; color: #71717a; margin-top: 4px; font-weight: 600; }
+  
+  .spinner {
+    display: inline-block; width: 32px; height: 32px;
+    border: 3px solid rgba(139,92,246,0.2);
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="/shop" class="back-btn">←</a>
+    <h1>📦 My Orders</h1>
+    <a href="/wallet" class="wallet-pill" id="walletPill">💰 ৳0</a>
+  </nav>
+
+  <div class="container" id="mainContainer">
+    <div style="text-align:center;padding:60px;"><div class="spinner"></div></div>
+  </div>
+
+  <script>
+    let userWallet = 0;
+
+    async function loadUser() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login'; return; }
+        const user = await res.json();
+        userWallet = user.wallet || 0;
+        document.getElementById('walletPill').textContent = '💰 ৳' + userWallet;
+      } catch (e) {
+        window.location.href = '/login';
+      }
+    }
+
+    async function loadOrders() {
+      try {
+        const res = await fetch('/api/shop/my-purchases');
+        const orders = await res.json();
+        
+        const container = document.getElementById('mainContainer');
+        
+        if (!orders.length) {
+          container.innerHTML = 
+            '<div class="empty">' +
+              '<div class="empty-icon">📦</div>' +
+              '<h3>কোনো order নেই</h3>' +
+              '<p>Shop এ গিয়ে কিছু কিনুন</p>' +
+              '<a href="/shop" class="empty-btn">🛍 Go to Shop</a>' +
+            '</div>';
+          return;
+        }
+        
+        const totalSpent = orders.reduce((s, o) => s + (o.price || 0), 0);
+        
+        container.innerHTML = 
+          '<div class="stats-bar">' +
+            '<div class="stat-card">' +
+              '<div class="stat-num">' + orders.length + '</div>' +
+              '<div class="stat-lbl">Total Orders</div>' +
+            '</div>' +
+            '<div class="stat-card">' +
+              '<div class="stat-num">৳' + totalSpent + '</div>' +
+              '<div class="stat-lbl">Total Spent</div>' +
+            '</div>' +
+          '</div>' +
+          orders.map(o => 
+            '<div class="order-card" onclick="openProduct(\'' + o.productId + '\')">' +
+              '<div class="order-icon">📦</div>' +
+              '<div class="order-info">' +
+                '<div class="order-title">' + esc(o.productTitle) + '</div>' +
+                '<div class="order-meta">' +
+                  '<span>🕐 ' + new Date(o.purchasedAt).toLocaleDateString() + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<div>' +
+                '<div class="order-price">৳' + o.price + '</div>' +
+                '<a href="/product/' + o.productId + '" class="order-btn">View →</a>' +
+              '</div>' +
+            '</div>'
+          ).join('');
+      } catch (e) {
+        document.getElementById('mainContainer').innerHTML = '<div style="text-align:center;padding:60px;color:#71717a;">❌ Failed to load</div>';
+      }
+    }
+
+    function openProduct(id) {
+      window.location.href = '/product/' + id;
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    loadUser().then(() => loadOrders());
+  </script>
+</body>
+</html>
