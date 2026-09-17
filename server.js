@@ -35,7 +35,6 @@ async function connectDB() {
   await products.createIndex({ createdAt: -1 });
   await deposits.createIndex({ status: 1, createdAt: -1 });
   
-  // Default settings তৈরি
   const existing = await settings.findOne({ _id: 'config' });
   if (!existing) {
     await settings.insertOne({
@@ -249,7 +248,6 @@ app.delete('/api/my-pages/:id', requireAuthAPI, async (req, res) => {
 
 // ============ SHOP ROUTES (PUBLIC) ============
 
-// সব products list (public)
 app.get('/api/shop/products', async (req, res) => {
   try {
     const { category, search, sort } = req.query;
@@ -267,14 +265,11 @@ app.get('/api/shop/products', async (req, res) => {
     if (sort === 'price-high') sortObj = { price: -1 };
     if (sort === 'popular') sortObj = { sold: -1 };
     
-    const list = await products.find(query, { 
-      projection: { deliveryData: 0 } 
-    }).sort(sortObj).toArray();
+    const list = await products.find(query, { projection: { deliveryData: 0 } }).sort(sortObj).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// একটা product details
 app.get('/api/shop/product/:id', async (req, res) => {
   try {
     const product = await products.findOne(
@@ -286,7 +281,6 @@ app.get('/api/shop/product/:id', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Categories list
 app.get('/api/shop/categories', async (req, res) => {
   try {
     const cats = await products.distinct('category', { active: true });
@@ -294,7 +288,6 @@ app.get('/api/shop/categories', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Payment settings (public)
 app.get('/api/shop/settings', async (req, res) => {
   try {
     const s = await settings.findOne({ _id: 'config' });
@@ -314,13 +307,11 @@ app.get('/api/shop/settings', async (req, res) => {
 
 // ============ PURCHASE ROUTES ============
 
-// Buy product
 app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
   try {
     const product = await products.findOne({ _id: req.params.id, active: true });
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
-    // Already kena kina check
     const alreadyBought = await purchases.findOne({
       userId: req.user._id.toString(),
       productId: req.params.id
@@ -345,13 +336,11 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
       });
     }
 
-    // Deduct wallet
     await users.updateOne(
       { _id: req.user._id },
       { $inc: { wallet: -price, totalSpent: price } }
     );
 
-    // Record purchase
     await purchases.insertOne({
       userId: req.user._id.toString(),
       userEmail: req.user.email,
@@ -361,7 +350,6 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
       purchasedAt: new Date()
     });
 
-    // Increment sold
     await products.updateOne({ _id: product._id }, { $inc: { sold: 1 } });
 
     res.json({
@@ -373,7 +361,6 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Get product delivery data (after purchase)
 app.get('/api/shop/access/:id', requireAuthAPI, async (req, res) => {
   try {
     const purchase = await purchases.findOne({
@@ -392,7 +379,6 @@ app.get('/api/shop/access/:id', requireAuthAPI, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// My purchases
 app.get('/api/shop/my-purchases', requireAuthAPI, async (req, res) => {
   try {
     const list = await purchases.find({ userId: req.user._id.toString() })
@@ -403,7 +389,6 @@ app.get('/api/shop/my-purchases', requireAuthAPI, async (req, res) => {
 
 // ============ DEPOSIT ROUTES ============
 
-// User deposit request
 app.post('/api/deposit/request', requireAuthAPI, async (req, res) => {
   try {
     const { amount, senderNumber, transactionId, screenshot } = req.body;
@@ -433,7 +418,6 @@ app.post('/api/deposit/request', requireAuthAPI, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// My deposits
 app.get('/api/deposit/my-list', requireAuthAPI, async (req, res) => {
   try {
     const list = await deposits.find({ userId: req.user._id.toString() })
@@ -559,7 +543,7 @@ app.get('/api/admin/deposits', adminAuth, async (req, res) => {
 
 app.put('/api/admin/deposit/:id', adminAuth, async (req, res) => {
   try {
-    const { action } = req.body; // "approve" or "reject"
+    const { action } = req.body;
     const deposit = await deposits.findOne({ _id: new ObjectId(req.params.id) });
     if (!deposit) return res.status(404).json({ error: 'Not found' });
     if (deposit.status !== 'pending') return res.status(400).json({ error: 'Already reviewed' });
@@ -599,7 +583,7 @@ app.put('/api/admin/settings', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ===== ADMIN: ORDERS/PURCHASES =====
+// ===== ADMIN: ORDERS =====
 
 app.get('/api/admin/purchases', adminAuth, async (req, res) => {
   const list = await purchases.find({}).sort({ purchasedAt: -1 }).limit(100).toArray();
@@ -634,6 +618,8 @@ app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
 app.get('/dashboard', requireAuth, (req, res) => res.sendFile(__dirname + '/public/dashboard.html'));
 app.get('/shop', (req, res) => res.sendFile(__dirname + '/public/shop.html'));
 app.get('/wallet', requireAuth, (req, res) => res.sendFile(__dirname + '/public/wallet.html'));
+app.get('/orders', requireAuth, (req, res) => res.sendFile(__dirname + '/public/orders.html'));
+app.get('/product/:id', (req, res) => res.sendFile(__dirname + '/public/product.html'));
 
 // ============ START ============
 
