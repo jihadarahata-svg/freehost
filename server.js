@@ -60,16 +60,12 @@ app.use(session({
 }));
 
 function requireAuth(req, res, next) {
-  if (req.session && req.session.userId) {
-    return next();
-  }
+  if (req.session && req.session.userId) return next();
   res.redirect('/login');
 }
 
 function requireAuthAPI(req, res, next) {
-  if (req.session && req.session.userId) {
-    return next();
-  }
+  if (req.session && req.session.userId) return next();
   res.status(401).json({ error: 'Login required' });
 }
 
@@ -93,39 +89,30 @@ function adminAuth(req, res, next) {
 
 // ============ AUTH ROUTES (Email + Password) ============
 
-// REGISTER
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, name } = req.body;
-
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'Email, Password, Name সব দিন' });
     }
-
     const cleanEmail = email.toLowerCase().trim();
     const cleanName = name.trim();
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(cleanEmail)) {
       return res.status(400).json({ error: 'সঠিক email দিন' });
     }
-
-    // Password length
     if (password.length < 6) {
       return res.status(400).json({ error: 'Password কমপক্ষে ৬ character' });
     }
 
-    // Existing user check
     const existing = await users.findOne({ email: cleanEmail });
     if (existing) {
       return res.status(400).json({ error: 'এই email দিয়ে account আছে' });
     }
 
-    // Hash password
     const hash = await bcrypt.hash(password, 10);
 
-    // Create user
     const result = await users.insertOne({
       email: cleanEmail,
       name: cleanName,
@@ -138,83 +125,57 @@ app.post('/api/auth/register', async (req, res) => {
       lastLogin: new Date()
     });
 
-    // Auto login
     req.session.userId = result.insertedId.toString();
 
     res.json({
       success: true,
-      user: {
-        email: cleanEmail,
-        name: cleanName,
-        wallet: 0
-      }
+      user: { email: cleanEmail, name: cleanName, wallet: 0 }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// LOGIN
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password) {
       return res.status(400).json({ error: 'Email ও Password দিন' });
     }
-
     const cleanEmail = email.toLowerCase().trim();
 
     const user = await users.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(401).json({ error: 'ভুল email বা password' });
     }
-
     if (user.banned) {
       return res.status(403).json({ error: 'Account banned' });
     }
 
-    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: 'ভুল email বা password' });
     }
 
-    // Update last login
-    await users.updateOne(
-      { _id: user._id },
-      { $set: { lastLogin: new Date() } }
-    );
-
-    // Set session
+    await users.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
     req.session.userId = user._id.toString();
 
     res.json({
       success: true,
-      user: {
-        email: user.email,
-        name: user.name,
-        wallet: user.wallet || 0
-      }
+      user: { email: user.email, name: user.name, wallet: user.wallet || 0 }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// LOGOUT
 app.get('/api/auth/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/login');
-  });
+  req.session.destroy(() => res.redirect('/login'));
 });
 
-// CURRENT USER
 app.get('/api/me', async (req, res) => {
   const user = await getCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: 'Not logged in' });
-  }
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
   res.json({
     email: user.email,
     name: user.name,
@@ -233,9 +194,7 @@ app.post('/api/create', async (req, res) => {
 
     let userId = null;
     const user = await getCurrentUser(req);
-    if (user) {
-      userId = user._id.toString();
-    }
+    if (user) userId = user._id.toString();
 
     const id = slug ? slug.trim() : Math.random().toString(36).slice(2, 10);
     const hash = password ? await bcrypt.hash(password, 10) : null;
@@ -694,11 +653,37 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
 // ============ HTML ROUTES ============
 
 app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
+
 app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
-app.get('/dashboard', requireAuth, (req, res) => res.sendFile(__dirname + '/public/dashboard.html'));
-app.get('/shop', (req, res) => res.sendFile(__dirname + '/public/shop.html'));
-app.get('/wallet', requireAuth, (req, res) => res.sendFile(__dirname + '/public/wallet.html'));
-app.get('/orders', requireAuth, (req, res) => res.sendFile(__dirname + '/public/orders.html'));
+
+app.get('/dashboard', (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
+  }
+  res.sendFile(__dirname + '/public/dashboard.html');
+});
+
+app.get('/shop', (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
+  }
+  res.sendFile(__dirname + '/public/shop.html');
+});
+
+app.get('/wallet', (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
+  }
+  res.sendFile(__dirname + '/public/wallet.html');
+});
+
+app.get('/orders', (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
+  }
+  res.sendFile(__dirname + '/public/orders.html');
+});
+
 app.get('/product/:id', (req, res) => res.sendFile(__dirname + '/public/product.html'));
 
 // ============ START ============
