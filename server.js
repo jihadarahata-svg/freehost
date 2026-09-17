@@ -15,7 +15,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-please';
 const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 
-let pages, users, products, deposits, purchases, settings, notifications, coupons, couponUses, referrals, db;
+let pages, users, products, deposits, purchases, settings, notifications, coupons, couponUses, referrals, giftClaims, db;
 
 async function connectDB() {
   const client = new MongoClient(MONGO_URI);
@@ -31,6 +31,8 @@ async function connectDB() {
   coupons = db.collection('coupons');
   couponUses = db.collection('couponUses');
   referrals = db.collection('referrals');
+  giftClaims = db.collection('giftClaims');
+
   await users.createIndex({ email: 1 }, { unique: true });
   await products.createIndex({ createdAt: -1 });
   await deposits.createIndex({ status: 1, createdAt: -1 });
@@ -42,6 +44,8 @@ async function connectDB() {
   await referrals.createIndex({ referrerId: 1 });
   await referrals.createIndex({ newUserId: 1 });
   await users.createIndex({ referralCode: 1 }, { sparse: true });
+  await giftClaims.createIndex({ code: 1, userId: 1 }, { unique: true });
+  await giftClaims.createIndex({ userId: 1, claimedAt: -1 });
 
   const existing = await settings.findOne({ _id: 'config' });
   if (!existing) {
@@ -156,7 +160,6 @@ app.post('/api/auth/register', async (req, res) => {
     const bonusNewUser = config?.referralBonusNewUser || 25;
     const bonusReferrer = config?.referralBonusReferrer || 50;
 
-    // Process referral
     let referrer = null;
     let newUserBonus = 0;
     let myReferralCode = generateReferralCode(cleanName);
@@ -169,7 +172,6 @@ app.post('/api/auth/register', async (req, res) => {
       }
     }
 
-    // Ensure unique referral code
     let attempts = 0;
     while (attempts < 5) {
       const dupe = await users.findOne({ referralCode: myReferralCode });
@@ -196,7 +198,6 @@ app.post('/api/auth/register', async (req, res) => {
 
     const newUserId = result.insertedId.toString();
 
-    // Credit referrer
     if (referrer) {
       await users.updateOne(
         { _id: referrer._id },
@@ -217,7 +218,6 @@ app.post('/api/auth/register', async (req, res) => {
         createdAt: new Date()
       });
 
-      // Notify referrer
       await createNotification(
         referrer._id.toString(),
         'referral',
@@ -230,7 +230,6 @@ app.post('/api/auth/register', async (req, res) => {
 
     req.session.userId = newUserId;
 
-    // Welcome notification
     const welcomeMsg = newUserBonus > 0 
       ? 'আপনার account তৈরি হয়েছে। Referral bonus ৳' + newUserBonus + ' পেয়েছেন! 🎉'
       : 'আপনার account সফলভাবে তৈরি হয়েছে। HTML host করা শুরু করুন!';
@@ -373,7 +372,100 @@ app.delete('/api/notifications/:id', requireAuthAPI, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ============ COUPON ROUTES ============
+// ============ GIFT CODE ROUTES ============
+
+app.post('/api/gift/claim', requireAuthAPI, async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ error: 'Code দিন' });
+
+    const cleanCode = code.toUpperCase().trim();
+    const coupon = await coupons.findOne({ code: cleanCode, type: 'cash' });
+
+    if (!coupon) return res.status(404).json({ error: '❌ ভুল gift code' });
+    if (!coupon.active) return res.status(400).json({ error: '❌ এই code এখন নিষ্ক্রিয়' });
+
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+      return res.status(400).json({ error: '❌ এই code এর সময় শেষ হয়ে গেছে' });
+    }
+
+    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+      return res.status(400).json({ error: '❌ এই code এর সব ব্যবহার হয়ে গেছে' });
+    }
+
+    const alreadyClaimed = await giftClaims.findOne({
+      code: cleanCode,
+      userId: user._id.toString()
+    });
+    if (alreadyClaimed) {
+      return res.status(400).json({ error: '❌ আপনি এই code আগেই ব্যবহার করেছেন' });
+    }
+
+    const amount = Number(coupon.value) || 0;
+    if (amount <= 0) {
+      return res.status(400).json({ error: '❌ এই code এ কোনো amount নেই' });
+    }
+
+    const newBalance = (user.wallet || 0) + amount;
+
+    await users.updateOne(
+      { _id: user._id },
+      { $inc: { wallet: amount } }
+    );
+
+    await giftClaims.insertOne({
+      code: cleanCode,
+      couponId: coupon._id.toString(),
+      userId: user._id.toString(),
+      userEmail: user.email,
+      userName: user.name,
+      amount: amount,
+      claimedAt: new Date()
+    });
+
+    await coupons.updateOne(
+      { _id: coupon._id },
+      { $inc: { usedCount: 1 } }
+    );
+
+    await createNotification(
+      user._id.toString(),
+      'gift_claimed',
+      '🎁 Gift Code Claimed!',
+      '৳' + amount + ' আপনার wallet এ যোগ হয়েছে (Code: ' + cleanCode + ')',
+      '🎁',
+      '/wallet'
+    );
+
+    res.json({
+      success: true,
+      amount: amount,
+      newBalance: newBalance,
+      code: cleanCode,
+      message: '৳' + amount + ' added to wallet'
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ error: '❌ আপনি এই code আগেই ব্যবহার করেছেন' });
+    }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/gift/my-claims', requireAuthAPI, async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+    const list = await giftClaims.find({ userId: user._id.toString() })
+      .sort({ claimedAt: -1 }).limit(50).toArray();
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ============ COUPON ROUTES (DISCOUNT TYPE) ============
 
 app.post('/api/coupon/validate', requireAuthAPI, async (req, res) => {
   try {
@@ -384,7 +476,7 @@ app.post('/api/coupon/validate', requireAuthAPI, async (req, res) => {
     if (!code || !productId) return res.status(400).json({ error: 'Code & product required' });
 
     const cleanCode = code.toUpperCase().trim();
-    const coupon = await coupons.findOne({ code: cleanCode });
+    const coupon = await coupons.findOne({ code: cleanCode, type: { $ne: 'cash' } });
 
     if (!coupon) return res.status(404).json({ error: 'ভুল coupon code' });
     if (!coupon.active) return res.status(400).json({ error: 'Coupon নিষ্ক্রিয়' });
@@ -658,7 +750,7 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
 
     if (couponCode) {
       const cleanCode = couponCode.toUpperCase().trim();
-      const coupon = await coupons.findOne({ code: cleanCode });
+      const coupon = await coupons.findOne({ code: cleanCode, type: { $ne: 'cash' } });
 
       if (coupon && coupon.active) {
         const notExpired = !coupon.expiresAt || new Date(coupon.expiresAt) > new Date();
@@ -730,7 +822,6 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
 
     await products.updateOne({ _id: product._id }, { $inc: { sold: 1 } });
 
-    // First purchase referral bonus
     if (user.referredBy && user.referralCount !== -1) {
       const firstPurchase = await purchases.countDocuments({ userId: user._id.toString() });
       if (firstPurchase === 1) {
@@ -987,11 +1078,90 @@ app.delete('/api/admin/product/:id', adminAuth, async (req, res) => {
   res.json({ success: true });
 });
 
-// ===== ADMIN: COUPONS =====
+// ===== ADMIN: GIFT CODES =====
+
+app.get('/api/admin/gift-codes', adminAuth, async (req, res) => {
+  try {
+    const list = await coupons.find({ type: 'cash' }).sort({ createdAt: -1 }).toArray();
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/gift-code', adminAuth, async (req, res) => {
+  try {
+    const { code, value, usageLimit, expiresAt, description } = req.body;
+    if (!code || !value) return res.status(400).json({ error: 'Code & Amount required' });
+
+    const cleanCode = code.toUpperCase().trim();
+    const existing = await coupons.findOne({ code: cleanCode });
+    if (existing) return res.status(400).json({ error: 'এই code আগেই আছে' });
+
+    const result = await coupons.insertOne({
+      code: cleanCode,
+      type: 'cash',
+      value: Number(value),
+      usageLimit: usageLimit ? Number(usageLimit) : null,
+      singleUse: true,
+      active: true,
+      expiresAt: expiresAt ? new Date(expiresAt) : null,
+      description: description || '',
+      usedCount: 0,
+      createdAt: new Date()
+    });
+
+    res.json({ success: true, id: result.insertedId.toString() });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/admin/gift-code/:id', adminAuth, async (req, res) => {
+  try {
+    const update = { ...req.body, updatedAt: new Date() };
+    delete update._id;
+    delete update.code;
+    delete update.usedCount;
+    delete update.type;
+
+    if (update.value) update.value = Number(update.value);
+    if (update.usageLimit) update.usageLimit = Number(update.usageLimit);
+    if (update.expiresAt) update.expiresAt = new Date(update.expiresAt);
+
+    await coupons.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: update }
+    );
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/admin/gift-code/:id', adminAuth, async (req, res) => {
+  try {
+    await coupons.deleteOne({ _id: new ObjectId(req.params.id) });
+    await giftClaims.deleteMany({ couponId: req.params.id });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/admin/gift-code/:id/claims', adminAuth, async (req, res) => {
+  try {
+    const list = await giftClaims.find({ couponId: req.params.id })
+      .sort({ claimedAt: -1 }).limit(200).toArray();
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/admin/gift-claims', adminAuth, async (req, res) => {
+  try {
+    const list = await giftClaims.find({})
+      .sort({ claimedAt: -1 }).limit(200).toArray();
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ===== ADMIN: COUPONS (DISCOUNT TYPE) =====
 
 app.get('/api/admin/coupons', adminAuth, async (req, res) => {
   try {
-    const list = await coupons.find({}).sort({ createdAt: -1 }).toArray();
+    const list = await coupons.find({ type: { $ne: 'cash' } }).sort({ createdAt: -1 }).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1047,14 +1217,6 @@ app.delete('/api/admin/coupon/:id', adminAuth, async (req, res) => {
     await coupons.deleteOne({ _id: new ObjectId(req.params.id) });
     await couponUses.deleteMany({ couponId: req.params.id });
     res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/api/admin/coupon/:id/uses', adminAuth, async (req, res) => {
-  try {
-    const list = await couponUses.find({ couponId: req.params.id })
-      .sort({ usedAt: -1 }).limit(100).toArray();
-    res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -1155,10 +1317,13 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const totalProducts = await products.countDocuments();
   const pendingDeposits = await deposits.countDocuments({ status: 'pending' });
   const totalPurchases = await purchases.countDocuments();
-  const totalCoupons = await coupons.countDocuments();
+  const totalCoupons = await coupons.countDocuments({ type: { $ne: 'cash' } });
+  const totalGiftCodes = await coupons.countDocuments({ type: 'cash' });
+  const totalGiftClaims = await giftClaims.countDocuments();
   const totalReferrals = await referrals.countDocuments();
   const revenueAgg = await purchases.aggregate([{ $group: { _id: null, t: { $sum: '$price' } } }]).toArray();
   const v = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
+  const giftAmountAgg = await giftClaims.aggregate([{ $group: { _id: null, t: { $sum: '$amount' } } }]).toArray();
 
   res.json({
     totalPages,
@@ -1167,6 +1332,9 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
     pendingDeposits,
     totalPurchases,
     totalCoupons,
+    totalGiftCodes,
+    totalGiftClaims,
+    totalGiftAmount: giftAmountAgg[0]?.t || 0,
     totalReferrals,
     totalRevenue: revenueAgg[0]?.t || 0,
     totalViews: v[0]?.v || 0
