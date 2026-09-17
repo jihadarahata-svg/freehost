@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
     background: #0a0a0f;
     color: #fff;
     min-height: 100vh;
@@ -22,7 +22,7 @@
     transform: translateX(-50%);
     width: 1000px;
     height: 700px;
-    background: radial-gradient(ellipse at center, rgba(139,92,246,0.2), transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(139,92,246,0.15), transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -40,10 +40,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 0;
-    margin-bottom: 40px;
+    padding: 16px 0 20px;
+    margin-bottom: 32px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
-    padding-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
   .brand {
     display: flex;
@@ -52,9 +53,12 @@
     font-size: 15px;
     font-weight: 800;
     letter-spacing: -0.3px;
+    text-decoration: none;
+    color: #fff;
   }
   .brand-mark {
-    width: 28px; height: 28px;
+    width: 28px;
+    height: 28px;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
     border-radius: 8px;
     display: flex;
@@ -62,97 +66,125 @@
     justify-content: center;
     font-size: 14px;
   }
-  .user-info {
+  .nav-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
-  .user-photo {
-    width: 34px; height: 34px;
-    border-radius: 50%;
-    border: 2px solid rgba(139,92,246,0.4);
-    object-fit: cover;
-  }
-  .user-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #e4e4e7;
-  }
-  .user-email {
-    font-size: 11px;
-    color: #71717a;
-  }
-  .logout-btn {
+  .nav-btn {
     padding: 8px 14px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
-    color: #a1a1aa;
     border-radius: 8px;
+    color: #a1a1aa;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
     transition: 0.15s;
   }
-  .logout-btn:hover {
+  .nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .nav-btn.logout:hover {
     background: rgba(239,68,68,0.1);
     color: #f87171;
     border-color: rgba(239,68,68,0.3);
   }
-  @media (max-width: 500px) {
-    .user-name, .user-email { display: none; }
+  .nav-btn.shop {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #fff;
+    border: none;
   }
   
   /* Header */
   .page-header {
-    margin-bottom: 32px;
+    margin-bottom: 28px;
   }
   .page-header h1 {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 800;
     letter-spacing: -1px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .page-header p {
     color: #a1a1aa;
+    font-size: 14px;
+  }
+  
+  /* User card */
+  .user-card {
+    background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(99,102,241,0.1));
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .user-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 150px; }
+  .user-info h2 {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+  .user-info p {
+    font-size: 13px;
+    color: #a1a1aa;
+  }
+  .wallet-badge {
+    background: linear-gradient(135deg, #10b981, #059669);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 800;
     font-size: 15px;
+    white-space: nowrap;
   }
   
   /* Stats */
   .stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 12px;
-    margin-bottom: 32px;
-  }
-  @media (max-width: 500px) {
-    .stats { grid-template-columns: 1fr; }
+    margin-bottom: 28px;
   }
   .stat {
-    background: linear-gradient(180deg, #101018 0%, #0d0d14 100%);
+    background: linear-gradient(180deg, #101018, #0d0d14);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
-    padding: 20px;
+    padding: 18px;
+    text-align: center;
   }
-  .stat-label {
-    font-size: 11px;
-    color: #71717a;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-  .stat-value {
-    font-size: 30px;
-    font-weight: 800;
-    letter-spacing: -1px;
+  .stat-num {
+    font-size: 26px;
+    font-weight: 900;
     background: linear-gradient(135deg, #c4b5fd, #8b5cf6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
+    letter-spacing: -1px;
+  }
+  .stat-lbl {
+    font-size: 11px;
+    color: #71717a;
+    margin-top: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   
-  /* Action buttons */
+  /* Actions */
   .actions {
     display: flex;
     gap: 12px;
@@ -162,13 +194,13 @@
   .btn-primary {
     flex: 1;
     min-width: 200px;
-    padding: 16px 24px;
+    padding: 15px 22px;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
     color: #fff;
     border: none;
     border-radius: 12px;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
     text-decoration: none;
     text-align: center;
@@ -180,43 +212,50 @@
     transition: 0.2s;
     font-family: inherit;
   }
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px -8px rgba(139,92,246,0.7);
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-primary.shop-btn {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    box-shadow: 0 12px 30px -8px rgba(245,158,11,0.5);
   }
   
-  /* Pages list */
+  /* Section title */
   .section-title {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
     color: #71717a;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .section-title .count {
+    color: #a1a1aa;
+    font-weight: 600;
   }
   
+  /* Page cards */
   .page-card {
-    background: linear-gradient(180deg, #101018 0%, #0d0d14 100%);
+    background: linear-gradient(180deg, #101018, #0d0d14);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
-    padding: 20px;
+    padding: 18px;
     margin-bottom: 12px;
     transition: 0.2s;
   }
-  .page-card:hover {
-    border-color: rgba(139,92,246,0.3);
-  }
+  .page-card:hover { border-color: rgba(139,92,246,0.3); }
   .page-card-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     gap: 12px;
     flex-wrap: wrap;
   }
   .page-title {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 800;
     margin-bottom: 6px;
     letter-spacing: -0.2px;
   }
@@ -226,20 +265,16 @@
     font-family: 'SF Mono', monospace;
     text-decoration: none;
     word-break: break-all;
+    display: block;
   }
   .page-url:hover { text-decoration: underline; }
   .page-meta {
     display: flex;
-    gap: 16px;
-    font-size: 12px;
+    gap: 14px;
+    font-size: 11px;
     color: #71717a;
     margin-top: 8px;
     flex-wrap: wrap;
-  }
-  .page-meta span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
   }
   .badge {
     display: inline-flex;
@@ -247,29 +282,18 @@
     gap: 4px;
     padding: 3px 10px;
     border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
   }
-  .badge.live {
-    background: rgba(16,185,129,0.15);
-    color: #34d399;
-    border: 1px solid rgba(16,185,129,0.3);
-  }
-  .badge.banned {
-    background: rgba(239,68,68,0.15);
-    color: #f87171;
-    border: 1px solid rgba(239,68,68,0.3);
-  }
-  .badge.locked {
-    background: rgba(251,191,36,0.15);
-    color: #fbbf24;
-    border: 1px solid rgba(251,191,36,0.3);
-  }
+  .badge.live { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+  .badge.banned { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .badge.locked { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
   
   .page-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
+    margin-top: 12px;
   }
   .mini-btn {
     padding: 7px 12px;
@@ -278,14 +302,14 @@
     color: #d4d4d8;
     border-radius: 7px;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     font-family: inherit;
     transition: 0.15s;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
   }
   .mini-btn:hover {
     background: rgba(139,92,246,0.2);
@@ -301,46 +325,44 @@
   /* Empty state */
   .empty {
     text-align: center;
-    padding: 60px 20px;
-    background: linear-gradient(180deg, #101018 0%, #0d0d14 100%);
+    padding: 50px 20px;
+    background: linear-gradient(180deg, #101018, #0d0d14);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
   }
-  .empty-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    opacity: 0.6;
-  }
-  .empty-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .empty-desc {
-    color: #71717a;
-    font-size: 14px;
-    margin-bottom: 20px;
-  }
+  .empty-icon { font-size: 44px; margin-bottom: 12px; opacity: 0.6; }
+  .empty-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .empty-desc { color: #71717a; font-size: 13px; margin-bottom: 18px; }
   
   /* Loading */
-  .loading {
-    text-align: center;
-    padding: 40px;
-    color: #71717a;
-  }
+  .loading { text-align: center; padding: 40px; color: #71717a; }
   .spinner {
     display: inline-block;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border: 3px solid rgba(139,92,246,0.2);
     border-top-color: #8b5cf6;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #16a34a;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    transition: transform 0.3s;
+    z-index: 9999;
   }
+  .toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -348,66 +370,88 @@
   <div class="glow"></div>
 
   <div class="wrap">
-    
+
     <!-- Nav -->
     <nav class="nav">
-      <div class="brand">
+      <a href="/" class="brand">
         <div class="brand-mark">◆</div>
         <span>FreeHost</span>
-      </div>
-      <div class="user-info">
-        <img id="userPhoto" class="user-photo" src="" alt="" onerror="this.style.display='none'">
-        <div>
-          <div class="user-name" id="userName">Loading...</div>
-          <div class="user-email" id="userEmail"></div>
-        </div>
-        <a href="/auth/logout" class="logout-btn">Logout</a>
+      </a>
+      <div class="nav-right">
+        <a href="/shop" class="nav-btn shop">🛍 Shop</a>
+        <a href="/wallet" class="nav-btn">💰 Wallet</a>
+        <a href="/orders" class="nav-btn">📦 Orders</a>
+        <a href="/api/auth/logout" class="nav-btn logout">🚪 Logout</a>
       </div>
     </nav>
-    
+
     <!-- Header -->
     <div class="page-header">
       <h1>My Dashboard</h1>
-      <p>Manage all your hosted pages in one place</p>
+      <p>Manage your hosted pages & shop purchases</p>
     </div>
-    
+
+    <!-- User card -->
+    <div class="user-card" id="userCard">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div class="user-info">
+        <h2 id="userName">Loading...</h2>
+        <p id="userEmail"></p>
+      </div>
+      <div class="wallet-badge" id="userWallet">💰 ৳0</div>
+    </div>
+
     <!-- Stats -->
     <div class="stats">
       <div class="stat">
-        <div class="stat-label">Total Pages</div>
-        <div class="stat-value" id="statPages">0</div>
+        <div class="stat-num" id="statPages">0</div>
+        <div class="stat-lbl">Total Pages</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Total Views</div>
-        <div class="stat-value" id="statViews">0</div>
+        <div class="stat-num" id="statViews">0</div>
+        <div class="stat-lbl">Total Views</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Live Now</div>
-        <div class="stat-value" id="statLive">0</div>
+        <div class="stat-num" id="statLive">0</div>
+        <div class="stat-lbl">Live Now</div>
       </div>
     </div>
-    
+
     <!-- Actions -->
     <div class="actions">
-      <a href="/" class="btn-primary">
-        <span>+</span> Host New Page
-      </a>
+      <a href="/" class="btn-primary">➕ Host New Page</a>
+      <a href="/shop" class="btn-primary shop-btn">🛍 Go to Shop</a>
     </div>
-    
+
     <!-- Pages -->
-    <div class="section-title">Your Pages</div>
+    <div class="section-title">
+      <span>Your Pages</span>
+      <span class="count" id="pagesCount">0</span>
+    </div>
+
     <div id="pagesContainer">
       <div class="loading">
         <div class="spinner"></div>
         <div>Loading your pages...</div>
       </div>
     </div>
-    
+
   </div>
-  
+
+  <div class="toast" id="toast"></div>
+
   <script>
     let allPages = [];
-    
+    let user = null;
+
+    function showToast(msg, color) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = color || '#16a34a';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
     async function loadUser() {
       try {
         const res = await fetch('/api/me');
@@ -415,37 +459,37 @@
           window.location.href = '/login';
           return;
         }
-        const user = await res.json();
+        user = await res.json();
+        
         document.getElementById('userName').textContent = user.name || 'User';
         document.getElementById('userEmail').textContent = user.email || '';
-        if (user.photo) {
-          document.getElementById('userPhoto').src = user.photo;
-        }
+        document.getElementById('userAvatar').textContent = (user.name || 'U')[0].toUpperCase();
+        document.getElementById('userWallet').textContent = '💰 ৳' + (user.wallet || 0);
       } catch (e) {
         window.location.href = '/login';
       }
     }
-    
+
     async function loadPages() {
       try {
         const res = await fetch('/api/my-pages');
         if (!res.ok) throw new Error('Failed');
         allPages = await res.json();
         
-        // Stats
         document.getElementById('statPages').textContent = allPages.length;
         const totalViews = allPages.reduce((sum, p) => sum + (p.views || 0), 0);
         document.getElementById('statViews').textContent = totalViews;
         const live = allPages.filter(p => !p.banned).length;
         document.getElementById('statLive').textContent = live;
+        document.getElementById('pagesCount').textContent = allPages.length;
         
         renderPages();
       } catch (e) {
         document.getElementById('pagesContainer').innerHTML =
-          '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Failed to load</div><div class="empty-desc">Please refresh the page</div></div>';
+          '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Failed to load</div></div>';
       }
     }
-    
+
     function renderPages() {
       const container = document.getElementById('pagesContainer');
       
@@ -455,13 +499,14 @@
             <div class="empty-icon">📄</div>
             <div class="empty-title">No pages yet</div>
             <div class="empty-desc">Host your first HTML page to get started</div>
+            <a href="/" class="btn-primary" style="display:inline-flex; text-decoration:none; max-width:220px; margin:0 auto;">➕ Host Now</a>
           </div>
         `;
         return;
       }
       
       container.innerHTML = allPages.map(p => {
-        const url = 'https://freehost-f01d.onrender.com/p/' + p._id;
+        const url = location.origin + '/p/' + p._id;
         const badge = p.banned
           ? '<span class="badge banned">⛔ Banned</span>'
           : (p.password ? '<span class="badge locked">🔒 Locked</span>' : '<span class="badge live">● Live</span>');
@@ -470,50 +515,50 @@
           <div class="page-card">
             <div class="page-card-head">
               <div>
-                <div class="page-title">${escapeHtml(p.title || 'Untitled')}</div>
+                <div class="page-title">${esc(p.title || 'Untitled')}</div>
                 <a href="${url}" target="_blank" class="page-url">${url}</a>
-                ${badge}
+                <div style="margin-top:8px;">${badge}</div>
               </div>
             </div>
             <div class="page-meta">
               <span>👁 ${p.views || 0} views</span>
               <span>📅 ${new Date(p.createdAt).toLocaleDateString()}</span>
             </div>
-            <div class="page-actions" style="margin-top: 12px;">
+            <div class="page-actions">
               <a href="${url}" target="_blank" class="mini-btn">🔗 Open</a>
               <button class="mini-btn" onclick="copyLink('${url}', this)">📋 Copy Link</button>
-              <button class="mini-btn danger" onclick="deletePage('${p._id}', '${escapeHtml(p.title || 'Untitled')}')">🗑 Delete</button>
+              <button class="mini-btn danger" onclick="deletePage('${p._id}', '${esc(p.title || 'Untitled')}')">🗑 Delete</button>
             </div>
           </div>
         `;
       }).join('');
     }
-    
+
     function copyLink(url, btn) {
       navigator.clipboard.writeText(url);
       const old = btn.textContent;
       btn.textContent = '✓ Copied';
       setTimeout(() => btn.textContent = old, 1500);
     }
-    
+
     async function deletePage(id, title) {
       if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
       try {
         const res = await fetch('/api/my-pages/' + id, { method: 'DELETE' });
         if (!res.ok) throw new Error('Failed');
+        showToast('🗑 Deleted');
         loadPages();
       } catch (e) {
-        alert('Failed to delete. Please try again.');
+        showToast('❌ Failed to delete', '#dc2626');
       }
     }
-    
-    function escapeHtml(s) {
+
+    function esc(s) {
       return String(s || '').replace(/[&<>"]/g, c => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
       }[c]));
     }
-    
-    // Load
+
     loadUser();
     loadPages();
   </script>
