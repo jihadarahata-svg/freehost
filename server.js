@@ -15,7 +15,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-please';
 const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 
-let pages, users, products, deposits, purchases, settings, db;
+let pages, users, products, deposits, purchases, settings, notifications, db;
 
 async function connectDB() {
   const client = new MongoClient(MONGO_URI);
@@ -27,9 +27,12 @@ async function connectDB() {
   deposits = db.collection('deposits');
   purchases = db.collection('purchases');
   settings = db.collection('settings');
+  notifications = db.collection('notifications');
   await users.createIndex({ email: 1 }, { unique: true });
   await products.createIndex({ createdAt: -1 });
   await deposits.createIndex({ status: 1, createdAt: -1 });
+  await notifications.createIndex({ userId: 1, createdAt: -1 });
+  await notifications.createIndex({ userId: 1, read: 1 });
 
   const existing = await settings.findOne({ _id: 'config' });
   if (!existing) {
@@ -87,6 +90,24 @@ function adminAuth(req, res, next) {
   next();
 }
 
+// Helper: Create notification
+async function createNotification(userId, type, title, message, icon, link) {
+  try {
+    await notifications.insertOne({
+      userId: String(userId),
+      type,
+      title,
+      message,
+      icon: icon || '🔔',
+      link: link || null,
+      read: false,
+      createdAt: new Date()
+    });
+  } catch (err) {
+    console.error('Notification error:', err.message);
+  }
+}
+
 // ============ AUTH ROUTES (Email + Password) ============
 
 app.post('/api/auth/register', async (req, res) => {
@@ -126,6 +147,16 @@ app.post('/api/auth/register', async (req, res) => {
     });
 
     req.session.userId = result.insertedId.toString();
+
+    // 🎉 Welcome notification
+    await createNotification(
+      result.insertedId.toString(),
+      'welcome',
+      'Welcome to FreeHost! 🎉',
+      'আপনার account সফলভাবে তৈরি হয়েছে। HTML host করা শুরু করুন!',
+      '🎉',
+      '/'
+    );
 
     res.json({
       success: true,
@@ -183,6 +214,109 @@ app.get('/api/me', async (req, res) => {
     wallet: user.wallet || 0,
     totalSpent: user.totalSpent || 0
   });
+});
+
+// ============ NOTIFICATIONS ROUTES ============
+
+app.get('/api/notifications', requireAuthAPI, async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
+    const list = await notifications.find({ userId: user._id.toString() })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .toArray();
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/notifications/unread-count', requireAuthAPI, async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
+    const count = await notifications.countDocuments({
+      userId: user._id.toString(),
+      read: false
+    });
+    res.json({ count });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/notifications/read/:id', requireAuthAPI, async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
+    await notifications.updateOne(
+      { _id: new ObjectId(req.params.id), userId: user._id.toString() },
+      { $set: { read: true, readAt: new Date() } }
+    );
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/notifications/read-all', requireAuthAPI, async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
+    await notifications.updateMany(
+      { userId: user._id.toString(), read: false },
+      { $set: { read: true, readAt: new Date() } }
+    );
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/notifications/clear/all', requireAuthAPI, async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
+    await notifications.deleteMany({ userId: user._id.toString() });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/notifications/:id', requireAuthAPI, async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
+    await notifications.deleteOne({
+      _id: new ObjectId(req.params.id),
+      userId: user._id.toString()
+    });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/notifications/send-all', adminAuth, async (req, res) => {
+  try {
+    const { title, message, icon, link } = req.body;
+    if (!title || !message) return res.status(400).json({ error: 'Title & message required' });
+
+    const allUsers = await users.find({ banned: { $ne: true } }, { projection: { _id: 1 } }).toArray();
+
+    const docs = allUsers.map(u => ({
+      userId: u._id.toString(),
+      type: 'custom',
+      title,
+      message,
+      icon: icon || '📢',
+      link: link || null,
+      read: false,
+      createdAt: new Date()
+    }));
+
+    if (docs.length > 0) {
+      await notifications.insertMany(docs);
+    }
+
+    res.json({ success: true, sent: docs.length });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ============ PAGE ROUTES ============
@@ -277,24 +411,22 @@ app.get('/api/shop/products', async (req, res) => {
   try {
     const { category, search, sort, minPrice, maxPrice, minRating } = req.query;
     const query = { active: true };
-    
+
     if (category && category !== 'all') query.category = category;
-    
+
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
       ];
     }
-    
-    // Price filter
+
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
-    
-    // Rating filter
+
     if (minRating) {
       query.rating = { $gte: Number(minRating) };
     }
@@ -395,6 +527,16 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
     });
 
     await products.updateOne({ _id: product._id }, { $inc: { sold: 1 } });
+
+    // 📦 Order notification
+    await createNotification(
+      user._id.toString(),
+      'order_complete',
+      '📦 Order Complete!',
+      '"' + product.title + '" সফলভাবে কিনেছেন। ৳' + price + ' কেটে নেওয়া হয়েছে।',
+      '📦',
+      '/orders'
+    );
 
     res.json({
       success: true,
@@ -526,6 +668,28 @@ app.put('/api/admin/user/:id/ban', adminAuth, async (req, res) => {
     const userId = req.params.id;
     await users.updateOne({ _id: new ObjectId(userId) }, { $set: { banned: !!banned } });
     await pages.updateMany({ userId }, { $set: { banned: !!banned } });
+
+    // Notify user about ban/unban
+    if (banned) {
+      await createNotification(
+        userId,
+        'banned',
+        '🚫 Account Suspended',
+        'আপনার account suspend করা হয়েছে।',
+        '🚫',
+        null
+      );
+    } else {
+      await createNotification(
+        userId,
+        'unbanned',
+        '✅ Account Restored',
+        'আপনার account পুনরায় চালু করা হয়েছে।',
+        '✅',
+        '/'
+      );
+    }
+
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -535,6 +699,7 @@ app.delete('/api/admin/user/:id', adminAuth, async (req, res) => {
     const userId = req.params.id;
     await users.deleteOne({ _id: new ObjectId(userId) });
     await pages.deleteMany({ userId });
+    await notifications.deleteMany({ userId: userId });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -567,6 +732,23 @@ app.post('/api/admin/product', adminAuth, async (req, res) => {
       active: true,
       createdAt: new Date()
     });
+
+    // 🎁 Notify all users about new product
+    const allUsers = await users.find({ banned: { $ne: true } }, { projection: { _id: 1 } }).toArray();
+    const docs = allUsers.map(u => ({
+      userId: u._id.toString(),
+      type: 'new_product',
+      title: '🎁 New Product!',
+      message: '"' + title + '" এখন available',
+      icon: '🎁',
+      link: '/product/' + result.insertedId.toString(),
+      read: false,
+      createdAt: new Date()
+    }));
+    if (docs.length > 0) {
+      await notifications.insertMany(docs);
+    }
+
     res.json({ success: true, id: result.insertedId.toString() });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -613,10 +795,30 @@ app.put('/api/admin/deposit/:id', adminAuth, async (req, res) => {
         { _id: deposit._id },
         { $set: { status: 'approved', reviewedAt: new Date() } }
       );
+
+      // ✅ Approval notification
+      await createNotification(
+        deposit.userId,
+        'deposit_approved',
+        '💰 Deposit Approved!',
+        'আপনার ৳' + deposit.amount + ' wallet এ যোগ হয়েছে।',
+        '✅',
+        '/wallet'
+      );
     } else if (action === 'reject') {
       await deposits.updateOne(
         { _id: deposit._id },
         { $set: { status: 'rejected', reviewedAt: new Date() } }
+      );
+
+      // ❌ Rejection notification
+      await createNotification(
+        deposit.userId,
+        'deposit_rejected',
+        '❌ Deposit Rejected',
+        'আপনার ৳' + deposit.amount + ' deposit reject হয়েছে। সঠিক screenshot পাঠান।',
+        '❌',
+        '/wallet'
       );
     }
     res.json({ success: true });
@@ -654,6 +856,7 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const totalProducts = await products.countDocuments();
   const pendingDeposits = await deposits.countDocuments({ status: 'pending' });
   const totalPurchases = await purchases.countDocuments();
+  const totalNotifications = await notifications.countDocuments();
   const revenueAgg = await purchases.aggregate([{ $group: { _id: null, t: { $sum: '$price' } } }]).toArray();
   const v = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
 
@@ -663,6 +866,7 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
     totalProducts,
     pendingDeposits,
     totalPurchases,
+    totalNotifications,
     totalRevenue: revenueAgg[0]?.t || 0,
     totalViews: v[0]?.v || 0
   });
@@ -700,6 +904,13 @@ app.get('/orders', (req, res) => {
     return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
   }
   res.sendFile(__dirname + '/public/orders.html');
+});
+
+app.get('/notifications', (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
+  }
+  res.sendFile(__dirname + '/public/notifications.html');
 });
 
 app.get('/product/:id', (req, res) => res.sendFile(__dirname + '/public/product.html'));
