@@ -84,6 +84,23 @@
     font-weight: 700; text-decoration: none;
     white-space: nowrap;
   }
+  .bell-nav { position: relative; }
+  .bell-badge-shop {
+    position: absolute;
+    top: -2px;
+    right: 2px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 20px;
+    min-width: 16px;
+    text-align: center;
+    display: none;
+    box-shadow: 0 0 8px rgba(239,68,68,0.6);
+  }
+  .bell-badge-shop.show { display: inline-block; }
   @media (max-width: 700px) {
     .nav { flex-wrap: wrap; }
     .search-bar { order: 3; max-width: 100%; flex-basis: 100%; }
@@ -383,6 +400,11 @@
         <span class="emoji">📦</span>
         <span>Orders</span>
       </a>
+      <a href="/notifications" class="nav-icon bell-nav">
+        <span class="emoji">🔔</span>
+        <span>Alerts</span>
+        <span class="bell-badge-shop" id="bellBadgeShop"></span>
+      </a>
       <a href="/wallet" class="wallet-pill" id="walletPill">💰 ৳0</a>
     </div>
   </nav>
@@ -649,6 +671,22 @@
       setTimeout(() => t.classList.remove('show'), 2000);
     }
 
+    async function checkNotifications() {
+      try {
+        const res = await fetch('/api/notifications/unread-count');
+        if (res.ok) {
+          const data = await res.json();
+          const badge = document.getElementById('bellBadgeShop');
+          if (data.count > 0) {
+            badge.textContent = data.count > 99 ? '99+' : data.count;
+            badge.classList.add('show');
+          } else {
+            badge.classList.remove('show');
+          }
+        }
+      } catch (e) {}
+    }
+
     function esc(s) {
       return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
@@ -662,6 +700,8 @@
     loadUser();
     loadCategories();
     loadProducts();
+    checkNotifications();
+    setInterval(checkNotifications, 30000);
   </script>
 </body>
 </html>
