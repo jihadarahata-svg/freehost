@@ -101,9 +101,7 @@
   }
   
   /* Form */
-  .field {
-    margin-bottom: 14px;
-  }
+  .field { margin-bottom: 14px; }
   .field label {
     display: block;
     font-size: 12px;
@@ -174,7 +172,6 @@
     color: #34d399;
   }
   
-  /* Form toggle */
   .form { display: none; }
   .form.active { display: block; animation: fadeIn 0.3s; }
   
@@ -252,7 +249,7 @@
       <button class="btn" id="signupBtn" onclick="doSignup()">Create Account</button>
     </div>
 
-    <a href="/" class="back-link">← Back to home</a>
+    <a href="/" class="back-link" id="backLink">← Back to home</a>
 
     <div class="terms">
       By signing up, you agree to our <a href="#" style="color:#71717a;">Terms</a> and <a href="#" style="color:#71717a;">Privacy Policy</a>
@@ -260,6 +257,29 @@
   </div>
 
   <script>
+    // Redirect target নেওয়া URL থেকে
+    const params = new URLSearchParams(window.location.search);
+    const redirectTo = params.get('redirect') || '/dashboard';
+    const errorParam = params.get('error');
+
+    // Back link এ redirect path যোগ করো
+    const backLink = document.getElementById('backLink');
+    if (redirectTo === '/shop') {
+      backLink.href = '/';
+      backLink.textContent = '← Back to home';
+    }
+
+    // Error message দেখাও
+    if (errorParam) {
+      showError('Login failed. Please try again.');
+    }
+
+    // Default tab = signup (যদি নতুন user হয়)
+    const mode = params.get('mode');
+    if (mode === 'signup') {
+      showForm('signup');
+    }
+
     function showForm(form) {
       document.getElementById('errorMsg').classList.remove('show');
       document.getElementById('successMsg').classList.remove('show');
@@ -312,7 +332,7 @@
         if (!res.ok) throw new Error(data.error);
 
         showSuccess('Login successful! Redirecting...');
-        setTimeout(() => window.location.href = '/dashboard', 500);
+        setTimeout(() => window.location.href = redirectTo, 500);
       } catch (e) {
         showError(e.message);
       }
@@ -344,19 +364,13 @@
         if (!res.ok) throw new Error(data.error);
 
         showSuccess('Account created! Redirecting...');
-        setTimeout(() => window.location.href = '/dashboard', 500);
+        setTimeout(() => window.location.href = redirectTo, 500);
       } catch (e) {
         showError(e.message);
       }
 
       btn.disabled = false;
       btn.textContent = 'Create Account';
-    }
-
-    // Check for error in URL
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('error')) {
-      showError('Login failed. Please try again.');
     }
   </script>
 </body>
