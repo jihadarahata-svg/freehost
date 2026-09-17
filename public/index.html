@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free HTML Hosting</title>
+<title>Free HTML Hosting — Ship HTML Instantly</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: #0a0a0f;
     color: #fff;
     min-height: 100vh;
@@ -51,6 +51,8 @@
     font-size: 16px;
     font-weight: 800;
     letter-spacing: -0.4px;
+    text-decoration: none;
+    color: #fff;
   }
   .nav-brand-mark {
     width: 28px;
@@ -66,27 +68,52 @@
   .nav-links {
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 20px;
     font-size: 14px;
   }
   .nav-links a {
     color: #a1a1aa;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     transition: 0.2s;
   }
   .nav-links a:hover { color: #fff; }
   .nav-cta {
-    padding: 8px 16px;
+    padding: 9px 18px;
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
     font-size: 13px;
     color: #fff !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
   }
   .nav-cta:hover { background: rgba(255,255,255,0.1) !important; }
-  @media (max-width: 700px) { .nav-links a:not(.nav-cta) { display: none; } }
+  .nav-cta.shop {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    border: none;
+    box-shadow: 0 8px 20px -5px rgba(245,158,11,0.5);
+    padding: 9px 18px;
+  }
+  .nav-cta.shop:hover {
+    background: linear-gradient(135deg, #ea580c, #dc2626) !important;
+    transform: translateY(-1px);
+  }
+  .nav-cta.dashboard {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border: none;
+    box-shadow: 0 8px 20px -5px rgba(139,92,246,0.5);
+  }
+  .nav-cta.dashboard:hover {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5) !important;
+  }
+  @media (max-width: 700px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+    .nav-cta { padding: 8px 14px; font-size: 12px; }
+  }
   
   /* Hero */
   .hero {
@@ -221,8 +248,8 @@
     tab-size: 2;
   }
   #html::placeholder { color: #3f3f46; }
-
-  /* ============ OPTIONS SECTION ============ */
+  
+  /* Options */
   .options-section {
     background: rgba(255,255,255,0.015);
     border: 1px solid rgba(255,255,255,0.05);
@@ -230,7 +257,6 @@
     padding: 20px;
     margin-bottom: 20px;
   }
-  
   .options-header {
     display: flex;
     align-items: center;
@@ -239,17 +265,14 @@
     padding-bottom: 14px;
     border-bottom: 1px solid rgba(255,255,255,0.05);
   }
-  
   .options-title {
     font-size: 13px;
     font-weight: 700;
     color: #e4e4e7;
-    letter-spacing: -0.1px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  
   .options-title-icon {
     width: 20px;
     height: 20px;
@@ -261,19 +284,13 @@
     justify-content: center;
     font-size: 11px;
   }
-  
   .options-subtitle {
     font-size: 11px;
     color: #71717a;
     font-weight: 500;
   }
-  
-  /* Field rows */
-  .field-row {
-    margin-bottom: 16px;
-  }
+  .field-row { margin-bottom: 16px; }
   .field-row:last-child { margin-bottom: 0; }
-  
   .field-label {
     display: flex;
     align-items: center;
@@ -282,9 +299,7 @@
     color: #e4e4e7;
     margin-bottom: 8px;
     font-weight: 600;
-    letter-spacing: -0.1px;
   }
-  
   .field-label-icon {
     width: 18px;
     height: 18px;
@@ -295,24 +310,18 @@
     justify-content: center;
     font-size: 10px;
   }
-  
   .field-label .optional-tag {
     font-size: 10px;
     color: #71717a;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
     padding: 2px 7px;
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 4px;
     margin-left: 4px;
   }
-  
-  .field-input-wrap {
-    position: relative;
-  }
-  
+  .field-input-wrap { position: relative; }
   .field-input-wrap input {
     width: 100%;
     padding: 14px 16px 14px 42px;
@@ -325,15 +334,12 @@
     font-family: inherit;
     transition: 0.2s;
   }
-  
   .field-input-wrap input:focus {
     border-color: rgba(139,92,246,0.6);
     background: rgba(139,92,246,0.06);
     box-shadow: 0 0 0 4px rgba(139,92,246,0.12);
   }
-  
   .field-input-wrap input::placeholder { color: #52525b; }
-  
   .field-input-icon {
     position: absolute;
     left: 14px;
@@ -343,25 +349,12 @@
     opacity: 0.7;
     pointer-events: none;
   }
-  
   .field-hint {
     font-size: 11.5px;
     color: #71717a;
     margin-top: 6px;
     padding-left: 4px;
-    line-height: 1.5;
   }
-  
-  .field-hint code {
-    background: rgba(139,92,246,0.12);
-    color: #c4b5fd;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-family: 'SF Mono', monospace;
-  }
-  
-  /* Two-column grid */
   .fields-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -370,8 +363,6 @@
   @media (max-width: 540px) {
     .fields-grid { grid-template-columns: 1fr; }
   }
-  
-  /* Preview of slug */
   .slug-preview {
     display: flex;
     align-items: center;
@@ -382,9 +373,7 @@
     padding-left: 4px;
     font-family: 'SF Mono', monospace;
   }
-  .slug-preview .domain {
-    color: #52525b;
-  }
+  .slug-preview .domain { color: #52525b; }
   .slug-preview .val {
     color: #c4b5fd;
     background: rgba(139,92,246,0.1);
@@ -409,18 +398,14 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    letter-spacing: -0.2px;
     box-shadow: 
       0 12px 30px -8px rgba(139,92,246,0.5),
       inset 0 1px 0 rgba(255,255,255,0.2);
   }
   .btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 
-      0 20px 45px -8px rgba(139,92,246,0.7),
-      inset 0 1px 0 rgba(255,255,255,0.3);
+    box-shadow: 0 20px 45px -8px rgba(139,92,246,0.7);
   }
-  .btn:active:not(:disabled) { transform: translateY(0); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn .kbd {
     background: rgba(0,0,0,0.25);
@@ -487,7 +472,6 @@
     font-family: inherit;
     transition: 0.15s;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
   }
   .mini-btn:hover {
     background: #8b5cf6;
@@ -513,7 +497,6 @@
   .feature:hover {
     border-color: rgba(139,92,246,0.3);
     transform: translateY(-3px);
-    box-shadow: 0 20px 40px -20px rgba(139,92,246,0.5);
   }
   .feature-icon {
     width: 40px; height: 40px;
@@ -530,7 +513,6 @@
     font-size: 15px;
     font-weight: 700;
     margin-bottom: 6px;
-    letter-spacing: -0.2px;
   }
   .feature-desc {
     font-size: 13px;
@@ -538,7 +520,6 @@
     line-height: 1.6;
   }
   
-  /* Footer */
   footer {
     margin-top: 80px;
     padding-top: 32px;
@@ -567,15 +548,15 @@
   <div class="wrap">
 
     <nav class="nav">
-      <div class="nav-brand">
+      <a href="/" class="nav-brand">
         <div class="nav-brand-mark">◆</div>
         <span>HTML Hosting</span>
-      </div>
-      <div class="nav-links">
-        <a href="#">Features</a>
-        <a href="#">Pricing</a>
-        <a href="#">Docs</a>
-        <a href="#" class="nav-cta">Sign in</a>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="#" style="opacity:0.7;">Features</a>
+        <a href="#" style="opacity:0.7;">Docs</a>
+        <!-- এখানে dynamically Shop / Login button বসবে -->
+        <div id="navButtons"></div>
       </div>
     </nav>
 
@@ -590,7 +571,6 @@
 
     <div class="card">
       
-      <!-- Code Editor -->
       <div class="editor">
         <div class="editor-bar">
           <div class="editor-left">
@@ -614,7 +594,6 @@
 </html>"></textarea>
       </div>
 
-      <!-- OPTIONS SECTION -->
       <div class="options-section">
         
         <div class="options-header">
@@ -625,10 +604,7 @@
           <span class="options-subtitle">All optional</span>
         </div>
 
-        <!-- Title & Slug -->
         <div class="fields-grid">
-          
-          <!-- Title -->
           <div class="field-row">
             <label class="field-label">
               <span class="field-label-icon">📝</span>
@@ -640,8 +616,7 @@
             </div>
             <div class="field-hint">Shown in browser tab & admin panel</div>
           </div>
-          
-          <!-- Slug -->
+
           <div class="field-row">
             <label class="field-label">
               <span class="field-label-icon">🔗</span>
@@ -655,10 +630,8 @@
               <span class="domain">your-site.com/p/</span><span class="val" id="slug-preview-val">custom-name</span>
             </div>
           </div>
-
         </div>
 
-        <!-- Password -->
         <div class="field-row">
           <label class="field-label">
             <span class="field-label-icon">🔒</span>
@@ -667,7 +640,7 @@
           </label>
           <div class="field-input-wrap">
             <span class="field-input-icon">🔑</span>
-            <input id="password" type="password" placeholder="optional url locked password">
+            <input id="password" type="password" placeholder="Leave empty for public page">
           </div>
           <div class="field-hint">Visitors must enter this password to view the page</div>
         </div>
@@ -729,16 +702,42 @@
     htmlEl.addEventListener('input', updateMeta);
     updateMeta();
 
-    // Live slug preview
     slugInput.addEventListener('input', () => {
       const v = slugInput.value.trim();
       slugPreview.textContent = v || 'custom-name';
     });
 
-    // Ctrl+Enter to submit
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') create();
     });
+
+    // ====== User Nav Setup ======
+    async function setupUserNav() {
+      try {
+        const res = await fetch('/api/me');
+        const nav = document.getElementById('navButtons');
+        
+        if (res.ok) {
+          const user = await res.json();
+          const initial = (user.name || 'U')[0].toUpperCase();
+          const firstName = (user.name || 'User').split(' ')[0];
+          
+          nav.innerHTML =
+            '<a href="/shop" class="nav-cta shop">🛍 Shop</a>' +
+            '<a href="/dashboard" class="nav-cta dashboard" title="' + user.email + '">' +
+              '👤 ' + esc(firstName) +
+            '</a>';
+        } else {
+          nav.innerHTML =
+            '<a href="/shop" class="nav-cta shop">🛍 Shop</a>' +
+            '<a href="/login" class="nav-cta">Sign in</a>';
+        }
+      } catch (e) {
+        document.getElementById('navButtons').innerHTML =
+          '<a href="/shop" class="nav-cta shop">🛍 Shop</a>' +
+          '<a href="/login" class="nav-cta">Sign in</a>';
+      }
+    }
 
     async function create() {
       const btn = document.getElementById('btn');
@@ -794,6 +793,12 @@
       btn.textContent = '✓ Copied';
       setTimeout(() => btn.textContent = old, 1500);
     }
+
+    function esc(s) {
+      return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    setupUserNav();
   </script>
 </body>
-  </html>
+</html>
