@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wallet — FreeHost</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0f0f14; color: #fff; min-height: 100vh;
+  }
+  
+  .nav {
+    background: #1a1a22; padding: 14px 20px;
+    display: flex; align-items: center; gap: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .back-btn {
+    background: transparent; border: none; color: #a1a1aa;
+    font-size: 22px; cursor: pointer; padding: 4px 8px;
+    text-decoration: none;
+  }
+  .back-btn:hover { color: #fff; }
+  .nav h1 { font-size: 17px; font-weight: 700; }
+  
+  .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+  
+  .balance-card {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 20px; padding: 28px 24px;
+    text-align: center; margin-bottom: 24px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 20px 50px -15px rgba(16,185,129,0.5);
+  }
+  .balance-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 60%);
+  }
+  .balance-content { position: relative; z-index: 1; }
+  .balance-label { font-size: 13px; opacity: 0.9; margin-bottom: 6px; font-weight: 600; }
+  .balance-amount {
+    font-size: 40px; font-weight: 900;
+    letter-spacing: -1.5px; margin-bottom: 4px;
+  }
+  .balance-sub { font-size: 12px; opacity: 0.8; }
+  
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 20px;
+    background: #1a1a22; padding: 4px;
+    border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);
+  }
+  .tab {
+    flex: 1; padding: 10px; text-align: center;
+    font-size: 13px; font-weight: 700;
+    color: #a1a1aa; cursor: pointer;
+    border-radius: 8px; transition: 0.2s;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #fff;
+  }
+  
+  .card {
+    background: #1a1a22;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card h3 {
+    font-size: 15px; font-weight: 800;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+  }
+  
+  .info-box {
+    background: rgba(139,92,246,0.1);
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 10px; padding: 12px 14px;
+    font-size: 12px; color: #c4b5fd;
+    margin-bottom: 16px; line-height: 1.6;
+  }
+  
+  .bkash-box {
+    background: linear-gradient(135deg, #e2136e, #c0125d);
+    border-radius: 12px; padding: 16px;
+    text-align: center; margin-bottom: 14px;
+  }
+  .bkash-label { font-size: 12px; opacity: 0.9; margin-bottom: 4px; }
+  .bkash-num {
+    font-size: 22px; font-weight: 900;
+    letter-spacing: 1px; margin-bottom: 6px;
+  }
+  .bkash-type { font-size: 11px; opacity: 0.85; }
+  .copy-btn {
+    background: rgba(255,255,255,0.2);
+    border: none; color: #fff;
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+    cursor: pointer; margin-top: 8px;
+    font-family: inherit;
+  }
+  
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-size: 12px; color: #a1a1aa;
+    margin-bottom: 6px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .field input, .field textarea {
+    width: 100%; padding: 12px 14px;
+    background: #0f0f14;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; color: #fff;
+    font-size: 14px; outline: none;
+    font-family: inherit;
+  }
+  .field input:focus, .field textarea:focus {
+    border-color: rgba(139,92,246,0.6);
+    box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+  }
+  .field textarea { resize: vertical; min-height: 70px; }
+  
+  .amount-row {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .amt-btn {
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; color: #fff;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+  }
+  .amt-btn:hover { background: rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.5); }
+  
+  .submit-btn {
+    width: 100%; padding: 15px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #fff; border: none;
+    border-radius: 12px; font-size: 15px;
+    font-weight: 800; cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 12px 30px -8px rgba(139,92,246,0.5);
+    transition: 0.2s;
+  }
+  .submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -8px rgba(139,92,246,0.7);
+  }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  .history-item {
+    background: #1a1a22;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 14px;
+    margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .history-info h4 { font-size: 14px; margin-bottom: 4px; }
+  .history-info p { font-size: 11px; color: #71717a; }
+  .history-amt {
+    font-size: 16px; font-weight: 800;
+    text-align: right;
+  }
+  .amt-plus { color: #4ade80; }
+  .amt-minus { color: #f87171; }
+  .badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 20px; font-size: 10px; font-weight: 700;
+    margin-top: 4px;
+  }
+  .badge-pending { background: rgba(234,88,12,0.2); color: #fb923c; }
+  .badge-approved { background: rgba(22,163,74,0.2); color: #4ade80; }
+  .badge-rejected { background: rgba(220,38,38,0.2); color: #f87171; }
+  
+  .empty {
+    text-align: center; padding: 40px 20px;
+    color: #71717a; font-size: 14px;
+  }
+  .empty-icon { font-size: 44px; margin-bottom: 8px; opacity: 0.5; }
+  
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #16a34a; color: #fff;
+    padding: 12px 24px; border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    transition: transform 0.3s; z-index: 9999;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="/shop" class="back-btn">←</a>
+    <h1>💰 My Wallet</h1>
+  </nav>
+
+  <div class="container">
+
+    <div class="balance-card">
+      <div class="balance-content">
+        <div class="balance-label">Current Balance</div>
+        <div class="balance-amount">৳<span id="balance">0</span></div>
+        <div class="balance-sub">💰 Safe & Secure</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('deposit', this)">➕ Add Money</div>
+      <div class="tab" onclick="showTab('history', this)">📋 History</div>
+    </div>
+
+    <!-- DEPOSIT TAB -->
+    <div id="depositTab">
+      
+      <div class="card">
+        <h3>💰 How to Add Money</h3>
+        <div class="info-box">
+          ⚠️ bKash এ Send Money করুন → Screenshot upload করুন → Admin approve করলে Wallet এ যোগ হবে (২-৪ ঘণ্টা)
+        </div>
+
+        <div class="bkash-box">
+          <div class="bkash-label">Send Money to bKash</div>
+          <div class="bkash-num" id="bkashNumber">01631628306</div>
+          <div class="bkash-type" id="bkashType">Personal</div>
+          <button class="copy-btn" onclick="copyBkash()">📋 Copy Number</button>
+        </div>
+
+        <div class="field">
+          <label>Amount (৳)</label>
+          <input id="amount" type="number" placeholder="সর্বনিম্ন ৫০ টাকা" min="50">
+          <div class="amount-row" style="margin-top: 10px;">
+            <button class="amt-btn" onclick="setAmount(50)">৳50</button>
+            <button class="amt-btn" onclick="setAmount(100)">৳100</button>
+            <button class="amt-btn" onclick="setAmount(200)">৳200</button>
+            <button class="amt-btn" onclick="setAmount(500)">৳500</button>
+            <button class="amt-btn" onclick="setAmount(1000)">৳1000</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Your bKash Number</label>
+          <input id="senderNumber" placeholder="01XXXXXXXXX">
+        </div>
+
+        <div class="field">
+          <label>Transaction ID (ঐচ্ছিক)</label>
+          <input id="transactionId" placeholder="TRX...">
+        </div>
+
+        <div class="field">
+          <label>Screenshot URL (bKash payment এর ছবি)</label>
+          <input id="screenshot" placeholder="https://photo-url.jpg">
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="submitDeposit()">
+          🚀 Submit Request
+        </button>
+      </div>
+
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div id="historyTab" style="display: none;">
+      <div id="historyList"></div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let minDeposit = 50;
+
+    async function loadUser() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login'; return; }
+        const user = await res.json();
+        document.getElementById('balance').textContent = user.wallet || 0;
+      } catch (e) {
+        window.location.href = '/login';
+      }
+    }
+
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/shop/settings');
+        const s = await res.json();
+        document.getElementById('bkashNumber').textContent = s.bkashNumber || '01631628306';
+        document.getElementById('bkashType').textContent = s.bkashType || 'Personal';
+        minDeposit = s.minDeposit || 50;
+        document.getElementById('amount').placeholder = 'সর্বনিম্ন ' + minDeposit + ' টাকা';
+      } catch (e) {}
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await fetch('/api/deposit/my-list');
+        const list = await res.json();
+        const container = document.getElementById('historyList');
+        
+        if (!list.length) {
+          container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div>কোনো history নেই</div></div>';
+          return;
+        }
+        
+        container.innerHTML = list.map(d => {
+          const badge = d.status === 'pending' ? '<span class="badge badge-pending">⏳ PENDING</span>'
+                      : d.status === 'approved' ? '<span class="badge badge-approved">✅ APPROVED</span>'
+                      : '<span class="badge badge-rejected">❌ REJECTED</span>';
+          return '<div class="history-item">' +
+            '<div class="history-info">' +
+              '<h4>💰 Deposit</h4>' +
+              '<p>' + new Date(d.createdAt).toLocaleString() + '</p>' +
+              badge +
+            '</div>' +
+            '<div class="history-amt amt-plus">+৳' + d.amount + '</div>' +
+          '</div>';
+        }).join('');
+      } catch (e) {}
+    }
+
+    function showTab(tab, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      
+      if (tab === 'deposit') {
+        document.getElementById('depositTab').style.display = 'block';
+        document.getElementById('historyTab').style.display = 'none';
+      } else {
+        document.getElementById('depositTab').style.display = 'none';
+        document.getElementById('historyTab').style.display = 'block';
+        loadHistory();
+      }
+    }
+
+    function setAmount(val) {
+      document.getElementById('amount').value = val;
+    }
+
+    function copyBkash() {
+      navigator.clipboard.writeText(document.getElementById('bkashNumber').textContent);
+      showToast('✅ bKash Number Copied!');
+    }
+
+    async function submitDeposit() {
+      const amount = Number(document.getElementById('amount').value);
+      const senderNumber = document.getElementById('senderNumber').value.trim();
+      const transactionId = document.getElementById('transactionId').value.trim();
+      const screenshot = document.getElementById('screenshot').value.trim();
+
+      if (!amount || amount < minDeposit) {
+        return showToast('❌ সর্বনিম্ন ' + minDeposit + ' টাকা', '#dc2626');
+      }
+      if (!senderNumber) {
+        return showToast('❌ আপনার bKash number দিন', '#dc2626');
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        const res = await fetch('/api/deposit/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount, senderNumber, transactionId, screenshot })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        showToast('✅ Request submitted!');
+        document.getElementById('amount').value = '';
+        document.getElementById('senderNumber').value = '';
+        document.getElementById('transactionId').value = '';
+        document.getElementById('screenshot').value = '';
+      } catch (e) {
+        showToast('❌ ' + e.message, '#dc2626');
+      }
+
+      btn.disabled = false;
+      btn.textContent = '🚀 Submit Request';
+    }
+
+    function showToast(msg, color) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = color || '#16a34a';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    loadUser();
+    loadSettings();
+  </script>
+</body>
+        </html>
