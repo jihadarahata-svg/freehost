@@ -129,6 +129,133 @@
   .cat-emoji { font-size: 24px; display: block; margin-bottom: 4px; }
   .cat-name { font-size: 11px; font-weight: 700; }
   
+  /* Filter Bar */
+  .filter-bar { margin-bottom: 16px; }
+  .filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: #1a1a22;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.2s;
+  }
+  .filter-toggle:hover {
+    background: rgba(139,92,246,0.15);
+    border-color: rgba(139,92,246,0.5);
+  }
+  #filterCount {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    display: none;
+  }
+  #filterCount.show { display: inline-block; }
+  
+  .filter-panel {
+    display: none;
+    margin-top: 12px;
+    padding: 20px;
+    background: #1a1a22;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+  }
+  .filter-panel.show { display: block; animation: slideIn 0.3s; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .filter-row { margin-bottom: 20px; }
+  .filter-row:last-child { margin-bottom: 16px; }
+  .filter-label {
+    display: block;
+    font-size: 12px;
+    color: #a1a1aa;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .price-inputs input {
+    flex: 1;
+    padding: 10px 12px;
+    background: #0f0f14;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+  }
+  .price-inputs input:focus { border-color: rgba(139,92,246,0.6); }
+  .price-inputs span { color: #52525b; font-weight: 700; }
+  
+  .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    padding: 8px 16px;
+    background: #0f0f14;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    color: #a1a1aa;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.2s;
+  }
+  .chip:hover { color: #fff; border-color: rgba(139,92,246,0.5); }
+  .chip.active {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #fff;
+    border-color: transparent;
+  }
+  
+  .filter-select {
+    width: 100%;
+    padding: 11px 14px;
+    background: #0f0f14;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .filter-select:focus { border-color: rgba(139,92,246,0.6); }
+  
+  .clear-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
+    color: #f87171;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.2s;
+  }
+  .clear-btn:hover {
+    background: rgba(239,68,68,0.2);
+    border-color: rgba(239,68,68,0.5);
+  }
+  
   .sec-head {
     display: flex; align-items: center; justify-content: space-between;
     margin: 24px 0 14px;
@@ -276,6 +403,48 @@
       </div>
     </div>
 
+    <!-- FILTER BAR -->
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-toggle" onclick="toggleFilters()">
+        ⚙ Filter <span id="filterCount"></span>
+      </button>
+      
+      <div class="filter-panel" id="filterPanel">
+        
+        <div class="filter-row">
+          <label class="filter-label">💰 Price Range (৳)</label>
+          <div class="price-inputs">
+            <input id="minPrice" type="number" placeholder="Min" min="0" oninput="applyFilters()">
+            <span>—</span>
+            <input id="maxPrice" type="number" placeholder="Max" min="0" oninput="applyFilters()">
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <label class="filter-label">⭐ Rating</label>
+          <div class="filter-chips">
+            <button class="chip active" onclick="setRating(null, this)">সব</button>
+            <button class="chip" onclick="setRating(4, this)">4★+</button>
+            <button class="chip" onclick="setRating(3, this)">3★+</button>
+            <button class="chip" onclick="setRating(2, this)">2★+</button>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <label class="filter-label">🔽 Sort By</label>
+          <select id="sortSelect" class="filter-select">
+            <option value="newest">Newest First</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="popular">Most Popular</option>
+            <option value="rating">Top Rated</option>
+          </select>
+        </div>
+
+        <button class="clear-btn" onclick="clearFilters()">❌ Clear All Filters</button>
+      </div>
+    </div>
+
     <div class="sec-head">
       <h2>📦 সব প্রোডাক্ট</h2>
       <span class="count" id="count">0 items</span>
@@ -302,6 +471,10 @@
     let currentSearch = '';
     let searchTimer = null;
     let userWallet = 0;
+    let currentMinPrice = null;
+    let currentMaxPrice = null;
+    let currentRating = null;
+    let currentSort = 'newest';
 
     async function loadUser() {
       try {
@@ -320,10 +493,15 @@
         const params = new URLSearchParams();
         if (currentCategory !== 'all') params.append('category', currentCategory);
         if (currentSearch) params.append('search', currentSearch);
+        if (currentMinPrice !== null) params.append('minPrice', currentMinPrice);
+        if (currentMaxPrice !== null) params.append('maxPrice', currentMaxPrice);
+        if (currentRating !== null) params.append('minRating', currentRating);
+        if (currentSort) params.append('sort', currentSort);
         
         const res = await fetch('/api/shop/products?' + params.toString());
         allProducts = await res.json();
         renderProducts();
+        updateFilterCount();
       } catch (e) {
         showToast('❌ Failed to load products', '#dc2626');
       }
@@ -409,6 +587,60 @@
       window.location.href = '/product/' + id;
     }
 
+    function toggleFilters() {
+      document.getElementById('filterPanel').classList.toggle('show');
+    }
+
+    function applyFilters() {
+      const minV = document.getElementById('minPrice').value;
+      const maxV = document.getElementById('maxPrice').value;
+      currentMinPrice = minV ? Number(minV) : null;
+      currentMaxPrice = maxV ? Number(maxV) : null;
+      
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        loadProducts();
+      }, 300);
+    }
+
+    function setRating(rating, el) {
+      currentRating = rating;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      loadProducts();
+    }
+
+    function updateFilterCount() {
+      let count = 0;
+      if (currentMinPrice !== null || currentMaxPrice !== null) count++;
+      if (currentRating !== null) count++;
+      if (currentSort !== 'newest') count++;
+      
+      const badge = document.getElementById('filterCount');
+      if (count > 0) {
+        badge.textContent = count;
+        badge.classList.add('show');
+      } else {
+        badge.classList.remove('show');
+      }
+    }
+
+    function clearFilters() {
+      document.getElementById('minPrice').value = '';
+      document.getElementById('maxPrice').value = '';
+      document.getElementById('sortSelect').value = 'newest';
+      currentMinPrice = null;
+      currentMaxPrice = null;
+      currentRating = null;
+      currentSort = 'newest';
+      
+      document.querySelectorAll('.chip').forEach((c, i) => {
+        c.classList.toggle('active', i === 0);
+      });
+      
+      loadProducts();
+    }
+
     function showToast(msg, color) {
       const t = document.getElementById('toast');
       t.textContent = msg;
@@ -420,6 +652,12 @@
     function esc(s) {
       return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
+
+    // Sort select listener
+    document.getElementById('sortSelect').addEventListener('change', function() {
+      currentSort = this.value;
+      loadProducts();
+    });
 
     loadUser();
     loadCategories();
