@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const { MongoClient, ObjectId } = require('mongodb');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const app = express();
 app.use(cors());
@@ -12,10 +14,19 @@ app.use(express.static('public'));
 
 const MONGO_URI = process.env.MONGO_URI;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-please';
 const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 
-let pages, users, products, deposits, purchases, settings, notifications, coupons, couponUses, referrals, giftClaims, db;
+let pages, users, products, deposits, purchases, settings, db;
+
+// ===== Helper: Flexible ID finder =====
+function makeIdQuery(id) {
+  const queries = [{ _id: id }];
+  try { queries.push({ _id: new ObjectId(id) }); } catch (e) {}
+  return { $or: queries };
+}
 
 async function connectDB() {
   const client = new MongoClient(MONGO_URI);
@@ -27,26 +38,9 @@ async function connectDB() {
   deposits = db.collection('deposits');
   purchases = db.collection('purchases');
   settings = db.collection('settings');
-  notifications = db.collection('notifications');
-  coupons = db.collection('coupons');
-  couponUses = db.collection('couponUses');
-  referrals = db.collection('referrals');
-  giftClaims = db.collection('giftClaims');
-
+  
   await users.createIndex({ email: 1 }, { unique: true });
-  await products.createIndex({ createdAt: -1 });
-  await deposits.createIndex({ status: 1, createdAt: -1 });
-  await notifications.createIndex({ userId: 1, createdAt: -1 });
-  await notifications.createIndex({ userId: 1, read: 1 });
-  await coupons.createIndex({ code: 1 }, { unique: true });
-  await couponUses.createIndex({ couponId: 1, userId: 1 });
-  await couponUses.createIndex({ userId: 1 });
-  await referrals.createIndex({ referrerId: 1 });
-  await referrals.createIndex({ newUserId: 1 });
-  await users.createIndex({ referralCode: 1 }, { sparse: true });
-  await giftClaims.createIndex({ code: 1, userId: 1 }, { unique: true });
-  await giftClaims.createIndex({ userId: 1, claimedAt: -1 });
-
+  
   const existing = await settings.findOne({ _id: 'config' });
   if (!existing) {
     await settings.insertOne({
@@ -60,14 +54,9 @@ async function connectDB() {
       supportEmail: 'support@freehost.com',
       supportWhatsapp: '',
       supportTelegram: '',
-      referralEnabled: true,
-      referralBonusReferrer: 50,
-      referralBonusNewUser: 25,
-      referralBonusFirstPurchase: 25,
       updatedAt: new Date()
     });
   }
-
   console.log('DB connected');
 }
 
@@ -76,28 +65,63 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: MONGO_URI, dbName: 'freehost' }),
-  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'lax' }
+  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => done(null, user._id.toString()));
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    let user = null;
+    try { user = await users.findOne({ _id: new ObjectId(id) }); } catch (e) {}
+    if (!user) user = await users.findOne({ _id: id });
+    if (user && user.banned) return done(null, false);
+    done(null, user);
+  } catch (err) { done(err, null); }
+});
+
+passport.use(new GoogleStrategy({
+  clientID: GOOGLE_CLIENT_ID,
+  clientSecret: GOOGLE_CLIENT_SECRET,
+  callbackURL: BASE_URL + '/auth/google/callback'
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+    if (!email) return done(new Error('No email'), null);
+    
+    let user = await users.findOne({ email });
+    if (user && user.banned) return done(new Error('Banned'), null);
+    
+    if (!user) {
+      const result = await users.insertOne({
+        email,
+        name: profile.displayName || email.split('@')[0],
+        photo: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
+        googleId: profile.id,
+        banned: false,
+        wallet: 0,
+        totalSpent: 0,
+        createdAt: new Date(),
+        lastLogin: new Date()
+      });
+      user = await users.findOne({ _id: result.insertedId });
+    } else {
+      await users.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
+      user = await users.findOne({ _id: user._id });
+    }
+    return done(null, user);
+  } catch (err) { return done(err, null); }
 }));
 
 function requireAuth(req, res, next) {
-  if (req.session && req.session.userId) return next();
-  res.redirect('/login');
-}
-
-function requireAuthAPI(req, res, next) {
-  if (req.session && req.session.userId) return next();
-  res.status(401).json({ error: 'Login required' });
-}
-
-async function getCurrentUser(req) {
-  if (!req.session || !req.session.userId) return null;
-  try {
-    const user = await users.findOne({ _id: new ObjectId(req.session.userId) });
-    if (user && user.banned) return null;
-    return user;
-  } catch (err) {
-    return null;
+  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+    if (req.user.banned) return res.status(403).json({ error: 'Banned' });
+    return next();
   }
+  res.redirect('/login');
 }
 
 function adminAuth(req, res, next) {
@@ -107,480 +131,49 @@ function adminAuth(req, res, next) {
   next();
 }
 
-async function createNotification(userId, type, title, message, icon, link) {
-  try {
-    await notifications.insertOne({
-      userId: String(userId),
-      type,
-      title,
-      message,
-      icon: icon || '🔔',
-      link: link || null,
-      read: false,
-      createdAt: new Date()
+// ============ GOOGLE AUTH ============
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login?error=1' }),
+  (req, res) => res.redirect('/dashboard')
+);
+app.get('/auth/logout', (req, res) => req.logout(() => res.redirect('/')));
+
+app.get('/api/me', (req, res) => {
+  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+    if (req.user.banned) return res.status(403).json({ error: 'Banned' });
+    res.json({
+      email: req.user.email,
+      name: req.user.name,
+      photo: req.user.photo,
+      wallet: req.user.wallet || 0,
+      totalSpent: req.user.totalSpent || 0,
+      id: req.user._id.toString()
     });
-  } catch (err) {
-    console.error('Notification error:', err.message);
+  } else {
+    res.status(401).json({ error: 'Not logged in' });
   }
-}
-
-function generateReferralCode(name) {
-  const base = (name || 'user').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8) || 'user';
-  const random = Math.random().toString(36).slice(2, 6);
-  return base + random;
-}
-
-// ============ AUTH ROUTES ============
-
-app.post('/api/auth/register', async (req, res) => {
-  try {
-    const { email, password, name, referralCode } = req.body;
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: 'Email, Password, Name সব দিন' });
-    }
-    const cleanEmail = email.toLowerCase().trim();
-    const cleanName = name.trim();
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(cleanEmail)) {
-      return res.status(400).json({ error: 'সঠিক email দিন' });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password কমপক্ষে ৬ character' });
-    }
-
-    const existing = await users.findOne({ email: cleanEmail });
-    if (existing) {
-      return res.status(400).json({ error: 'এই email দিয়ে account আছে' });
-    }
-
-    const hash = await bcrypt.hash(password, 10);
-    const config = await settings.findOne({ _id: 'config' });
-    const referralEnabled = config?.referralEnabled !== false;
-    const bonusNewUser = config?.referralBonusNewUser || 25;
-    const bonusReferrer = config?.referralBonusReferrer || 50;
-
-    let referrer = null;
-    let newUserBonus = 0;
-    let myReferralCode = generateReferralCode(cleanName);
-
-    if (referralCode && referralEnabled) {
-      const cleanRefCode = referralCode.toUpperCase().trim();
-      referrer = await users.findOne({ referralCode: cleanRefCode });
-      if (referrer) {
-        newUserBonus = bonusNewUser;
-      }
-    }
-
-    let attempts = 0;
-    while (attempts < 5) {
-      const dupe = await users.findOne({ referralCode: myReferralCode });
-      if (!dupe) break;
-      myReferralCode = generateReferralCode(cleanName);
-      attempts++;
-    }
-
-    const result = await users.insertOne({
-      email: cleanEmail,
-      name: cleanName,
-      password: hash,
-      photo: null,
-      banned: false,
-      wallet: newUserBonus,
-      totalSpent: 0,
-      referralCode: myReferralCode,
-      referredBy: referrer ? referrer._id.toString() : null,
-      referralCount: 0,
-      referralEarnings: 0,
-      createdAt: new Date(),
-      lastLogin: new Date()
-    });
-
-    const newUserId = result.insertedId.toString();
-
-    if (referrer) {
-      await users.updateOne(
-        { _id: referrer._id },
-        { 
-          $inc: { wallet: bonusReferrer, referralCount: 1, referralEarnings: bonusReferrer }
-        }
-      );
-
-      await referrals.insertOne({
-        referrerId: referrer._id.toString(),
-        referrerEmail: referrer.email,
-        newUserId: newUserId,
-        newUserEmail: cleanEmail,
-        newUserName: cleanName,
-        referrerBonus: bonusReferrer,
-        newUserBonus: newUserBonus,
-        firstPurchaseBonus: 0,
-        createdAt: new Date()
-      });
-
-      await createNotification(
-        referrer._id.toString(),
-        'referral',
-        '🎉 New Referral!',
-        cleanName + ' আপনার referral link দিয়ে join করেছে। ৳' + bonusReferrer + ' পেয়েছেন!',
-        '🎉',
-        '/dashboard'
-      );
-    }
-
-    req.session.userId = newUserId;
-
-    const welcomeMsg = newUserBonus > 0 
-      ? 'আপনার account তৈরি হয়েছে। Referral bonus ৳' + newUserBonus + ' পেয়েছেন! 🎉'
-      : 'আপনার account সফলভাবে তৈরি হয়েছে। HTML host করা শুরু করুন!';
-
-    await createNotification(
-      newUserId,
-      'welcome',
-      'Welcome to FreeHost! 🎉',
-      welcomeMsg,
-      '🎉',
-      '/'
-    );
-
-    res.json({
-      success: true,
-      user: { email: cleanEmail, name: cleanName, wallet: newUserBonus }
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email ও Password দিন' });
-    }
-    const cleanEmail = email.toLowerCase().trim();
-
-    const user = await users.findOne({ email: cleanEmail });
-    if (!user) {
-      return res.status(401).json({ error: 'ভুল email বা password' });
-    }
-    if (user.banned) {
-      return res.status(403).json({ error: 'Account banned' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ error: 'ভুল email বা password' });
-    }
-
-    await users.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
-    req.session.userId = user._id.toString();
-
-    res.json({
-      success: true,
-      user: { email: user.email, name: user.name, wallet: user.wallet || 0 }
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/auth/logout', (req, res) => {
-  req.session.destroy(() => res.redirect('/login'));
-});
-
-app.get('/api/me', async (req, res) => {
-  const user = await getCurrentUser(req);
-  if (!user) return res.status(401).json({ error: 'Not logged in' });
-  res.json({
-    email: user.email,
-    name: user.name,
-    photo: user.photo,
-    wallet: user.wallet || 0,
-    totalSpent: user.totalSpent || 0,
-    referralCode: user.referralCode || null,
-    referralCount: user.referralCount || 0,
-    referralEarnings: user.referralEarnings || 0
-  });
-});
-
-// ============ NOTIFICATIONS ROUTES ============
-
-app.get('/api/notifications', requireAuthAPI, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-    const list = await notifications.find({ userId: user._id.toString() })
-      .sort({ createdAt: -1 }).limit(50).toArray();
-    res.json(list);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/api/notifications/unread-count', requireAuthAPI, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-    const count = await notifications.countDocuments({
-      userId: user._id.toString(), read: false
-    });
-    res.json({ count });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.post('/api/notifications/read/:id', requireAuthAPI, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-    await notifications.updateOne(
-      { _id: new ObjectId(req.params.id), userId: user._id.toString() },
-      { $set: { read: true, readAt: new Date() } }
-    );
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.post('/api/notifications/read-all', requireAuthAPI, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-    await notifications.updateMany(
-      { userId: user._id.toString(), read: false },
-      { $set: { read: true, readAt: new Date() } }
-    );
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.delete('/api/notifications/clear/all', requireAuthAPI, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-    await notifications.deleteMany({ userId: user._id.toString() });
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.delete('/api/notifications/:id', requireAuthAPI, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-    await notifications.deleteOne({
-      _id: new ObjectId(req.params.id),
-      userId: user._id.toString()
-    });
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// ============ GIFT CODE ROUTES ============
-
-app.post('/api/gift/claim', requireAuthAPI, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-
-    const { code } = req.body;
-    if (!code) return res.status(400).json({ error: 'Code দিন' });
-
-    const cleanCode = code.toUpperCase().trim();
-    const coupon = await coupons.findOne({ code: cleanCode, type: 'cash' });
-
-    if (!coupon) return res.status(404).json({ error: '❌ ভুল gift code' });
-    if (!coupon.active) return res.status(400).json({ error: '❌ এই code এখন নিষ্ক্রিয়' });
-
-    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
-      return res.status(400).json({ error: '❌ এই code এর সময় শেষ হয়ে গেছে' });
-    }
-
-    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-      return res.status(400).json({ error: '❌ এই code এর সব ব্যবহার হয়ে গেছে' });
-    }
-
-    const alreadyClaimed = await giftClaims.findOne({
-      code: cleanCode,
-      userId: user._id.toString()
-    });
-    if (alreadyClaimed) {
-      return res.status(400).json({ error: '❌ আপনি এই code আগেই ব্যবহার করেছেন' });
-    }
-
-    const amount = Number(coupon.value) || 0;
-    if (amount <= 0) {
-      return res.status(400).json({ error: '❌ এই code এ কোনো amount নেই' });
-    }
-
-    const newBalance = (user.wallet || 0) + amount;
-
-    await users.updateOne(
-      { _id: user._id },
-      { $inc: { wallet: amount } }
-    );
-
-    await giftClaims.insertOne({
-      code: cleanCode,
-      couponId: coupon._id.toString(),
-      userId: user._id.toString(),
-      userEmail: user.email,
-      userName: user.name,
-      amount: amount,
-      claimedAt: new Date()
-    });
-
-    await coupons.updateOne(
-      { _id: coupon._id },
-      { $inc: { usedCount: 1 } }
-    );
-
-    await createNotification(
-      user._id.toString(),
-      'gift_claimed',
-      '🎁 Gift Code Claimed!',
-      '৳' + amount + ' আপনার wallet এ যোগ হয়েছে (Code: ' + cleanCode + ')',
-      '🎁',
-      '/wallet'
-    );
-
-    res.json({
-      success: true,
-      amount: amount,
-      newBalance: newBalance,
-      code: cleanCode,
-      message: '৳' + amount + ' added to wallet'
-    });
-  } catch (err) {
-    if (err.code === 11000) {
-      return res.status(400).json({ error: '❌ আপনি এই code আগেই ব্যবহার করেছেন' });
-    }
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/gift/my-claims', requireAuthAPI, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-    const list = await giftClaims.find({ userId: user._id.toString() })
-      .sort({ claimedAt: -1 }).limit(50).toArray();
-    res.json(list);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// ============ COUPON ROUTES (DISCOUNT TYPE) ============
-
-app.post('/api/coupon/validate', requireAuthAPI, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-
-    const { code, productId } = req.body;
-    if (!code || !productId) return res.status(400).json({ error: 'Code & product required' });
-
-    const cleanCode = code.toUpperCase().trim();
-    const coupon = await coupons.findOne({ code: cleanCode, type: { $ne: 'cash' } });
-
-    if (!coupon) return res.status(404).json({ error: 'ভুল coupon code' });
-    if (!coupon.active) return res.status(400).json({ error: 'Coupon নিষ্ক্রিয়' });
-
-    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
-      return res.status(400).json({ error: 'Coupon এর সময় শেষ' });
-    }
-
-    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-      return res.status(400).json({ error: 'Coupon এর limit শেষ' });
-    }
-
-    if (coupon.singleUse) {
-      const alreadyUsed = await couponUses.findOne({
-        couponId: coupon._id.toString(),
-        userId: user._id.toString()
-      });
-      if (alreadyUsed) {
-        return res.status(400).json({ error: 'এই coupon আপনি ইতিমধ্যে ব্যবহার করেছেন' });
-      }
-    }
-
-    const product = await products.findOne({ _id: productId, active: true });
-    if (!product) return res.status(404).json({ error: 'Product not found' });
-
-    const price = product.discountPrice || product.price;
-
-    if (coupon.minPurchase && price < coupon.minPurchase) {
-      return res.status(400).json({
-        error: 'কমপক্ষে ৳' + coupon.minPurchase + ' কিনতে হবে',
-        minPurchase: coupon.minPurchase,
-        currentPrice: price
-      });
-    }
-
-    let discount = 0;
-    if (coupon.type === 'percentage') {
-      discount = Math.floor(price * coupon.value / 100);
-      if (coupon.maxDiscount && discount > coupon.maxDiscount) {
-        discount = coupon.maxDiscount;
-      }
-    } else {
-      discount = Math.min(coupon.value, price);
-    }
-
-    res.json({
-      success: true,
-      coupon: {
-        code: coupon.code,
-        type: coupon.type,
-        value: coupon.value,
-        description: coupon.description || ''
-      },
-      price: price,
-      discount: discount,
-      finalPrice: price - discount
-    });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// ============ REFERRAL ROUTES ============
-
-app.get('/api/referral/stats', requireAuthAPI, async (req, res) => {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-
-    const list = await referrals.find({ referrerId: user._id.toString() })
-      .sort({ createdAt: -1 }).toArray();
-
-    const totalEarned = list.reduce((s, r) => s + (r.referrerBonus || 0) + (r.firstPurchaseBonus || 0), 0);
-
-    res.json({
-      referralCode: user.referralCode || null,
-      referralLink: user.referralCode ? BASE_URL + '/login?ref=' + user.referralCode : null,
-      totalReferrals: list.length,
-      totalEarned: totalEarned,
-      referrals: list
-    });
-  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ============ PAGE ROUTES ============
-
 app.post('/api/create', async (req, res) => {
   try {
     const { html, slug, password, title } = req.body;
     if (!html) return res.status(400).json({ error: 'HTML required' });
-
     let userId = null;
-    const user = await getCurrentUser(req);
-    if (user) userId = user._id.toString();
-
+    if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+      if (req.user.banned) return res.status(403).json({ error: 'Banned' });
+      userId = req.user._id.toString();
+    }
     const id = slug ? slug.trim() : Math.random().toString(36).slice(2, 10);
     const hash = password ? await bcrypt.hash(password, 10) : null;
-
     await pages.insertOne({
       _id: id,
       title: title || 'Untitled',
       html, password: hash,
       views: 0, userId, banned: false,
-      createdAt: new Date(),
+      createdAt: new Date()
     });
-
     res.json({ url: BASE_URL + '/p/' + id, id });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -620,64 +213,33 @@ app.get('/embed/:id', async (req, res) => {
     if (page.banned) return res.status(403).send('Suspended');
     if (!(await checkPassword(page, req))) return res.status(403).send('Forbidden');
     res.send(page.html);
-  } catch (err) { res.status(500).send('Server error'); }
+  } catch (err) { res.status(500).send('Error'); }
 });
 
-// ============ USER ROUTES ============
-
-app.get('/api/my-pages', requireAuthAPI, async (req, res) => {
-  const user = await getCurrentUser(req);
-  if (!user) return res.status(401).json({ error: 'Not logged in' });
-  const userId = user._id.toString();
+// ============ USER ============
+app.get('/api/my-pages', requireAuth, async (req, res) => {
+  const userId = req.user._id.toString();
   const list = await pages.find({ userId }, { projection: { html: 0, password: 0 } })
     .sort({ createdAt: -1 }).toArray();
   res.json(list);
 });
 
-app.delete('/api/my-pages/:id', requireAuthAPI, async (req, res) => {
-  const user = await getCurrentUser(req);
-  if (!user) return res.status(401).json({ error: 'Not logged in' });
-  const userId = user._id.toString();
-  const page = await pages.findOne({ _id: req.params.id });
-  if (!page) return res.status(404).json({ error: 'Not found' });
-  if (page.userId !== userId) return res.status(403).json({ error: 'Not yours' });
-  await pages.deleteOne({ _id: req.params.id });
-  res.json({ success: true });
-});
-
-// ============ SHOP ROUTES (PUBLIC) ============
-
+// ============ SHOP ============
 app.get('/api/shop/products', async (req, res) => {
   try {
-    const { category, search, sort, minPrice, maxPrice, minRating } = req.query;
+    const { category, search, sort } = req.query;
     const query = { active: true };
-
     if (category && category !== 'all') query.category = category;
-
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
       ];
     }
-
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
-    }
-
-    if (minRating) {
-      query.rating = { $gte: Number(minRating) };
-    }
-
     let sortObj = { createdAt: -1 };
     if (sort === 'price-low') sortObj = { price: 1 };
     if (sort === 'price-high') sortObj = { price: -1 };
     if (sort === 'popular') sortObj = { sold: -1 };
-    if (sort === 'rating') sortObj = { rating: -1 };
-    if (sort === 'newest') sortObj = { createdAt: -1 };
-
     const list = await products.find(query, { projection: { deliveryData: 0 } }).sort(sortObj).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -718,18 +280,14 @@ app.get('/api/shop/settings', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ============ PURCHASE ROUTES ============
-
-app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
+// ============ PURCHASE ============
+app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
   try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-
     const product = await products.findOne({ _id: req.params.id, active: true });
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
     const alreadyBought = await purchases.findOne({
-      userId: user._id.toString(),
+      userId: req.user._id.toString(),
       productId: req.params.id
     });
     if (alreadyBought) {
@@ -742,150 +300,50 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
     }
 
     const price = product.discountPrice || product.price;
-    const userWallet = user.wallet || 0;
-    const { couponCode } = req.body || {};
+    const userWallet = req.user.wallet || 0;
 
-    let discount = 0;
-    let appliedCoupon = null;
-
-    if (couponCode) {
-      const cleanCode = couponCode.toUpperCase().trim();
-      const coupon = await coupons.findOne({ code: cleanCode, type: { $ne: 'cash' } });
-
-      if (coupon && coupon.active) {
-        const notExpired = !coupon.expiresAt || new Date(coupon.expiresAt) > new Date();
-        const withinLimit = !coupon.usageLimit || coupon.usedCount < coupon.usageLimit;
-        const meetsMin = !coupon.minPurchase || price >= coupon.minPurchase;
-        let notUsedByUser = true;
-        if (coupon.singleUse) {
-          const used = await couponUses.findOne({
-            couponId: coupon._id.toString(),
-            userId: user._id.toString()
-          });
-          if (used) notUsedByUser = false;
-        }
-
-        if (notExpired && withinLimit && meetsMin && notUsedByUser) {
-          if (coupon.type === 'percentage') {
-            discount = Math.floor(price * coupon.value / 100);
-            if (coupon.maxDiscount && discount > coupon.maxDiscount) {
-              discount = coupon.maxDiscount;
-            }
-          } else {
-            discount = Math.min(coupon.value, price);
-          }
-          appliedCoupon = coupon;
-        }
-      }
-    }
-
-    const finalPrice = Math.max(0, price - discount);
-
-    if (userWallet < finalPrice) {
+    if (userWallet < price) {
       return res.status(400).json({
         error: 'Insufficient balance',
-        needed: finalPrice - userWallet,
+        needed: price - userWallet,
         current: userWallet
       });
     }
 
     await users.updateOne(
-      { _id: user._id },
-      { $inc: { wallet: -finalPrice, totalSpent: finalPrice } }
+      { _id: req.user._id },
+      { $inc: { wallet: -price, totalSpent: price } }
     );
 
     await purchases.insertOne({
-      userId: user._id.toString(),
-      userEmail: user.email,
+      userId: req.user._id.toString(),
+      userEmail: req.user.email,
       productId: product._id,
       productTitle: product.title,
-      price: finalPrice,
-      originalPrice: price,
-      discount: discount,
-      couponCode: appliedCoupon ? appliedCoupon.code : null,
+      price: price,
       purchasedAt: new Date()
     });
 
-    if (appliedCoupon) {
-      await couponUses.insertOne({
-        couponId: appliedCoupon._id.toString(),
-        userId: user._id.toString(),
-        productId: product._id,
-        discount: discount,
-        usedAt: new Date()
-      });
-      await coupons.updateOne(
-        { _id: appliedCoupon._id },
-        { $inc: { usedCount: 1 } }
-      );
-    }
-
     await products.updateOne({ _id: product._id }, { $inc: { sold: 1 } });
-
-    if (user.referredBy && user.referralCount !== -1) {
-      const firstPurchase = await purchases.countDocuments({ userId: user._id.toString() });
-      if (firstPurchase === 1) {
-        const config = await settings.findOne({ _id: 'config' });
-        const fpBonus = config?.referralBonusFirstPurchase || 25;
-        if (fpBonus > 0) {
-          await users.updateOne(
-            { _id: new ObjectId(user.referredBy) },
-            { $inc: { wallet: fpBonus, referralEarnings: fpBonus } }
-          );
-          await referrals.updateOne(
-            { referrerId: user.referredBy, newUserId: user._id.toString() },
-            { $set: { firstPurchaseBonus: fpBonus, firstPurchaseAt: new Date() } }
-          );
-          await createNotification(
-            user.referredBy,
-            'referral',
-            '💰 Referral Bonus!',
-            user.name + ' প্রথম কেনাকাটা করেছে। ৳' + fpBonus + ' bonus পেয়েছেন!',
-            '💰',
-            '/dashboard'
-          );
-        }
-      }
-    }
-
-    const notifMsg = appliedCoupon
-      ? '"' + product.title + '" কিনেছেন। 🎟️ Coupon ' + appliedCoupon.code + ' এ ৳' + discount + ' বাঁচিয়েছেন!'
-      : '"' + product.title + '" সফলভাবে কিনেছেন। ৳' + finalPrice + ' কেটে নেওয়া হয়েছে।';
-
-    await createNotification(
-      user._id.toString(),
-      'order_complete',
-      '📦 Order Complete!',
-      notifMsg,
-      '📦',
-      '/orders'
-    );
 
     res.json({
       success: true,
       deliveryType: product.deliveryType,
       deliveryData: product.deliveryData,
-      newBalance: userWallet - finalPrice,
-      discount: discount,
-      saved: discount
+      newBalance: userWallet - price
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/shop/access/:id', requireAuthAPI, async (req, res) => {
+app.get('/api/shop/access/:id', requireAuth, async (req, res) => {
   try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-
     const purchase = await purchases.findOne({
-      userId: user._id.toString(),
+      userId: req.user._id.toString(),
       productId: req.params.id
     });
     if (!purchase) return res.status(403).json({ error: 'Not purchased' });
-
     const product = await products.findOne({ _id: req.params.id });
     if (!product) return res.status(404).json({ error: 'Product gone' });
-
     res.json({
       deliveryType: product.deliveryType,
       deliveryData: product.deliveryData
@@ -893,23 +351,17 @@ app.get('/api/shop/access/:id', requireAuthAPI, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/shop/my-purchases', requireAuthAPI, async (req, res) => {
+app.get('/api/shop/my-purchases', requireAuth, async (req, res) => {
   try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-    const list = await purchases.find({ userId: user._id.toString() })
+    const list = await purchases.find({ userId: req.user._id.toString() })
       .sort({ purchasedAt: -1 }).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ============ DEPOSIT ROUTES ============
-
-app.post('/api/deposit/request', requireAuthAPI, async (req, res) => {
+// ============ DEPOSIT ============
+app.post('/api/deposit/request', requireAuth, async (req, res) => {
   try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-
     const { amount, senderNumber, transactionId, screenshot } = req.body;
     const config = await settings.findOne({ _id: 'config' });
     const minDep = config?.minDeposit || 50;
@@ -920,9 +372,9 @@ app.post('/api/deposit/request', requireAuthAPI, async (req, res) => {
     if (!senderNumber) return res.status(400).json({ error: 'Sender number required' });
 
     const result = await deposits.insertOne({
-      userId: user._id.toString(),
-      userEmail: user.email,
-      userName: user.name,
+      userId: req.user._id.toString(),
+      userEmail: req.user.email,
+      userName: req.user.name,
       amount: Number(amount),
       method: 'bKash',
       senderNumber,
@@ -932,28 +384,24 @@ app.post('/api/deposit/request', requireAuthAPI, async (req, res) => {
       createdAt: new Date(),
       reviewedAt: null
     });
-
     res.json({ success: true, id: result.insertedId.toString() });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/deposit/my-list', requireAuthAPI, async (req, res) => {
+app.get('/api/deposit/my-list', requireAuth, async (req, res) => {
   try {
-    const user = await getCurrentUser(req);
-    if (!user) return res.status(401).json({ error: 'Login required' });
-    const list = await deposits.find({ userId: user._id.toString() })
+    const list = await deposits.find({ userId: req.user._id.toString() })
       .sort({ createdAt: -1 }).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ============ ADMIN ROUTES ============
-
+// ============ ADMIN ============
 app.post('/api/admin/login', (req, res) => {
   if (req.body.password === ADMIN_PASSWORD) {
     res.json({ success: true, token: ADMIN_PASSWORD });
   } else {
-    res.status(401).json({ error: 'Wrong password' });
+    res.status(401).json({ error: 'Wrong' });
   }
 });
 
@@ -964,7 +412,7 @@ app.get('/api/admin/list-full', adminAuth, async (req, res) => {
 });
 
 app.get('/api/admin/list-users', adminAuth, async (req, res) => {
-  const list = await users.find({}, { projection: { password: 0 } })
+  const list = await users.find({}, { projection: { googleId: 0 } })
     .sort({ createdAt: -1 }).toArray();
   res.json(list);
 });
@@ -977,30 +425,26 @@ app.put('/api/admin/page/:id', adminAuth, async (req, res) => {
     if (title !== undefined) update.title = title;
     if (banned !== undefined) update.banned = banned;
     if (password !== undefined) update.password = password ? await bcrypt.hash(password, 10) : null;
-    await pages.updateOne({ _id: req.params.id }, { $set: update });
+    const result = await pages.updateOne({ _id: req.params.id }, { $set: update });
+    if (result.matchedCount === 0) return res.status(404).json({ error: 'Not found' });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.delete('/api/admin/delete/:id', adminAuth, async (req, res) => {
-  await pages.deleteOne({ _id: req.params.id });
-  res.json({ success: true });
+  try {
+    const result = await pages.deleteOne({ _id: req.params.id });
+    res.json({ success: true, deleted: result.deletedCount });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.put('/api/admin/user/:id/ban', adminAuth, async (req, res) => {
   try {
     const { banned } = req.body;
     const userId = req.params.id;
-    await users.updateOne({ _id: new ObjectId(userId) }, { $set: { banned: !!banned } });
+    const q = makeIdQuery(userId);
+    await users.updateOne(q, { $set: { banned: !!banned } });
     await pages.updateMany({ userId }, { $set: { banned: !!banned } });
-
-    if (banned) {
-      await createNotification(userId, 'banned', '🚫 Account Suspended',
-        'আপনার account suspend করা হয়েছে।', '🚫', null);
-    } else {
-      await createNotification(userId, 'unbanned', '✅ Account Restored',
-        'আপনার account পুনরায় চালু করা হয়েছে।', '✅', '/');
-    }
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1008,15 +452,14 @@ app.put('/api/admin/user/:id/ban', adminAuth, async (req, res) => {
 app.delete('/api/admin/user/:id', adminAuth, async (req, res) => {
   try {
     const userId = req.params.id;
-    await users.deleteOne({ _id: new ObjectId(userId) });
+    const q = makeIdQuery(userId);
+    await users.deleteOne(q);
     await pages.deleteMany({ userId });
-    await notifications.deleteMany({ userId });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ===== ADMIN: PRODUCTS =====
-
+// ===== ADMIN PRODUCTS =====
 app.get('/api/admin/products', adminAuth, async (req, res) => {
   const list = await products.find({}).sort({ createdAt: -1 }).toArray();
   res.json(list);
@@ -1025,203 +468,63 @@ app.get('/api/admin/products', adminAuth, async (req, res) => {
 app.post('/api/admin/product', adminAuth, async (req, res) => {
   try {
     const { title, description, category, price, discountPrice, photo, deliveryType, deliveryData, stock } = req.body;
-    if (!title || !price || !deliveryData) return res.status(400).json({ error: 'Required: title, price, deliveryData' });
-
+    if (!title || !price || !deliveryData) {
+      return res.status(400).json({ error: 'Required: title, price, deliveryData' });
+    }
     const result = await products.insertOne({
-      title,
-      description: description || '',
-      category: category || 'Other',
+      title: String(title),
+      description: String(description || ''),
+      category: String(category || 'Other'),
       price: Number(price),
       discountPrice: discountPrice ? Number(discountPrice) : null,
-      photo: photo || '',
-      deliveryType: deliveryType || 'link',
-      deliveryData,
+      photo: String(photo || ''),
+      deliveryType: String(deliveryType || 'link'),
+      deliveryData: String(deliveryData),
       stock: stock ? Number(stock) : 999,
       sold: 0,
-      rating: 0,
-      reviews: 0,
       active: true,
       createdAt: new Date()
     });
-
-    const allUsers = await users.find({ banned: { $ne: true } }, { projection: { _id: 1 } }).toArray();
-    const docs = allUsers.map(u => ({
-      userId: u._id.toString(),
-      type: 'new_product',
-      title: '🎁 New Product!',
-      message: '"' + title + '" এখন available',
-      icon: '🎁',
-      link: '/product/' + result.insertedId.toString(),
-      read: false,
-      createdAt: new Date()
-    }));
-    if (docs.length > 0) await notifications.insertMany(docs);
-
     res.json({ success: true, id: result.insertedId.toString() });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.put('/api/admin/product/:id', adminAuth, async (req, res) => {
   try {
-    const update = { ...req.body, updatedAt: new Date() };
-    delete update._id;
-    if (update.price) update.price = Number(update.price);
-    if (update.discountPrice) update.discountPrice = Number(update.discountPrice);
-    if (update.stock !== undefined) update.stock = Number(update.stock);
-    await products.updateOne({ _id: req.params.id }, { $set: update });
-    res.json({ success: true });
+    const { title, description, category, price, discountPrice, photo, deliveryType, deliveryData, stock, active } = req.body;
+    const update = { updatedAt: new Date() };
+    if (title !== undefined) update.title = String(title);
+    if (description !== undefined) update.description = String(description);
+    if (category !== undefined) update.category = String(category);
+    if (price !== undefined) update.price = Number(price);
+    if (discountPrice !== undefined) update.discountPrice = discountPrice ? Number(discountPrice) : null;
+    if (photo !== undefined) update.photo = String(photo);
+    if (deliveryType !== undefined) update.deliveryType = String(deliveryType);
+    if (deliveryData !== undefined) update.deliveryData = String(deliveryData);
+    if (stock !== undefined) update.stock = Number(stock);
+    if (active !== undefined) update.active = !!active;
+
+    const q = makeIdQuery(req.params.id);
+    const result = await products.updateOne(q, { $set: update });
+    if (result.matchedCount === 0) return res.status(404).json({ error: 'Product not found in DB' });
+    res.json({ success: true, modified: result.modifiedCount });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.delete('/api/admin/product/:id', adminAuth, async (req, res) => {
-  await products.deleteOne({ _id: req.params.id });
-  res.json({ success: true });
-});
-
-// ===== ADMIN: GIFT CODES =====
-
-app.get('/api/admin/gift-codes', adminAuth, async (req, res) => {
   try {
-    const list = await coupons.find({ type: 'cash' }).sort({ createdAt: -1 }).toArray();
-    res.json(list);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+    const q = makeIdQuery(req.params.id);
+    const result = await products.deleteOne(q);
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Product not found in DB' });
+    }
+    res.json({ success: true, deleted: result.deletedCount });
+  } catch (err) { 
+    res.status(500).json({ error: err.message }); 
+  }
 });
 
-app.post('/api/admin/gift-code', adminAuth, async (req, res) => {
-  try {
-    const { code, value, usageLimit, expiresAt, description } = req.body;
-    if (!code || !value) return res.status(400).json({ error: 'Code & Amount required' });
-
-    const cleanCode = code.toUpperCase().trim();
-    const existing = await coupons.findOne({ code: cleanCode });
-    if (existing) return res.status(400).json({ error: 'এই code আগেই আছে' });
-
-    const result = await coupons.insertOne({
-      code: cleanCode,
-      type: 'cash',
-      value: Number(value),
-      usageLimit: usageLimit ? Number(usageLimit) : null,
-      singleUse: true,
-      active: true,
-      expiresAt: expiresAt ? new Date(expiresAt) : null,
-      description: description || '',
-      usedCount: 0,
-      createdAt: new Date()
-    });
-
-    res.json({ success: true, id: result.insertedId.toString() });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.put('/api/admin/gift-code/:id', adminAuth, async (req, res) => {
-  try {
-    const update = { ...req.body, updatedAt: new Date() };
-    delete update._id;
-    delete update.code;
-    delete update.usedCount;
-    delete update.type;
-
-    if (update.value) update.value = Number(update.value);
-    if (update.usageLimit) update.usageLimit = Number(update.usageLimit);
-    if (update.expiresAt) update.expiresAt = new Date(update.expiresAt);
-
-    await coupons.updateOne(
-      { _id: new ObjectId(req.params.id) },
-      { $set: update }
-    );
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.delete('/api/admin/gift-code/:id', adminAuth, async (req, res) => {
-  try {
-    await coupons.deleteOne({ _id: new ObjectId(req.params.id) });
-    await giftClaims.deleteMany({ couponId: req.params.id });
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/api/admin/gift-code/:id/claims', adminAuth, async (req, res) => {
-  try {
-    const list = await giftClaims.find({ couponId: req.params.id })
-      .sort({ claimedAt: -1 }).limit(200).toArray();
-    res.json(list);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/api/admin/gift-claims', adminAuth, async (req, res) => {
-  try {
-    const list = await giftClaims.find({})
-      .sort({ claimedAt: -1 }).limit(200).toArray();
-    res.json(list);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// ===== ADMIN: COUPONS (DISCOUNT TYPE) =====
-
-app.get('/api/admin/coupons', adminAuth, async (req, res) => {
-  try {
-    const list = await coupons.find({ type: { $ne: 'cash' } }).sort({ createdAt: -1 }).toArray();
-    res.json(list);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.post('/api/admin/coupon', adminAuth, async (req, res) => {
-  try {
-    const { code, type, value, minPurchase, maxDiscount, usageLimit, singleUse, expiresAt, description } = req.body;
-    if (!code || !value) return res.status(400).json({ error: 'Code & value required' });
-
-    const cleanCode = code.toUpperCase().trim();
-    const existing = await coupons.findOne({ code: cleanCode });
-    if (existing) return res.status(400).json({ error: 'এই code আগেই আছে' });
-
-    const result = await coupons.insertOne({
-      code: cleanCode,
-      type: type || 'percentage',
-      value: Number(value),
-      minPurchase: minPurchase ? Number(minPurchase) : null,
-      maxDiscount: maxDiscount ? Number(maxDiscount) : null,
-      usageLimit: usageLimit ? Number(usageLimit) : null,
-      singleUse: !!singleUse,
-      expiresAt: expiresAt ? new Date(expiresAt) : null,
-      description: description || '',
-      active: true,
-      usedCount: 0,
-      createdAt: new Date()
-    });
-
-    res.json({ success: true, id: result.insertedId.toString() });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.put('/api/admin/coupon/:id', adminAuth, async (req, res) => {
-  try {
-    const update = { ...req.body, updatedAt: new Date() };
-    delete update._id;
-    delete update.usedCount;
-    delete update.code;
-
-    if (update.value) update.value = Number(update.value);
-    if (update.minPurchase) update.minPurchase = Number(update.minPurchase);
-    if (update.maxDiscount) update.maxDiscount = Number(update.maxDiscount);
-    if (update.usageLimit) update.usageLimit = Number(update.usageLimit);
-    if (update.expiresAt) update.expiresAt = new Date(update.expiresAt);
-
-    await coupons.updateOne({ _id: new ObjectId(req.params.id) }, { $set: update });
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.delete('/api/admin/coupon/:id', adminAuth, async (req, res) => {
-  try {
-    await coupons.deleteOne({ _id: new ObjectId(req.params.id) });
-    await couponUses.deleteMany({ couponId: req.params.id });
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// ===== ADMIN: DEPOSITS =====
-
+// ===== ADMIN DEPOSITS =====
 app.get('/api/admin/deposits', adminAuth, async (req, res) => {
   const { status } = req.query;
   const query = status && status !== 'all' ? { status } : {};
@@ -1232,165 +535,66 @@ app.get('/api/admin/deposits', adminAuth, async (req, res) => {
 app.put('/api/admin/deposit/:id', adminAuth, async (req, res) => {
   try {
     const { action } = req.body;
-    const deposit = await deposits.findOne({ _id: new ObjectId(req.params.id) });
+    const q = makeIdQuery(req.params.id);
+    const deposit = await deposits.findOne(q);
     if (!deposit) return res.status(404).json({ error: 'Not found' });
     if (deposit.status !== 'pending') return res.status(400).json({ error: 'Already reviewed' });
 
     if (action === 'approve') {
-      await users.updateOne(
-        { _id: new ObjectId(deposit.userId) },
-        { $inc: { wallet: deposit.amount } }
-      );
-      await deposits.updateOne(
-        { _id: deposit._id },
-        { $set: { status: 'approved', reviewedAt: new Date() } }
-      );
-      await createNotification(
-        deposit.userId, 'deposit_approved', '💰 Deposit Approved!',
-        'আপনার ৳' + deposit.amount + ' wallet এ যোগ হয়েছে।', '✅', '/wallet'
-      );
+      const userQ = makeIdQuery(deposit.userId);
+      await users.updateOne(userQ, { $inc: { wallet: deposit.amount } });
+      await deposits.updateOne(q, { $set: { status: 'approved', reviewedAt: new Date() } });
     } else if (action === 'reject') {
-      await deposits.updateOne(
-        { _id: deposit._id },
-        { $set: { status: 'rejected', reviewedAt: new Date() } }
-      );
-      await createNotification(
-        deposit.userId, 'deposit_rejected', '❌ Deposit Rejected',
-        'আপনার ৳' + deposit.amount + ' deposit reject হয়েছে।', '❌', '/wallet'
-      );
+      await deposits.updateOne(q, { $set: { status: 'rejected', reviewedAt: new Date() } });
     }
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ===== ADMIN: SETTINGS =====
-
+// ===== ADMIN SETTINGS =====
 app.get('/api/admin/settings', adminAuth, async (req, res) => {
   const s = await settings.findOne({ _id: 'config' });
-  res.json(s);
+  res.json(s || {});
 });
 
 app.put('/api/admin/settings', adminAuth, async (req, res) => {
   try {
     const update = { ...req.body, updatedAt: new Date() };
     delete update._id;
-    await settings.updateOne({ _id: 'config' }, { $set: update });
+    await settings.updateOne({ _id: 'config' }, { $set: update }, { upsert: true });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ===== ADMIN: ORDERS =====
-
+// ===== ADMIN PURCHASES =====
 app.get('/api/admin/purchases', adminAuth, async (req, res) => {
-  const list = await purchases.find({}).sort({ purchasedAt: -1 }).limit(100).toArray();
+  const list = await purchases.find({}).sort({ purchasedAt: -1 }).limit(200).toArray();
   res.json(list);
 });
 
-// ===== ADMIN: NOTIFICATIONS =====
-
-app.post('/api/admin/notifications/send-all', adminAuth, async (req, res) => {
-  try {
-    const { title, message, icon, link } = req.body;
-    if (!title || !message) return res.status(400).json({ error: 'Title & message required' });
-
-    const allUsers = await users.find({ banned: { $ne: true } }, { projection: { _id: 1 } }).toArray();
-    const docs = allUsers.map(u => ({
-      userId: u._id.toString(),
-      type: 'custom',
-      title, message,
-      icon: icon || '📢',
-      link: link || null,
-      read: false,
-      createdAt: new Date()
-    }));
-    if (docs.length > 0) await notifications.insertMany(docs);
-
-    res.json({ success: true, sent: docs.length });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
 // ===== ADMIN STATS =====
-
 app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const totalPages = await pages.countDocuments();
   const totalUsers = await users.countDocuments();
   const totalProducts = await products.countDocuments();
   const pendingDeposits = await deposits.countDocuments({ status: 'pending' });
   const totalPurchases = await purchases.countDocuments();
-  const totalCoupons = await coupons.countDocuments({ type: { $ne: 'cash' } });
-  const totalGiftCodes = await coupons.countDocuments({ type: 'cash' });
-  const totalGiftClaims = await giftClaims.countDocuments();
-  const totalReferrals = await referrals.countDocuments();
   const revenueAgg = await purchases.aggregate([{ $group: { _id: null, t: { $sum: '$price' } } }]).toArray();
   const v = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
-  const giftAmountAgg = await giftClaims.aggregate([{ $group: { _id: null, t: { $sum: '$amount' } } }]).toArray();
-
   res.json({
-    totalPages,
-    totalUsers,
-    totalProducts,
-    pendingDeposits,
-    totalPurchases,
-    totalCoupons,
-    totalGiftCodes,
-    totalGiftClaims,
-    totalGiftAmount: giftAmountAgg[0]?.t || 0,
-    totalReferrals,
+    totalPages, totalUsers, totalProducts,
+    pendingDeposits, totalPurchases,
     totalRevenue: revenueAgg[0]?.t || 0,
     totalViews: v[0]?.v || 0
   });
 });
 
-// ============ HTML ROUTES ============
-
-app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
+// ============ HTML ============
 app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
-
-app.get('/dashboard', (req, res) => {
-  if (!req.session || !req.session.userId) {
-    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
-  }
-  res.sendFile(__dirname + '/public/dashboard.html');
-});
-
-app.get('/shop', (req, res) => {
-  if (!req.session || !req.session.userId) {
-    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
-  }
-  res.sendFile(__dirname + '/public/shop.html');
-});
-
-app.get('/wallet', (req, res) => {
-  if (!req.session || !req.session.userId) {
-    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
-  }
-  res.sendFile(__dirname + '/public/wallet.html');
-});
-
-app.get('/orders', (req, res) => {
-  if (!req.session || !req.session.userId) {
-    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
-  }
-  res.sendFile(__dirname + '/public/orders.html');
-});
-
-app.get('/notifications', (req, res) => {
-  if (!req.session || !req.session.userId) {
-    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
-  }
-  res.sendFile(__dirname + '/public/notifications.html');
-});
-
-app.get('/referral', (req, res) => {
-  if (!req.session || !req.session.userId) {
-    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
-  }
-  res.sendFile(__dirname + '/public/referral.html');
-});
-
+app.get('/dashboard', requireAuth, (req, res) => res.sendFile(__dirname + '/public/dashboard.html'));
+app.get('/shop', (req, res) => res.sendFile(__dirname + '/public/shop.html'));
+app.get('/wallet', requireAuth, (req, res) => res.sendFile(__dirname + '/public/wallet.html'));
 app.get('/product/:id', (req, res) => res.sendFile(__dirname + '/public/product.html'));
-
-// ============ START ============
 
 connectDB().then(() => {
   const PORT = process.env.PORT || 3000;
