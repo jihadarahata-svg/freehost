@@ -4,8 +4,6 @@ const bcrypt = require('bcryptjs');
 const { MongoClient, ObjectId } = require('mongodb');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const app = express();
 app.use(cors());
@@ -14,8 +12,6 @@ app.use(express.static('public'));
 
 const MONGO_URI = process.env.MONGO_URI;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-please';
 const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 
@@ -34,7 +30,7 @@ async function connectDB() {
   await users.createIndex({ email: 1 }, { unique: true });
   await products.createIndex({ createdAt: -1 });
   await deposits.createIndex({ status: 1, createdAt: -1 });
-  
+
   const existing = await settings.findOne({ _id: 'config' });
   if (!existing) {
     await settings.insertOne({
@@ -51,7 +47,7 @@ async function connectDB() {
       updatedAt: new Date()
     });
   }
-  
+
   console.log('DB connected');
 }
 
@@ -60,73 +56,32 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: MONGO_URI, dbName: 'freehost' }),
-  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.serializeUser((user, done) => done(null, user._id));
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await users.findOne({ _id: new ObjectId(id) });
-    if (user && user.banned) return done(null, false);
-    done(null, user);
-  } catch (err) { done(err, null); }
-});
-
-passport.use(new GoogleStrategy({
-  clientID: GOOGLE_CLIENT_ID,
-  clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: BASE_URL + '/auth/google/callback'
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-    if (!email) return done(new Error('No email found'), null);
-    let user = await users.findOne({ email });
-    if (user && user.banned) return done(new Error('Account banned'), null);
-    if (!user) {
-      const result = await users.insertOne({
-        email,
-        name: profile.displayName || email.split('@')[0],
-        photo: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
-        googleId: profile.id,
-        banned: false,
-        wallet: 0,
-        totalSpent: 0,
-        createdAt: new Date(),
-        lastLogin: new Date()
-      });
-      user = await users.findOne({ _id: result.insertedId });
-    } else {
-      await users.updateOne({ _id: user._id }, {
-        $set: {
-          name: profile.displayName || user.name,
-          photo: profile.photos && profile.photos[0] ? profile.photos[0].value : user.photo,
-          lastLogin: new Date()
-        }
-      });
-      user = await users.findOne({ _id: user._id });
-    }
-    return done(null, user);
-  } catch (err) { return done(err, null); }
+  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'lax' }
 }));
 
 function requireAuth(req, res, next) {
-  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-    if (req.user.banned) return res.status(403).json({ error: 'Account banned' });
+  if (req.session && req.session.userId) {
     return next();
   }
   res.redirect('/login');
 }
 
 function requireAuthAPI(req, res, next) {
-  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-    if (req.user.banned) return res.status(403).json({ error: 'Account banned' });
+  if (req.session && req.session.userId) {
     return next();
   }
   res.status(401).json({ error: 'Login required' });
+}
+
+async function getCurrentUser(req) {
+  if (!req.session || !req.session.userId) return null;
+  try {
+    const user = await users.findOne({ _id: new ObjectId(req.session.userId) });
+    if (user && user.banned) return null;
+    return user;
+  } catch (err) {
+    return null;
+  }
 }
 
 function adminAuth(req, res, next) {
@@ -136,30 +91,137 @@ function adminAuth(req, res, next) {
   next();
 }
 
-// ============ GOOGLE AUTH ============
+// ============ AUTH ROUTES (Email + Password) ============
 
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// REGISTER
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { email, password, name } = req.body;
 
-app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login?error=1' }),
-  (req, res) => res.redirect('/dashboard')
-);
+    if (!email || !password || !name) {
+      return res.status(400).json({ error: 'Email, Password, Name সব দিন' });
+    }
 
-app.get('/auth/logout', (req, res) => req.logout(() => res.redirect('/')));
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanName = name.trim();
 
-app.get('/api/me', (req, res) => {
-  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-    if (req.user.banned) return res.status(403).json({ error: 'Account banned' });
-    res.json({
-      email: req.user.email,
-      name: req.user.name,
-      photo: req.user.photo,
-      wallet: req.user.wallet || 0,
-      totalSpent: req.user.totalSpent || 0
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({ error: 'সঠিক email দিন' });
+    }
+
+    // Password length
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password কমপক্ষে ৬ character' });
+    }
+
+    // Existing user check
+    const existing = await users.findOne({ email: cleanEmail });
+    if (existing) {
+      return res.status(400).json({ error: 'এই email দিয়ে account আছে' });
+    }
+
+    // Hash password
+    const hash = await bcrypt.hash(password, 10);
+
+    // Create user
+    const result = await users.insertOne({
+      email: cleanEmail,
+      name: cleanName,
+      password: hash,
+      photo: null,
+      banned: false,
+      wallet: 0,
+      totalSpent: 0,
+      createdAt: new Date(),
+      lastLogin: new Date()
     });
-  } else {
-    res.status(401).json({ error: 'Not logged in' });
+
+    // Auto login
+    req.session.userId = result.insertedId.toString();
+
+    res.json({
+      success: true,
+      user: {
+        email: cleanEmail,
+        name: cleanName,
+        wallet: 0
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
+
+// LOGIN
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email ও Password দিন' });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+
+    const user = await users.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(401).json({ error: 'ভুল email বা password' });
+    }
+
+    if (user.banned) {
+      return res.status(403).json({ error: 'Account banned' });
+    }
+
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'ভুল email বা password' });
+    }
+
+    // Update last login
+    await users.updateOne(
+      { _id: user._id },
+      { $set: { lastLogin: new Date() } }
+    );
+
+    // Set session
+    req.session.userId = user._id.toString();
+
+    res.json({
+      success: true,
+      user: {
+        email: user.email,
+        name: user.name,
+        wallet: user.wallet || 0
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// LOGOUT
+app.get('/api/auth/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login');
+  });
+});
+
+// CURRENT USER
+app.get('/api/me', async (req, res) => {
+  const user = await getCurrentUser(req);
+  if (!user) {
+    return res.status(401).json({ error: 'Not logged in' });
+  }
+  res.json({
+    email: user.email,
+    name: user.name,
+    photo: user.photo,
+    wallet: user.wallet || 0,
+    totalSpent: user.totalSpent || 0
+  });
 });
 
 // ============ PAGE ROUTES ============
@@ -170,9 +232,9 @@ app.post('/api/create', async (req, res) => {
     if (!html) return res.status(400).json({ error: 'HTML required' });
 
     let userId = null;
-    if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-      if (req.user.banned) return res.status(403).json({ error: 'Account banned' });
-      userId = req.user._id.toString();
+    const user = await getCurrentUser(req);
+    if (user) {
+      userId = user._id.toString();
     }
 
     const id = slug ? slug.trim() : Math.random().toString(36).slice(2, 10);
@@ -231,14 +293,18 @@ app.get('/embed/:id', async (req, res) => {
 // ============ USER ROUTES ============
 
 app.get('/api/my-pages', requireAuthAPI, async (req, res) => {
-  const userId = req.user._id.toString();
+  const user = await getCurrentUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const userId = user._id.toString();
   const list = await pages.find({ userId }, { projection: { html: 0, password: 0 } })
     .sort({ createdAt: -1 }).toArray();
   res.json(list);
 });
 
 app.delete('/api/my-pages/:id', requireAuthAPI, async (req, res) => {
-  const userId = req.user._id.toString();
+  const user = await getCurrentUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const userId = user._id.toString();
   const page = await pages.findOne({ _id: req.params.id });
   if (!page) return res.status(404).json({ error: 'Not found' });
   if (page.userId !== userId) return res.status(403).json({ error: 'Not yours' });
@@ -259,12 +325,12 @@ app.get('/api/shop/products', async (req, res) => {
         { description: { $regex: search, $options: 'i' } }
       ];
     }
-    
+
     let sortObj = { createdAt: -1 };
     if (sort === 'price-low') sortObj = { price: 1 };
     if (sort === 'price-high') sortObj = { price: -1 };
     if (sort === 'popular') sortObj = { sold: -1 };
-    
+
     const list = await products.find(query, { projection: { deliveryData: 0 } }).sort(sortObj).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -309,16 +375,19 @@ app.get('/api/shop/settings', async (req, res) => {
 
 app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
   try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
     const product = await products.findOne({ _id: req.params.id, active: true });
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
     const alreadyBought = await purchases.findOne({
-      userId: req.user._id.toString(),
+      userId: user._id.toString(),
       productId: req.params.id
     });
     if (alreadyBought) {
-      return res.json({ 
-        success: true, 
+      return res.json({
+        success: true,
         alreadyOwned: true,
         deliveryType: product.deliveryType,
         deliveryData: product.deliveryData
@@ -326,10 +395,10 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
     }
 
     const price = product.discountPrice || product.price;
-    const userWallet = req.user.wallet || 0;
+    const userWallet = user.wallet || 0;
 
     if (userWallet < price) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Insufficient balance',
         needed: price - userWallet,
         current: userWallet
@@ -337,13 +406,13 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
     }
 
     await users.updateOne(
-      { _id: req.user._id },
+      { _id: user._id },
       { $inc: { wallet: -price, totalSpent: price } }
     );
 
     await purchases.insertOne({
-      userId: req.user._id.toString(),
-      userEmail: req.user.email,
+      userId: user._id.toString(),
+      userEmail: user.email,
       productId: product._id,
       productTitle: product.title,
       price: price,
@@ -363,8 +432,11 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
 
 app.get('/api/shop/access/:id', requireAuthAPI, async (req, res) => {
   try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
     const purchase = await purchases.findOne({
-      userId: req.user._id.toString(),
+      userId: user._id.toString(),
       productId: req.params.id
     });
     if (!purchase) return res.status(403).json({ error: 'Not purchased' });
@@ -381,7 +453,9 @@ app.get('/api/shop/access/:id', requireAuthAPI, async (req, res) => {
 
 app.get('/api/shop/my-purchases', requireAuthAPI, async (req, res) => {
   try {
-    const list = await purchases.find({ userId: req.user._id.toString() })
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+    const list = await purchases.find({ userId: user._id.toString() })
       .sort({ purchasedAt: -1 }).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -391,6 +465,9 @@ app.get('/api/shop/my-purchases', requireAuthAPI, async (req, res) => {
 
 app.post('/api/deposit/request', requireAuthAPI, async (req, res) => {
   try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
     const { amount, senderNumber, transactionId, screenshot } = req.body;
     const config = await settings.findOne({ _id: 'config' });
     const minDep = config?.minDeposit || 50;
@@ -401,9 +478,9 @@ app.post('/api/deposit/request', requireAuthAPI, async (req, res) => {
     if (!senderNumber) return res.status(400).json({ error: 'Sender number required' });
 
     const result = await deposits.insertOne({
-      userId: req.user._id.toString(),
-      userEmail: req.user.email,
-      userName: req.user.name,
+      userId: user._id.toString(),
+      userEmail: user.email,
+      userName: user.name,
       amount: Number(amount),
       method: 'bKash',
       senderNumber,
@@ -420,7 +497,9 @@ app.post('/api/deposit/request', requireAuthAPI, async (req, res) => {
 
 app.get('/api/deposit/my-list', requireAuthAPI, async (req, res) => {
   try {
-    const list = await deposits.find({ userId: req.user._id.toString() })
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+    const list = await deposits.find({ userId: user._id.toString() })
       .sort({ createdAt: -1 }).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -443,7 +522,7 @@ app.get('/api/admin/list-full', adminAuth, async (req, res) => {
 });
 
 app.get('/api/admin/list-users', adminAuth, async (req, res) => {
-  const list = await users.find({}, { projection: { googleId: 0 } })
+  const list = await users.find({}, { projection: { password: 0 } })
     .sort({ createdAt: -1 }).toArray();
   res.json(list);
 });
@@ -600,7 +679,7 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const totalPurchases = await purchases.countDocuments();
   const revenueAgg = await purchases.aggregate([{ $group: { _id: null, t: { $sum: '$price' } } }]).toArray();
   const v = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
-  
+
   res.json({
     totalPages,
     totalUsers,
@@ -614,6 +693,7 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
 
 // ============ HTML ROUTES ============
 
+app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
 app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
 app.get('/dashboard', requireAuth, (req, res) => res.sendFile(__dirname + '/public/dashboard.html'));
 app.get('/shop', (req, res) => res.sendFile(__dirname + '/public/shop.html'));
