@@ -20,7 +20,7 @@
   .back-btn {
     background: transparent; border: none; color: #a1a1aa;
     font-size: 22px; cursor: pointer; padding: 4px 8px;
-    text-decoration: none;
+    text-decoration: none; display: inline-block;
   }
   .back-btn:hover { color: #fff; }
   .nav h1 { font-size: 17px; font-weight: 700; }
@@ -45,6 +45,95 @@
     letter-spacing: -1.5px; margin-bottom: 4px;
   }
   .balance-sub { font-size: 12px; opacity: 0.8; }
+  
+  /* Gift Code Card */
+  .gift-card {
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.1));
+    border: 1px solid rgba(245,158,11,0.4);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .gift-card h3 {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gift-desc {
+    font-size: 12px;
+    color: #a1a1aa;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .gift-row {
+    display: flex;
+    gap: 8px;
+  }
+  .gift-row input {
+    flex: 1;
+    padding: 13px 16px;
+    background: #0f0f14;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'SF Mono', monospace;
+    letter-spacing: 1px;
+    font-weight: 700;
+    outline: none;
+  }
+  .gift-row input:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+  }
+  .gift-row button {
+    padding: 13px 22px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.2s;
+    white-space: nowrap;
+    box-shadow: 0 8px 20px -5px rgba(245,158,11,0.5);
+  }
+  .gift-row button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px -5px rgba(245,158,11,0.7);
+  }
+  .gift-row button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .gift-msg {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    display: none;
+  }
+  .gift-msg.show { display: block; animation: slideIn 0.3s; }
+  .gift-msg.success {
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.4);
+    color: #34d399;
+  }
+  .gift-msg.error {
+    background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.4);
+    color: #f87171;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   
   .tabs {
     display: flex; gap: 6px; margin-bottom: 20px;
@@ -175,11 +264,62 @@
   .badge-approved { background: rgba(22,163,74,0.2); color: #4ade80; }
   .badge-rejected { background: rgba(220,38,38,0.2); color: #f87171; }
   
+  /* Gift claim item */
+  .gift-claim-item {
+    background: #1a1a22;
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .gift-claim-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .gift-claim-info { flex: 1; min-width: 0; }
+  .gift-claim-code {
+    font-family: 'SF Mono', monospace;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fbbf24;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+  .gift-claim-date {
+    font-size: 11px;
+    color: #71717a;
+  }
+  .gift-claim-amount {
+    font-size: 18px;
+    font-weight: 900;
+    color: #34d399;
+    white-space: nowrap;
+  }
+  
   .empty {
     text-align: center; padding: 40px 20px;
     color: #71717a; font-size: 14px;
   }
   .empty-icon { font-size: 44px; margin-bottom: 8px; opacity: 0.5; }
+  
+  .spinner {
+    display: inline-block; width: 32px; height: 32px;
+    border: 3px solid rgba(139,92,246,0.2);
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
   
   .toast {
     position: fixed; bottom: 24px; left: 50%;
@@ -188,6 +328,7 @@
     padding: 12px 24px; border-radius: 10px;
     font-size: 14px; font-weight: 600;
     transition: transform 0.3s; z-index: 9999;
+    max-width: 90vw; text-align: center;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
 </style>
@@ -195,7 +336,7 @@
 <body>
 
   <nav class="nav">
-    <a href="/shop" class="back-btn">←</a>
+    <a href="/dashboard" class="back-btn">←</a>
     <h1>💰 My Wallet</h1>
   </nav>
 
@@ -209,9 +350,21 @@
       </div>
     </div>
 
+    <!-- GIFT CODE REDEEM -->
+    <div class="gift-card">
+      <h3>🎁 Redeem Gift Code</h3>
+      <p class="gift-desc">আপনার gift code লিখুন এবং সাথে সাথে wallet এ টাকা পান!</p>
+      <div class="gift-row">
+        <input id="giftCode" type="text" placeholder="GIFT100" style="text-transform:uppercase;" onkeypress="if(event.key==='Enter') claimGift()">
+        <button id="giftBtn" onclick="claimGift()">🎉 Claim</button>
+      </div>
+      <div id="giftMsg" class="gift-msg"></div>
+    </div>
+
     <div class="tabs">
       <div class="tab active" onclick="showTab('deposit', this)">➕ Add Money</div>
       <div class="tab" onclick="showTab('history', this)">📋 History</div>
+      <div class="tab" onclick="showTab('gifts', this)">🎁 My Gifts</div>
     </div>
 
     <!-- DEPOSIT TAB -->
@@ -269,6 +422,15 @@
       <div id="historyList"></div>
     </div>
 
+    <!-- GIFTS TAB -->
+    <div id="giftsTab" style="display: none;">
+      <div id="giftClaimsList">
+        <div style="text-align:center;padding:40px;">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="toast" id="toast"></div>
@@ -310,9 +472,10 @@
         }
         
         container.innerHTML = list.map(d => {
-          const badge = d.status === 'pending' ? '<span class="badge badge-pending">⏳ PENDING</span>'
-                      : d.status === 'approved' ? '<span class="badge badge-approved">✅ APPROVED</span>'
-                      : '<span class="badge badge-rejected">❌ REJECTED</span>';
+          let badge = '<span class="badge badge-pending">⏳ PENDING</span>';
+          if (d.status === 'approved') badge = '<span class="badge badge-approved">✅ APPROVED</span>';
+          if (d.status === 'rejected') badge = '<span class="badge badge-rejected">❌ REJECTED</span>';
+          
           return '<div class="history-item">' +
             '<div class="history-info">' +
               '<h4>💰 Deposit</h4>' +
@@ -325,18 +488,112 @@
       } catch (e) {}
     }
 
+    async function loadGiftClaims() {
+      const container = document.getElementById('giftClaimsList');
+      if (!container) return;
+      
+      try {
+        const res = await fetch('/api/gift/my-claims');
+        const list = await res.json();
+        
+        if (!list.length) {
+          container.innerHTML = 
+            '<div class="empty">' +
+              '<div class="empty-icon">🎁</div>' +
+              '<div>এখনো কোনো gift claim করেননি</div>' +
+            '</div>';
+          return;
+        }
+        
+        container.innerHTML = list.map(g => 
+          '<div class="gift-claim-item">' +
+            '<div class="gift-claim-icon">🎁</div>' +
+            '<div class="gift-claim-info">' +
+              '<div class="gift-claim-code">' + esc(g.code) + '</div>' +
+              '<div class="gift-claim-date">🕐 ' + new Date(g.claimedAt).toLocaleString() + '</div>' +
+            '</div>' +
+            '<div class="gift-claim-amount">+৳' + g.amount + '</div>' +
+          '</div>'
+        ).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="empty">Failed to load</div>';
+      }
+    }
+
     function showTab(tab, el) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
       
+      const depositTab = document.getElementById('depositTab');
+      const historyTab = document.getElementById('historyTab');
+      const giftsTab = document.getElementById('giftsTab');
+      
+      depositTab.style.display = 'none';
+      historyTab.style.display = 'none';
+      if (giftsTab) giftsTab.style.display = 'none';
+      
       if (tab === 'deposit') {
-        document.getElementById('depositTab').style.display = 'block';
-        document.getElementById('historyTab').style.display = 'none';
-      } else {
-        document.getElementById('depositTab').style.display = 'none';
-        document.getElementById('historyTab').style.display = 'block';
+        depositTab.style.display = 'block';
+      } else if (tab === 'history') {
+        historyTab.style.display = 'block';
         loadHistory();
+      } else if (tab === 'gifts') {
+        if (giftsTab) {
+          giftsTab.style.display = 'block';
+          loadGiftClaims();
+        }
       }
+    }
+
+    async function claimGift() {
+      const codeInput = document.getElementById('giftCode');
+      const code = codeInput.value.trim().toUpperCase();
+      const msg = document.getElementById('giftMsg');
+      const btn = document.getElementById('giftBtn');
+      
+      if (!code) {
+        msg.className = 'gift-msg show error';
+        msg.textContent = '❌ Gift code লিখুন';
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Claiming...';
+      msg.className = 'gift-msg';
+      
+      try {
+        const res = await fetch('/api/gift/claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          msg.className = 'gift-msg show error';
+          msg.textContent = data.error || '❌ Claim failed';
+          btn.disabled = false;
+          btn.textContent = '🎉 Claim';
+          return;
+        }
+        
+        msg.className = 'gift-msg show success';
+        msg.innerHTML = '✅ <strong>৳' + data.amount + '</strong> আপনার wallet এ যোগ হয়েছে! 🎉<br>' +
+                        'নতুন Balance: <strong>৳' + data.newBalance + '</strong>';
+        
+        document.getElementById('balance').textContent = data.newBalance;
+        codeInput.value = '';
+        
+        showToast('🎁 ৳' + data.amount + ' added!');
+        
+        setTimeout(() => loadUser(), 500);
+      } catch (e) {
+        msg.className = 'gift-msg show error';
+        msg.textContent = '❌ Failed to claim. Try again.';
+      }
+      
+      btn.disabled = false;
+      btn.textContent = '🎉 Claim';
     }
 
     function setAmount(val) {
@@ -392,11 +649,15 @@
       t.textContent = msg;
       t.style.background = color || '#16a34a';
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2000);
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
 
     loadUser();
     loadSettings();
   </script>
 </body>
-        </html>
+</html>
