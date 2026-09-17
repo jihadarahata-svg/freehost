@@ -344,4 +344,50 @@
     function openBuyModal() {
       const price = product.discountPrice || product.price;
       document.getElementById('mTitle').textContent = product.title;
-      document.getElementById('
+      document.getElementById('mPrice').textContent = '৳' + price;
+      document.getElementById('mBalance').textContent = '৳' + userWallet;
+      document.getElementById('mAfter').textContent = '৳' + (userWallet - price);
+      document.getElementById('buyModal').classList.add('show');
+    }
+    function closeBuyModal() { document.getElementById('buyModal').classList.remove('show'); }
+
+    async function confirmBuy() {
+      try {
+        const res = await fetch('/api/shop/buy/' + productId, { method: 'POST' });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          showToast('❌ ' + (data.error || 'Failed'), '#dc2626');
+          return;
+        }
+        
+        showToast('✅ Purchase successful!');
+        closeBuyModal();
+        await loadUser();
+        await loadProduct();
+      } catch (e) {
+        showToast('❌ Failed', '#dc2626');
+      }
+    }
+
+    function copyDelivery() {
+      navigator.clipboard.writeText(product.deliveryData);
+      showToast('✅ Copied!');
+    }
+
+    function showToast(msg, color) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = color || '#16a34a';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    loadUser().then(() => loadProduct());
+  </script>
+</body>
+</html>
