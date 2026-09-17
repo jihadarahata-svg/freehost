@@ -15,7 +15,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-please';
 const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 
-let pages, users, products, deposits, purchases, settings, notifications, db;
+let pages, users, products, deposits, purchases, settings, notifications, coupons, couponUses, referrals, db;
 
 async function connectDB() {
   const client = new MongoClient(MONGO_URI);
@@ -28,11 +28,20 @@ async function connectDB() {
   purchases = db.collection('purchases');
   settings = db.collection('settings');
   notifications = db.collection('notifications');
+  coupons = db.collection('coupons');
+  couponUses = db.collection('couponUses');
+  referrals = db.collection('referrals');
   await users.createIndex({ email: 1 }, { unique: true });
   await products.createIndex({ createdAt: -1 });
   await deposits.createIndex({ status: 1, createdAt: -1 });
   await notifications.createIndex({ userId: 1, createdAt: -1 });
   await notifications.createIndex({ userId: 1, read: 1 });
+  await coupons.createIndex({ code: 1 }, { unique: true });
+  await couponUses.createIndex({ couponId: 1, userId: 1 });
+  await couponUses.createIndex({ userId: 1 });
+  await referrals.createIndex({ referrerId: 1 });
+  await referrals.createIndex({ newUserId: 1 });
+  await users.createIndex({ referralCode: 1 }, { sparse: true });
 
   const existing = await settings.findOne({ _id: 'config' });
   if (!existing) {
@@ -47,6 +56,10 @@ async function connectDB() {
       supportEmail: 'support@freehost.com',
       supportWhatsapp: '',
       supportTelegram: '',
+      referralEnabled: true,
+      referralBonusReferrer: 50,
+      referralBonusNewUser: 25,
+      referralBonusFirstPurchase: 25,
       updatedAt: new Date()
     });
   }
@@ -90,7 +103,6 @@ function adminAuth(req, res, next) {
   next();
 }
 
-// Helper: Create notification
 async function createNotification(userId, type, title, message, icon, link) {
   try {
     await notifications.insertOne({
@@ -108,11 +120,17 @@ async function createNotification(userId, type, title, message, icon, link) {
   }
 }
 
-// ============ AUTH ROUTES (Email + Password) ============
+function generateReferralCode(name) {
+  const base = (name || 'user').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8) || 'user';
+  const random = Math.random().toString(36).slice(2, 6);
+  return base + random;
+}
+
+// ============ AUTH ROUTES ============
 
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, referralCode } = req.body;
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'Email, Password, Name সব দিন' });
     }
@@ -133,6 +151,32 @@ app.post('/api/auth/register', async (req, res) => {
     }
 
     const hash = await bcrypt.hash(password, 10);
+    const config = await settings.findOne({ _id: 'config' });
+    const referralEnabled = config?.referralEnabled !== false;
+    const bonusNewUser = config?.referralBonusNewUser || 25;
+    const bonusReferrer = config?.referralBonusReferrer || 50;
+
+    // Process referral
+    let referrer = null;
+    let newUserBonus = 0;
+    let myReferralCode = generateReferralCode(cleanName);
+
+    if (referralCode && referralEnabled) {
+      const cleanRefCode = referralCode.toUpperCase().trim();
+      referrer = await users.findOne({ referralCode: cleanRefCode });
+      if (referrer) {
+        newUserBonus = bonusNewUser;
+      }
+    }
+
+    // Ensure unique referral code
+    let attempts = 0;
+    while (attempts < 5) {
+      const dupe = await users.findOne({ referralCode: myReferralCode });
+      if (!dupe) break;
+      myReferralCode = generateReferralCode(cleanName);
+      attempts++;
+    }
 
     const result = await users.insertOne({
       email: cleanEmail,
@@ -140,27 +184,69 @@ app.post('/api/auth/register', async (req, res) => {
       password: hash,
       photo: null,
       banned: false,
-      wallet: 0,
+      wallet: newUserBonus,
       totalSpent: 0,
+      referralCode: myReferralCode,
+      referredBy: referrer ? referrer._id.toString() : null,
+      referralCount: 0,
+      referralEarnings: 0,
       createdAt: new Date(),
       lastLogin: new Date()
     });
 
-    req.session.userId = result.insertedId.toString();
+    const newUserId = result.insertedId.toString();
 
-    // 🎉 Welcome notification
+    // Credit referrer
+    if (referrer) {
+      await users.updateOne(
+        { _id: referrer._id },
+        { 
+          $inc: { wallet: bonusReferrer, referralCount: 1, referralEarnings: bonusReferrer }
+        }
+      );
+
+      await referrals.insertOne({
+        referrerId: referrer._id.toString(),
+        referrerEmail: referrer.email,
+        newUserId: newUserId,
+        newUserEmail: cleanEmail,
+        newUserName: cleanName,
+        referrerBonus: bonusReferrer,
+        newUserBonus: newUserBonus,
+        firstPurchaseBonus: 0,
+        createdAt: new Date()
+      });
+
+      // Notify referrer
+      await createNotification(
+        referrer._id.toString(),
+        'referral',
+        '🎉 New Referral!',
+        cleanName + ' আপনার referral link দিয়ে join করেছে। ৳' + bonusReferrer + ' পেয়েছেন!',
+        '🎉',
+        '/dashboard'
+      );
+    }
+
+    req.session.userId = newUserId;
+
+    // Welcome notification
+    const welcomeMsg = newUserBonus > 0 
+      ? 'আপনার account তৈরি হয়েছে। Referral bonus ৳' + newUserBonus + ' পেয়েছেন! 🎉'
+      : 'আপনার account সফলভাবে তৈরি হয়েছে। HTML host করা শুরু করুন!';
+
     await createNotification(
-      result.insertedId.toString(),
+      newUserId,
       'welcome',
       'Welcome to FreeHost! 🎉',
-      'আপনার account সফলভাবে তৈরি হয়েছে। HTML host করা শুরু করুন!',
+      welcomeMsg,
       '🎉',
       '/'
     );
 
     res.json({
       success: true,
-      user: { email: cleanEmail, name: cleanName, wallet: 0 }
+      user: { email: cleanEmail, name: cleanName, wallet: newUserBonus }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -212,7 +298,10 @@ app.get('/api/me', async (req, res) => {
     name: user.name,
     photo: user.photo,
     wallet: user.wallet || 0,
-    totalSpent: user.totalSpent || 0
+    totalSpent: user.totalSpent || 0,
+    referralCode: user.referralCode || null,
+    referralCount: user.referralCount || 0,
+    referralEarnings: user.referralEarnings || 0
   });
 });
 
@@ -222,11 +311,8 @@ app.get('/api/notifications', requireAuthAPI, async (req, res) => {
   try {
     const user = await getCurrentUser(req);
     if (!user) return res.status(401).json({ error: 'Login required' });
-
     const list = await notifications.find({ userId: user._id.toString() })
-      .sort({ createdAt: -1 })
-      .limit(50)
-      .toArray();
+      .sort({ createdAt: -1 }).limit(50).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -235,10 +321,8 @@ app.get('/api/notifications/unread-count', requireAuthAPI, async (req, res) => {
   try {
     const user = await getCurrentUser(req);
     if (!user) return res.status(401).json({ error: 'Login required' });
-
     const count = await notifications.countDocuments({
-      userId: user._id.toString(),
-      read: false
+      userId: user._id.toString(), read: false
     });
     res.json({ count });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -248,7 +332,6 @@ app.post('/api/notifications/read/:id', requireAuthAPI, async (req, res) => {
   try {
     const user = await getCurrentUser(req);
     if (!user) return res.status(401).json({ error: 'Login required' });
-
     await notifications.updateOne(
       { _id: new ObjectId(req.params.id), userId: user._id.toString() },
       { $set: { read: true, readAt: new Date() } }
@@ -261,7 +344,6 @@ app.post('/api/notifications/read-all', requireAuthAPI, async (req, res) => {
   try {
     const user = await getCurrentUser(req);
     if (!user) return res.status(401).json({ error: 'Login required' });
-
     await notifications.updateMany(
       { userId: user._id.toString(), read: false },
       { $set: { read: true, readAt: new Date() } }
@@ -274,7 +356,6 @@ app.delete('/api/notifications/clear/all', requireAuthAPI, async (req, res) => {
   try {
     const user = await getCurrentUser(req);
     if (!user) return res.status(401).json({ error: 'Login required' });
-
     await notifications.deleteMany({ userId: user._id.toString() });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -284,7 +365,6 @@ app.delete('/api/notifications/:id', requireAuthAPI, async (req, res) => {
   try {
     const user = await getCurrentUser(req);
     if (!user) return res.status(401).json({ error: 'Login required' });
-
     await notifications.deleteOne({
       _id: new ObjectId(req.params.id),
       userId: user._id.toString()
@@ -293,29 +373,97 @@ app.delete('/api/notifications/:id', requireAuthAPI, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/admin/notifications/send-all', adminAuth, async (req, res) => {
+// ============ COUPON ROUTES ============
+
+app.post('/api/coupon/validate', requireAuthAPI, async (req, res) => {
   try {
-    const { title, message, icon, link } = req.body;
-    if (!title || !message) return res.status(400).json({ error: 'Title & message required' });
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
 
-    const allUsers = await users.find({ banned: { $ne: true } }, { projection: { _id: 1 } }).toArray();
+    const { code, productId } = req.body;
+    if (!code || !productId) return res.status(400).json({ error: 'Code & product required' });
 
-    const docs = allUsers.map(u => ({
-      userId: u._id.toString(),
-      type: 'custom',
-      title,
-      message,
-      icon: icon || '📢',
-      link: link || null,
-      read: false,
-      createdAt: new Date()
-    }));
+    const cleanCode = code.toUpperCase().trim();
+    const coupon = await coupons.findOne({ code: cleanCode });
 
-    if (docs.length > 0) {
-      await notifications.insertMany(docs);
+    if (!coupon) return res.status(404).json({ error: 'ভুল coupon code' });
+    if (!coupon.active) return res.status(400).json({ error: 'Coupon নিষ্ক্রিয়' });
+
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+      return res.status(400).json({ error: 'Coupon এর সময় শেষ' });
     }
 
-    res.json({ success: true, sent: docs.length });
+    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+      return res.status(400).json({ error: 'Coupon এর limit শেষ' });
+    }
+
+    if (coupon.singleUse) {
+      const alreadyUsed = await couponUses.findOne({
+        couponId: coupon._id.toString(),
+        userId: user._id.toString()
+      });
+      if (alreadyUsed) {
+        return res.status(400).json({ error: 'এই coupon আপনি ইতিমধ্যে ব্যবহার করেছেন' });
+      }
+    }
+
+    const product = await products.findOne({ _id: productId, active: true });
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+
+    const price = product.discountPrice || product.price;
+
+    if (coupon.minPurchase && price < coupon.minPurchase) {
+      return res.status(400).json({
+        error: 'কমপক্ষে ৳' + coupon.minPurchase + ' কিনতে হবে',
+        minPurchase: coupon.minPurchase,
+        currentPrice: price
+      });
+    }
+
+    let discount = 0;
+    if (coupon.type === 'percentage') {
+      discount = Math.floor(price * coupon.value / 100);
+      if (coupon.maxDiscount && discount > coupon.maxDiscount) {
+        discount = coupon.maxDiscount;
+      }
+    } else {
+      discount = Math.min(coupon.value, price);
+    }
+
+    res.json({
+      success: true,
+      coupon: {
+        code: coupon.code,
+        type: coupon.type,
+        value: coupon.value,
+        description: coupon.description || ''
+      },
+      price: price,
+      discount: discount,
+      finalPrice: price - discount
+    });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ============ REFERRAL ROUTES ============
+
+app.get('/api/referral/stats', requireAuthAPI, async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+
+    const list = await referrals.find({ referrerId: user._id.toString() })
+      .sort({ createdAt: -1 }).toArray();
+
+    const totalEarned = list.reduce((s, r) => s + (r.referrerBonus || 0) + (r.firstPurchaseBonus || 0), 0);
+
+    res.json({
+      referralCode: user.referralCode || null,
+      referralLink: user.referralCode ? BASE_URL + '/login?ref=' + user.referralCode : null,
+      totalReferrals: list.length,
+      totalEarned: totalEarned,
+      referrals: list
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -503,18 +651,55 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
 
     const price = product.discountPrice || product.price;
     const userWallet = user.wallet || 0;
+    const { couponCode } = req.body || {};
 
-    if (userWallet < price) {
+    let discount = 0;
+    let appliedCoupon = null;
+
+    if (couponCode) {
+      const cleanCode = couponCode.toUpperCase().trim();
+      const coupon = await coupons.findOne({ code: cleanCode });
+
+      if (coupon && coupon.active) {
+        const notExpired = !coupon.expiresAt || new Date(coupon.expiresAt) > new Date();
+        const withinLimit = !coupon.usageLimit || coupon.usedCount < coupon.usageLimit;
+        const meetsMin = !coupon.minPurchase || price >= coupon.minPurchase;
+        let notUsedByUser = true;
+        if (coupon.singleUse) {
+          const used = await couponUses.findOne({
+            couponId: coupon._id.toString(),
+            userId: user._id.toString()
+          });
+          if (used) notUsedByUser = false;
+        }
+
+        if (notExpired && withinLimit && meetsMin && notUsedByUser) {
+          if (coupon.type === 'percentage') {
+            discount = Math.floor(price * coupon.value / 100);
+            if (coupon.maxDiscount && discount > coupon.maxDiscount) {
+              discount = coupon.maxDiscount;
+            }
+          } else {
+            discount = Math.min(coupon.value, price);
+          }
+          appliedCoupon = coupon;
+        }
+      }
+    }
+
+    const finalPrice = Math.max(0, price - discount);
+
+    if (userWallet < finalPrice) {
       return res.status(400).json({
         error: 'Insufficient balance',
-        needed: price - userWallet,
+        needed: finalPrice - userWallet,
         current: userWallet
       });
     }
 
     await users.updateOne(
       { _id: user._id },
-      { $inc: { wallet: -price, totalSpent: price } }
+      { $inc: { wallet: -finalPrice, totalSpent: finalPrice } }
     );
 
     await purchases.insertOne({
@@ -522,18 +707,65 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
       userEmail: user.email,
       productId: product._id,
       productTitle: product.title,
-      price: price,
+      price: finalPrice,
+      originalPrice: price,
+      discount: discount,
+      couponCode: appliedCoupon ? appliedCoupon.code : null,
       purchasedAt: new Date()
     });
 
+    if (appliedCoupon) {
+      await couponUses.insertOne({
+        couponId: appliedCoupon._id.toString(),
+        userId: user._id.toString(),
+        productId: product._id,
+        discount: discount,
+        usedAt: new Date()
+      });
+      await coupons.updateOne(
+        { _id: appliedCoupon._id },
+        { $inc: { usedCount: 1 } }
+      );
+    }
+
     await products.updateOne({ _id: product._id }, { $inc: { sold: 1 } });
 
-    // 📦 Order notification
+    // First purchase referral bonus
+    if (user.referredBy && user.referralCount !== -1) {
+      const firstPurchase = await purchases.countDocuments({ userId: user._id.toString() });
+      if (firstPurchase === 1) {
+        const config = await settings.findOne({ _id: 'config' });
+        const fpBonus = config?.referralBonusFirstPurchase || 25;
+        if (fpBonus > 0) {
+          await users.updateOne(
+            { _id: new ObjectId(user.referredBy) },
+            { $inc: { wallet: fpBonus, referralEarnings: fpBonus } }
+          );
+          await referrals.updateOne(
+            { referrerId: user.referredBy, newUserId: user._id.toString() },
+            { $set: { firstPurchaseBonus: fpBonus, firstPurchaseAt: new Date() } }
+          );
+          await createNotification(
+            user.referredBy,
+            'referral',
+            '💰 Referral Bonus!',
+            user.name + ' প্রথম কেনাকাটা করেছে। ৳' + fpBonus + ' bonus পেয়েছেন!',
+            '💰',
+            '/dashboard'
+          );
+        }
+      }
+    }
+
+    const notifMsg = appliedCoupon
+      ? '"' + product.title + '" কিনেছেন। 🎟️ Coupon ' + appliedCoupon.code + ' এ ৳' + discount + ' বাঁচিয়েছেন!'
+      : '"' + product.title + '" সফলভাবে কিনেছেন। ৳' + finalPrice + ' কেটে নেওয়া হয়েছে।';
+
     await createNotification(
       user._id.toString(),
       'order_complete',
       '📦 Order Complete!',
-      '"' + product.title + '" সফলভাবে কিনেছেন। ৳' + price + ' কেটে নেওয়া হয়েছে।',
+      notifMsg,
       '📦',
       '/orders'
     );
@@ -542,7 +774,9 @@ app.post('/api/shop/buy/:id', requireAuthAPI, async (req, res) => {
       success: true,
       deliveryType: product.deliveryType,
       deliveryData: product.deliveryData,
-      newBalance: userWallet - price
+      newBalance: userWallet - finalPrice,
+      discount: discount,
+      saved: discount
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -669,27 +903,13 @@ app.put('/api/admin/user/:id/ban', adminAuth, async (req, res) => {
     await users.updateOne({ _id: new ObjectId(userId) }, { $set: { banned: !!banned } });
     await pages.updateMany({ userId }, { $set: { banned: !!banned } });
 
-    // Notify user about ban/unban
     if (banned) {
-      await createNotification(
-        userId,
-        'banned',
-        '🚫 Account Suspended',
-        'আপনার account suspend করা হয়েছে।',
-        '🚫',
-        null
-      );
+      await createNotification(userId, 'banned', '🚫 Account Suspended',
+        'আপনার account suspend করা হয়েছে।', '🚫', null);
     } else {
-      await createNotification(
-        userId,
-        'unbanned',
-        '✅ Account Restored',
-        'আপনার account পুনরায় চালু করা হয়েছে।',
-        '✅',
-        '/'
-      );
+      await createNotification(userId, 'unbanned', '✅ Account Restored',
+        'আপনার account পুনরায় চালু করা হয়েছে।', '✅', '/');
     }
-
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -699,7 +919,7 @@ app.delete('/api/admin/user/:id', adminAuth, async (req, res) => {
     const userId = req.params.id;
     await users.deleteOne({ _id: new ObjectId(userId) });
     await pages.deleteMany({ userId });
-    await notifications.deleteMany({ userId: userId });
+    await notifications.deleteMany({ userId });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -733,7 +953,6 @@ app.post('/api/admin/product', adminAuth, async (req, res) => {
       createdAt: new Date()
     });
 
-    // 🎁 Notify all users about new product
     const allUsers = await users.find({ banned: { $ne: true } }, { projection: { _id: 1 } }).toArray();
     const docs = allUsers.map(u => ({
       userId: u._id.toString(),
@@ -745,9 +964,7 @@ app.post('/api/admin/product', adminAuth, async (req, res) => {
       read: false,
       createdAt: new Date()
     }));
-    if (docs.length > 0) {
-      await notifications.insertMany(docs);
-    }
+    if (docs.length > 0) await notifications.insertMany(docs);
 
     res.json({ success: true, id: result.insertedId.toString() });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -768,6 +985,77 @@ app.put('/api/admin/product/:id', adminAuth, async (req, res) => {
 app.delete('/api/admin/product/:id', adminAuth, async (req, res) => {
   await products.deleteOne({ _id: req.params.id });
   res.json({ success: true });
+});
+
+// ===== ADMIN: COUPONS =====
+
+app.get('/api/admin/coupons', adminAuth, async (req, res) => {
+  try {
+    const list = await coupons.find({}).sort({ createdAt: -1 }).toArray();
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/coupon', adminAuth, async (req, res) => {
+  try {
+    const { code, type, value, minPurchase, maxDiscount, usageLimit, singleUse, expiresAt, description } = req.body;
+    if (!code || !value) return res.status(400).json({ error: 'Code & value required' });
+
+    const cleanCode = code.toUpperCase().trim();
+    const existing = await coupons.findOne({ code: cleanCode });
+    if (existing) return res.status(400).json({ error: 'এই code আগেই আছে' });
+
+    const result = await coupons.insertOne({
+      code: cleanCode,
+      type: type || 'percentage',
+      value: Number(value),
+      minPurchase: minPurchase ? Number(minPurchase) : null,
+      maxDiscount: maxDiscount ? Number(maxDiscount) : null,
+      usageLimit: usageLimit ? Number(usageLimit) : null,
+      singleUse: !!singleUse,
+      expiresAt: expiresAt ? new Date(expiresAt) : null,
+      description: description || '',
+      active: true,
+      usedCount: 0,
+      createdAt: new Date()
+    });
+
+    res.json({ success: true, id: result.insertedId.toString() });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/admin/coupon/:id', adminAuth, async (req, res) => {
+  try {
+    const update = { ...req.body, updatedAt: new Date() };
+    delete update._id;
+    delete update.usedCount;
+    delete update.code;
+
+    if (update.value) update.value = Number(update.value);
+    if (update.minPurchase) update.minPurchase = Number(update.minPurchase);
+    if (update.maxDiscount) update.maxDiscount = Number(update.maxDiscount);
+    if (update.usageLimit) update.usageLimit = Number(update.usageLimit);
+    if (update.expiresAt) update.expiresAt = new Date(update.expiresAt);
+
+    await coupons.updateOne({ _id: new ObjectId(req.params.id) }, { $set: update });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/admin/coupon/:id', adminAuth, async (req, res) => {
+  try {
+    await coupons.deleteOne({ _id: new ObjectId(req.params.id) });
+    await couponUses.deleteMany({ couponId: req.params.id });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/admin/coupon/:id/uses', adminAuth, async (req, res) => {
+  try {
+    const list = await couponUses.find({ couponId: req.params.id })
+      .sort({ usedAt: -1 }).limit(100).toArray();
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ===== ADMIN: DEPOSITS =====
@@ -795,30 +1083,18 @@ app.put('/api/admin/deposit/:id', adminAuth, async (req, res) => {
         { _id: deposit._id },
         { $set: { status: 'approved', reviewedAt: new Date() } }
       );
-
-      // ✅ Approval notification
       await createNotification(
-        deposit.userId,
-        'deposit_approved',
-        '💰 Deposit Approved!',
-        'আপনার ৳' + deposit.amount + ' wallet এ যোগ হয়েছে।',
-        '✅',
-        '/wallet'
+        deposit.userId, 'deposit_approved', '💰 Deposit Approved!',
+        'আপনার ৳' + deposit.amount + ' wallet এ যোগ হয়েছে।', '✅', '/wallet'
       );
     } else if (action === 'reject') {
       await deposits.updateOne(
         { _id: deposit._id },
         { $set: { status: 'rejected', reviewedAt: new Date() } }
       );
-
-      // ❌ Rejection notification
       await createNotification(
-        deposit.userId,
-        'deposit_rejected',
-        '❌ Deposit Rejected',
-        'আপনার ৳' + deposit.amount + ' deposit reject হয়েছে। সঠিক screenshot পাঠান।',
-        '❌',
-        '/wallet'
+        deposit.userId, 'deposit_rejected', '❌ Deposit Rejected',
+        'আপনার ৳' + deposit.amount + ' deposit reject হয়েছে।', '❌', '/wallet'
       );
     }
     res.json({ success: true });
@@ -848,6 +1124,29 @@ app.get('/api/admin/purchases', adminAuth, async (req, res) => {
   res.json(list);
 });
 
+// ===== ADMIN: NOTIFICATIONS =====
+
+app.post('/api/admin/notifications/send-all', adminAuth, async (req, res) => {
+  try {
+    const { title, message, icon, link } = req.body;
+    if (!title || !message) return res.status(400).json({ error: 'Title & message required' });
+
+    const allUsers = await users.find({ banned: { $ne: true } }, { projection: { _id: 1 } }).toArray();
+    const docs = allUsers.map(u => ({
+      userId: u._id.toString(),
+      type: 'custom',
+      title, message,
+      icon: icon || '📢',
+      link: link || null,
+      read: false,
+      createdAt: new Date()
+    }));
+    if (docs.length > 0) await notifications.insertMany(docs);
+
+    res.json({ success: true, sent: docs.length });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ===== ADMIN STATS =====
 
 app.get('/api/admin/stats', adminAuth, async (req, res) => {
@@ -856,7 +1155,8 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const totalProducts = await products.countDocuments();
   const pendingDeposits = await deposits.countDocuments({ status: 'pending' });
   const totalPurchases = await purchases.countDocuments();
-  const totalNotifications = await notifications.countDocuments();
+  const totalCoupons = await coupons.countDocuments();
+  const totalReferrals = await referrals.countDocuments();
   const revenueAgg = await purchases.aggregate([{ $group: { _id: null, t: { $sum: '$price' } } }]).toArray();
   const v = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
 
@@ -866,7 +1166,8 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
     totalProducts,
     pendingDeposits,
     totalPurchases,
-    totalNotifications,
+    totalCoupons,
+    totalReferrals,
     totalRevenue: revenueAgg[0]?.t || 0,
     totalViews: v[0]?.v || 0
   });
@@ -875,7 +1176,6 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
 // ============ HTML ROUTES ============
 
 app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
-
 app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
 
 app.get('/dashboard', (req, res) => {
@@ -911,6 +1211,13 @@ app.get('/notifications', (req, res) => {
     return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
   }
   res.sendFile(__dirname + '/public/notifications.html');
+});
+
+app.get('/referral', (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
+  }
+  res.sendFile(__dirname + '/public/referral.html');
 });
 
 app.get('/product/:id', (req, res) => res.sendFile(__dirname + '/public/product.html'));
