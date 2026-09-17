@@ -275,20 +275,36 @@ app.delete('/api/my-pages/:id', requireAuthAPI, async (req, res) => {
 
 app.get('/api/shop/products', async (req, res) => {
   try {
-    const { category, search, sort } = req.query;
+    const { category, search, sort, minPrice, maxPrice, minRating } = req.query;
     const query = { active: true };
+    
     if (category && category !== 'all') query.category = category;
+    
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
       ];
     }
+    
+    // Price filter
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+    
+    // Rating filter
+    if (minRating) {
+      query.rating = { $gte: Number(minRating) };
+    }
 
     let sortObj = { createdAt: -1 };
     if (sort === 'price-low') sortObj = { price: 1 };
     if (sort === 'price-high') sortObj = { price: -1 };
     if (sort === 'popular') sortObj = { sold: -1 };
+    if (sort === 'rating') sortObj = { rating: -1 };
+    if (sort === 'newest') sortObj = { createdAt: -1 };
 
     const list = await products.find(query, { projection: { deliveryData: 0 } }).sort(sortObj).toArray();
     res.json(list);
@@ -546,6 +562,8 @@ app.post('/api/admin/product', adminAuth, async (req, res) => {
       deliveryData,
       stock: stock ? Number(stock) : 999,
       sold: 0,
+      rating: 0,
+      reviews: 0,
       active: true,
       createdAt: new Date()
     });
