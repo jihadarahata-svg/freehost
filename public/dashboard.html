@@ -70,6 +70,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
   }
   .nav-btn {
     padding: 8px 14px;
@@ -94,6 +95,27 @@
     color: #fff;
     border: none;
   }
+  .nav-btn.bell-btn {
+    position: relative;
+    padding: 8px 14px;
+    font-size: 15px;
+  }
+  .bell-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 20px;
+    min-width: 18px;
+    text-align: center;
+    display: none;
+    box-shadow: 0 0 10px rgba(239,68,68,0.5);
+  }
+  .bell-badge.show { display: inline-block; }
   
   /* Header */
   .page-header {
@@ -381,6 +403,9 @@
         <a href="/shop" class="nav-btn shop">🛍 Shop</a>
         <a href="/wallet" class="nav-btn">💰 Wallet</a>
         <a href="/orders" class="nav-btn">📦 Orders</a>
+        <a href="/notifications" class="nav-btn bell-btn">
+          🔔 <span class="bell-badge" id="bellBadge"></span>
+        </a>
         <a href="/api/auth/logout" class="nav-btn logout">🚪 Logout</a>
       </div>
     </nav>
@@ -553,6 +578,22 @@
       }
     }
 
+    async function checkNotifications() {
+      try {
+        const res = await fetch('/api/notifications/unread-count');
+        if (res.ok) {
+          const data = await res.json();
+          const badge = document.getElementById('bellBadge');
+          if (data.count > 0) {
+            badge.textContent = data.count > 99 ? '99+' : data.count;
+            badge.classList.add('show');
+          } else {
+            badge.classList.remove('show');
+          }
+        }
+      } catch (e) {}
+    }
+
     function esc(s) {
       return String(s || '').replace(/[&<>"]/g, c => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
@@ -561,6 +602,8 @@
 
     loadUser();
     loadPages();
+    checkNotifications();
+    setInterval(checkNotifications, 30000);
   </script>
 
 </body>
