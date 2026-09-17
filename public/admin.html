@@ -13,6 +13,7 @@
   input, textarea, select { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; font-family: inherit; }
   textarea { resize: vertical; min-height: 100px; }
   select { cursor: pointer; }
+  input:disabled { opacity: 0.6; cursor: not-allowed; }
   button { padding: 12px 18px; background: #fff; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 12px; font-family: inherit; font-size: 13px; transition: 0.15s; }
   button:hover:not(:disabled) { transform: translateY(-1px); opacity: 0.9; }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -27,6 +28,7 @@
   button.blue:hover { background: #1d4ed8; }
   button.orange { background: #ea580c; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
   button.orange:hover { background: #c2410c; }
+  button.gold { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; padding: 12px; font-size: 14px; margin: 0; }
   
   #dash { display: none; }
   #dash.show { display: block; }
@@ -91,7 +93,6 @@
   .modal-btns { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #222; }
   .modal-btns button { flex: 1; margin: 0; }
   
-  .product-card { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
   .product-photo { width: 60px; height: 60px; border-radius: 8px; background: #222; object-fit: cover; flex-shrink: 0; }
 </style>
 </head>
@@ -128,6 +129,7 @@
       <div class="tab active" onclick="showTab('pages')" id="tab-pages">📄 Pages</div>
       <div class="tab" onclick="showTab('users')" id="tab-users">👥 Users</div>
       <div class="tab" onclick="showTab('products')" id="tab-products">🛍 Products</div>
+      <div class="tab" onclick="showTab('gifts')" id="tab-gifts">🎁 Gift Codes</div>
       <div class="tab" onclick="showTab('coupons')" id="tab-coupons">🎟️ Coupons</div>
       <div class="tab" onclick="showTab('deposits')" id="tab-deposits">💰 Deposits</div>
       <div class="tab" onclick="showTab('orders')" id="tab-orders">📦 Orders</div>
@@ -154,6 +156,12 @@
     <div id="tab-content-products" style="display:none;">
       <button class="blue" style="width:100%; margin-bottom:16px; padding:12px;" onclick="openProductModal()">➕ Add New Product</button>
       <div id="productList"><div class="empty">Loading...</div></div>
+    </div>
+
+    <!-- GIFT CODES TAB -->
+    <div id="tab-content-gifts" style="display:none;">
+      <button class="gold" style="width:100%; margin-bottom:16px;" onclick="openGiftModal()">➕ Create Gift Code</button>
+      <div id="giftCodeList"><div class="empty">Loading...</div></div>
     </div>
 
     <!-- COUPONS TAB -->
@@ -345,6 +353,43 @@
     </div>
   </div>
 
+  <!-- GIFT CODE MODAL -->
+  <div class="modal-overlay" id="giftModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="giftModalTitle">🎁 Create Gift Code</h2>
+        <button class="modal-close" onclick="closeGiftModal()">✕</button>
+      </div>
+      <div class="modal-field">
+        <label>Gift Code *</label>
+        <input id="gCode" placeholder="GIFT100" style="text-transform:uppercase;">
+      </div>
+      <div class="modal-field">
+        <label>Amount (৳) * — কত টাকা Wallet এ যোগ হবে</label>
+        <input id="gValue" type="number" placeholder="100">
+      </div>
+      <div class="modal-field">
+        <label>Usage Limit (total users) — optional</label>
+        <input id="gLimit" type="number" placeholder="100">
+      </div>
+      <div class="modal-field">
+        <label>Expiry Date — optional</label>
+        <input id="gExpiry" type="date">
+      </div>
+      <div class="modal-field">
+        <label>Description — optional</label>
+        <input id="gDesc" placeholder="Welcome gift for users">
+      </div>
+      <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:12px;font-size:12px;color:#fbbf24;line-height:1.6;margin-top:8px;">
+        ℹ️ <strong>Info:</strong> প্রতি user এই code শুধু <strong>একবারই</strong> claim করতে পারবে।
+      </div>
+      <div class="modal-btns">
+        <button class="sm" onclick="closeGiftModal()">Cancel</button>
+        <button class="blue" onclick="saveGiftCode()" id="saveGiftBtn">💾 Save Gift Code</button>
+      </div>
+    </div>
+  </div>
+
   <!-- COUPON MODAL -->
   <div class="modal-overlay" id="couponModal">
     <div class="modal">
@@ -402,9 +447,9 @@
 
   <script>
     let token = localStorage.getItem('adm_token');
-    let allPages = [], allUsers = [], allProducts = [], allDeposits = [], allOrders = [], allCoupons = [];
+    let allPages = [], allUsers = [], allProducts = [], allDeposits = [], allOrders = [], allCoupons = [], allGiftCodes = [];
     let currentTab = 'pages';
-    let editingId = null, editingProductId = null, editingCouponId = null;
+    let editingId = null, editingProductId = null, editingCouponId = null, editingGiftId = null;
 
     if (token) showDash();
 
@@ -450,7 +495,7 @@
 
     function showTab(tab) {
       currentTab = tab;
-      const tabs = ['pages','users','products','coupons','deposits','orders','settings'];
+      const tabs = ['pages','users','products','gifts','coupons','deposits','orders','settings'];
       tabs.forEach(t => {
         const content = document.getElementById('tab-content-' + t);
         const btn = document.getElementById('tab-' + t);
@@ -460,6 +505,7 @@
       
       if (tab === 'users' && !allUsers.length) loadUsers();
       if (tab === 'products' && !allProducts.length) loadProducts();
+      if (tab === 'gifts' && !allGiftCodes.length) loadGiftCodes();
       if (tab === 'coupons' && !allCoupons.length) loadCoupons();
       if (tab === 'deposits' && !allDeposits.length) loadDeposits('pending');
       if (tab === 'orders' && !allOrders.length) loadOrders();
@@ -792,6 +838,190 @@
         }
       } catch (e) {
         showToast('❌ Failed to delete', '#dc2626');
+      }
+    }
+
+    // ===== GIFT CODES =====
+    async function loadGiftCodes() {
+      try {
+        const res = await fetch('/api/admin/gift-codes', {
+          headers: { 'x-admin-token': token }
+        });
+        if (res.status === 401) return logout();
+        allGiftCodes = await res.json();
+        renderGiftCodes();
+      } catch (e) {
+        document.getElementById('giftCodeList').innerHTML = '<div class="empty">Failed to load</div>';
+      }
+    }
+
+    function renderGiftCodes() {
+      const list = document.getElementById('giftCodeList');
+      if (!allGiftCodes.length) {
+        list.innerHTML = '<div class="empty">🎁 কোনো gift code নেই<br><br>উপরে "Create Gift Code" চাপো</div>';
+        return;
+      }
+
+      list.innerHTML = allGiftCodes.map(g => {
+        const expired = g.expiresAt && new Date(g.expiresAt) < new Date();
+        const limitReached = g.usageLimit && g.usedCount >= g.usageLimit;
+        const inactive = !g.active;
+        
+        let statusBadge = '<span style="color:#34d399;font-size:11px;font-weight:700;">● Active</span>';
+        if (inactive) statusBadge = '<span style="color:#888;font-size:11px;font-weight:700;">○ Inactive</span>';
+        if (expired) statusBadge = '<span style="color:#f87171;font-size:11px;font-weight:700;">⏰ Expired</span>';
+        if (limitReached) statusBadge = '<span style="color:#fbbf24;font-size:11px;font-weight:700;">🎯 Limit reached</span>';
+
+        const expiryStr = g.expiresAt ? new Date(g.expiresAt).toLocaleDateString() : 'Never';
+        const limitStr = g.usageLimit ? (g.usedCount + '/' + g.usageLimit) : (g.usedCount + '/∞');
+
+        return '<div class="page-item">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
+            '<div>' +
+              '<h3 style="font-family:monospace;font-size:16px;color:#fbbf24;letter-spacing:1px;">🎁 ' + esc(g.code) + '</h3>' +
+              '<div style="font-size:18px;font-weight:900;color:#4ade80;margin-top:4px;">৳' + g.value + '</div>' +
+            '</div>' +
+            '<div style="text-align:right;">' + statusBadge + '</div>' +
+          '</div>' +
+          (g.description ? '<div style="font-size:11px;color:#888;margin-bottom:8px;">' + esc(g.description) + '</div>' : '') +
+          '<div class="meta">' +
+            '👥 Claimed: ' + limitStr + ' · ' +
+            '⏰ Expiry: ' + expiryStr +
+          '</div>' +
+          '<div class="btns" style="margin-top:10px;">' +
+            '<button class="blue" onclick="openGiftModal(\'' + g._id + '\')">📝 Edit</button>' +
+            '<button class="sm" onclick="toggleGiftCode(\'' + g._id + '\', ' + !g.active + ')">' + (g.active ? '⏸ Deactivate' : '▶️ Activate') + '</button>' +
+            '<button class="sm" onclick="viewGiftClaims(\'' + g._id + '\', \'' + esc(g.code) + '\')">📋 Claims</button>' +
+            '<button class="red" onclick="delGiftCode(\'' + g._id + '\', \'' + esc(g.code) + '\')">🗑 Delete</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function openGiftModal(id) {
+      editingGiftId = id || null;
+      document.getElementById('giftModalTitle').textContent = id ? '📝 Edit Gift Code' : '🎁 Create Gift Code';
+      
+      if (id) {
+        const g = allGiftCodes.find(x => x._id === id);
+        if (g) {
+          document.getElementById('gCode').value = g.code;
+          document.getElementById('gCode').disabled = true;
+          document.getElementById('gValue').value = g.value || '';
+          document.getElementById('gLimit').value = g.usageLimit || '';
+          document.getElementById('gExpiry').value = g.expiresAt ? new Date(g.expiresAt).toISOString().split('T')[0] : '';
+          document.getElementById('gDesc').value = g.description || '';
+        }
+      } else {
+        ['gCode','gValue','gLimit','gExpiry','gDesc'].forEach(i => document.getElementById(i).value = '');
+        document.getElementById('gCode').disabled = false;
+      }
+      document.getElementById('giftModal').classList.add('show');
+    }
+
+    function closeGiftModal() {
+      editingGiftId = null;
+      document.getElementById('giftModal').classList.remove('show');
+    }
+
+    async function saveGiftCode() {
+      const code = document.getElementById('gCode').value.trim().toUpperCase();
+      const value = document.getElementById('gValue').value;
+      
+      if (!code || !value) return showToast('❌ Code & Amount দিন', '#dc2626');
+      
+      const body = {
+        code,
+        value: Number(value),
+        usageLimit: document.getElementById('gLimit').value || null,
+        expiresAt: document.getElementById('gExpiry').value || null,
+        description: document.getElementById('gDesc').value || ''
+      };
+      
+      const btn = document.getElementById('saveGiftBtn');
+      btn.disabled = true;
+      btn.textContent = '💾 Saving...';
+      
+      try {
+        const url = editingGiftId ? '/api/admin/gift-code/' + editingGiftId : '/api/admin/gift-code';
+        const method = editingGiftId ? 'PUT' : 'POST';
+        
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        
+        showToast('✅ Gift code saved!');
+        closeGiftModal();
+        allGiftCodes = [];
+        loadGiftCodes();
+      } catch (e) {
+        showToast('❌ ' + e.message, '#dc2626');
+      }
+      
+      btn.disabled = false;
+      btn.textContent = '💾 Save Gift Code';
+    }
+
+    async function toggleGiftCode(id, active) {
+      try {
+        const res = await fetch('/api/admin/gift-code/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+          body: JSON.stringify({ active })
+        });
+        if (res.ok) {
+          showToast(active ? '▶️ Activated' : '⏸ Deactivated');
+          allGiftCodes = [];
+          loadGiftCodes();
+        } else {
+          showToast('❌ Failed', '#dc2626');
+        }
+      } catch (e) {
+        showToast('❌ Failed', '#dc2626');
+      }
+    }
+
+    async function delGiftCode(id, code) {
+      if (!confirm('"' + code + '" gift code delete করবে?')) return;
+      try {
+        const res = await fetch('/api/admin/gift-code/' + id, {
+          method: 'DELETE',
+          headers: { 'x-admin-token': token }
+        });
+        if (res.ok) {
+          showToast('🗑 Deleted');
+          allGiftCodes = [];
+          loadGiftCodes();
+        } else {
+          showToast('❌ Failed', '#dc2626');
+        }
+      } catch (e) {
+        showToast('❌ Failed', '#dc2626');
+      }
+    }
+
+    async function viewGiftClaims(id, code) {
+      try {
+        const res = await fetch('/api/admin/gift-code/' + id + '/claims', {
+          headers: { 'x-admin-token': token }
+        });
+        const list = await res.json();
+        
+        if (!list.length) {
+          return alert('এই code এখনো কেউ claim করেনি');
+        }
+        
+        const text = list.map((c, i) => 
+          (i+1) + '. ' + c.userEmail + ' — ৳' + c.amount + ' — ' + new Date(c.claimedAt).toLocaleString()
+        ).join('\n');
+        
+        alert('🎁 ' + code + ' Claims (' + list.length + '):\n\n' + text);
+      } catch (e) {
+        showToast('❌ Failed', '#dc2626');
       }
     }
 
