@@ -69,7 +69,7 @@
   .nav-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
   }
   .nav-btn {
@@ -83,6 +83,9 @@
     cursor: pointer;
     text-decoration: none;
     transition: 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
   .nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
   .nav-btn.logout:hover {
@@ -99,6 +102,17 @@
     position: relative;
     padding: 8px 14px;
     font-size: 15px;
+  }
+  .nav-btn.referral-btn {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  .nav-btn.referral-btn:hover {
+    background: linear-gradient(135deg, #ea580c, #dc2626);
+    color: #fff;
   }
   .bell-badge {
     position: absolute;
@@ -215,7 +229,7 @@
   }
   .btn-primary {
     flex: 1;
-    min-width: 200px;
+    min-width: 180px;
     padding: 15px 22px;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
     color: #fff;
@@ -238,6 +252,10 @@
   .btn-primary.shop-btn {
     background: linear-gradient(135deg, #f59e0b, #ef4444);
     box-shadow: 0 12px 30px -8px rgba(245,158,11,0.5);
+  }
+  .btn-primary.referral-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 12px 30px -8px rgba(16,185,129,0.5);
   }
   
   /* Section title */
@@ -406,6 +424,7 @@
         <a href="/notifications" class="nav-btn bell-btn">
           🔔 <span class="bell-badge" id="bellBadge"></span>
         </a>
+        <a href="/referral" class="nav-btn referral-btn">🎁 Refer</a>
         <a href="/api/auth/logout" class="nav-btn logout">🚪 Logout</a>
       </div>
     </nav>
@@ -440,12 +459,17 @@
         <div class="stat-num" id="statLive">0</div>
         <div class="stat-lbl">Live Now</div>
       </div>
+      <div class="stat">
+        <div class="stat-num" id="statReferrals">0</div>
+        <div class="stat-lbl">Referrals</div>
+      </div>
     </div>
 
     <!-- Actions -->
     <div class="actions">
       <a href="/" class="btn-primary">➕ Host New Page</a>
       <a href="/shop" class="btn-primary shop-btn">🛍 Go to Shop</a>
+      <a href="/referral" class="btn-primary referral-btn">🎁 Invite Friends</a>
     </div>
 
     <!-- Pages -->
@@ -490,6 +514,7 @@
         document.getElementById('userEmail').textContent = user.email || '';
         document.getElementById('userAvatar').textContent = (user.name || 'U')[0].toUpperCase();
         document.getElementById('userWallet').textContent = '💰 ৳' + (user.wallet || 0);
+        document.getElementById('statReferrals').textContent = user.referralCount || 0;
       } catch (e) {
         window.location.href = '/login';
       }
