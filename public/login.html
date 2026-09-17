@@ -73,6 +73,22 @@
     margin-bottom: 26px;
   }
   
+  /* Referral banner */
+  .ref-banner {
+    padding: 12px 14px;
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 10px;
+    font-size: 13px;
+    color: #34d399;
+    margin-bottom: 14px;
+    text-align: center;
+    font-weight: 600;
+    display: none;
+  }
+  .ref-banner.show { display: block; animation: fadeIn 0.4s; }
+  .ref-banner strong { color: #fff; }
+  
   /* Tabs */
   .tabs {
     display: flex;
@@ -209,6 +225,12 @@
     <h1>Welcome to FreeHost</h1>
     <p class="sub">Sign in or create account to continue</p>
 
+    <!-- Referral Banner -->
+    <div class="ref-banner" id="refBanner">
+      🎉 আপনি referral link দিয়ে এসেছেন!<br>
+      Sign Up করলে <strong>৳25</strong> bonus পাবেন!
+    </div>
+
     <!-- Tabs -->
     <div class="tabs">
       <div class="tab active" id="tabLogin" onclick="showForm('login')">Sign In</div>
@@ -257,16 +279,17 @@
   </div>
 
   <script>
-    // Redirect target নেওয়া URL থেকে
+    // URL params
     const params = new URLSearchParams(window.location.search);
     const redirectTo = params.get('redirect') || '/dashboard';
     const errorParam = params.get('error');
+    const referralCode = params.get('ref');  // 🆕 Referral code
+    const mode = params.get('mode');
 
-    // Back link এ redirect path যোগ করো
-    const backLink = document.getElementById('backLink');
-    if (redirectTo === '/shop') {
-      backLink.href = '/';
-      backLink.textContent = '← Back to home';
+    // 🆕 Referral mode
+    if (referralCode) {
+      document.getElementById('refBanner').classList.add('show');
+      setTimeout(() => showForm('signup'), 200);
     }
 
     // Error message দেখাও
@@ -274,10 +297,16 @@
       showError('Login failed. Please try again.');
     }
 
-    // Default tab = signup (যদি নতুন user হয়)
-    const mode = params.get('mode');
+    // Mode = signup হলে form switch
     if (mode === 'signup') {
       showForm('signup');
+    }
+
+    // Back link
+    const backLink = document.getElementById('backLink');
+    if (redirectTo === '/shop') {
+      backLink.href = '/';
+      backLink.textContent = '← Back to home';
     }
 
     function showForm(form) {
@@ -354,16 +383,23 @@
       btn.textContent = 'Creating account...';
 
       try {
+        const body = { name, email, password };
+        // 🆕 Referral code send করো
+        if (referralCode) body.referralCode = referralCode;
+
         const res = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password })
+          body: JSON.stringify(body)
         });
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.error);
 
-        showSuccess('Account created! Redirecting...');
+        const msg = referralCode 
+          ? 'Account created with ৳25 bonus! Redirecting...' 
+          : 'Account created! Redirecting...';
+        showSuccess(msg);
         setTimeout(() => window.location.href = redirectTo, 500);
       } catch (e) {
         showError(e.message);
