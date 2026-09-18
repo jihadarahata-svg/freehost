@@ -205,6 +205,9 @@
   .badge.banned { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
   .badge.live { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
   .badge.locked { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+  .badge.link { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); text-transform: none; }
+  .badge.file { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); text-transform: none; }
+  .badge.code { background: rgba(139,92,246,0.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); text-transform: none; }
   
   .btn {
     padding: 7px 12px;
@@ -309,7 +312,41 @@
   }
   .modal-btns .btn { flex: 1; padding: 12px; justify-content: center; font-size: 14px; }
   
-  /* ===== CONTENT EDITOR ===== */
+  /* DELIVERY BOX */
+  .delivery-box {
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    background: rgba(139,92,246,0.03);
+  }
+  .delivery-box-title {
+    font-size: 12px; color: #c4b5fd;
+    font-weight: 700; margin-bottom: 14px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .delivery-hint {
+    font-size: 11px; color: #71717a;
+    text-transform: none; font-weight: 400;
+  }
+  .delivery-warning {
+    margin-top: 10px; padding: 8px 12px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    font-size: 11px; color: #f87171;
+    display: none;
+  }
+  .delivery-success {
+    margin-top: 10px; padding: 8px 12px;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 8px;
+    font-size: 11px; color: #34d399;
+    display: none;
+  }
+  
+  /* CONTENT EDITOR */
   .content-tabs {
     display: flex; gap: 6px; margin-bottom: 20px;
     flex-wrap: wrap; padding-bottom: 16px;
@@ -702,10 +739,12 @@
         <label>Product Title <span class="required">*</span></label>
         <input id="pTitle" placeholder="HTML Templates Pack" maxlength="100">
       </div>
+      
       <div class="form-group">
         <label>Description</label>
         <textarea id="pDesc" placeholder="Product এর description..."></textarea>
       </div>
+      
       <div class="form-row">
         <div class="form-group">
           <label>Category</label>
@@ -716,6 +755,7 @@
           <input id="pStock" type="number" placeholder="999">
         </div>
       </div>
+      
       <div class="form-row">
         <div class="form-group">
           <label>Price (৳) <span class="required">*</span></label>
@@ -726,22 +766,43 @@
           <input id="pDiscount" type="number" placeholder="80">
         </div>
       </div>
+      
       <div class="form-group">
         <label>Photo URL</label>
         <input id="pPhoto" placeholder="https://photo-url.jpg" oninput="previewPhoto()">
         <img id="photoPreview" class="photo-preview" onerror="this.classList.remove('show')">
       </div>
-      <div class="form-group">
-        <label>Delivery Type <span class="required">*</span></label>
-        <select id="pDeliveryType">
-          <option value="link">🔗 Link</option>
-          <option value="file">📁 File</option>
-          <option value="code">💻 Code</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Delivery Data <span class="required">*</span></label>
-        <textarea id="pDeliveryData" placeholder="https://drive.google.com/... অথবা Code"></textarea>
+      
+      <!-- DELIVERY OPTIONS -->
+      <div class="delivery-box">
+        <div class="delivery-box-title">
+          📦 Delivery Options <span style="color:#71717a; text-transform:none; font-weight:400;">(কমপক্ষে একটা দিতে হবে)</span>
+        </div>
+        
+        <div class="form-group">
+          <label>🔗 Link URL <span class="delivery-hint">(optional)</span></label>
+          <input id="pLinkData" placeholder="https://drive.google.com/..." oninput="checkDeliveries()">
+          <small>External link (Google Drive, Mega, etc.)</small>
+        </div>
+        
+        <div class="form-group">
+          <label>📁 File URL <span class="delivery-hint">(optional)</span></label>
+          <input id="pFileData" placeholder="https://example.com/file.zip" oninput="checkDeliveries()">
+          <small>Direct file download link</small>
+        </div>
+        
+        <div class="form-group" style="margin-bottom:0;">
+          <label>💻 Code <span class="delivery-hint">(optional)</span></label>
+          <textarea id="pCodeData" placeholder="<html>...</html>" style="min-height:100px; font-family:monospace; font-size:12px;" oninput="checkDeliveries()"></textarea>
+          <small>HTML / CSS / JS source code</small>
+        </div>
+        
+        <div id="deliveryWarning" class="delivery-warning">
+          ⚠️ কমপক্ষে একটা Delivery option দিতে হবে
+        </div>
+        <div id="deliverySuccess" class="delivery-success">
+          ✅ Delivery option যোগ হয়েছে
+        </div>
       </div>
       
       <div class="modal-btns">
@@ -1086,11 +1147,18 @@
         const photo = p.photo 
           ? '<img src="' + esc(p.photo) + '" class="product-img" onerror="this.outerHTML=\'<div class=&quot;product-img&quot;>📦</div>\'">'
           : '<div class="product-img">📦</div>';
+        
+        const badges = [];
+        if (p.linkData) badges.push('<span class="badge link">🔗 Link</span>');
+        if (p.fileData) badges.push('<span class="badge file">📁 File</span>');
+        if (p.codeData) badges.push('<span class="badge code">💻 Code</span>');
+        
         return '<div class="product-row">' + photo +
           '<div class="product-info">' +
             '<h4>' + esc(p.title) + '</h4>' +
             '<p>📁 ' + esc(p.category || 'Other') + ' · 📦 Stock: ' + (p.stock || 0) + '</p>' +
             '<p>🛒 Sold: ' + (p.sold || 0) + (p.active ? ' · ● Active' : ' · ⛔ Inactive') + '</p>' +
+            '<div style="margin:6px 0; display:flex; gap:4px; flex-wrap:wrap;">' + badges.join('') + '</div>' +
             '<div class="product-price">৳' + (p.discountPrice || p.price) + 
               (p.discountPrice ? ' <span style="color:#888;font-size:11px;text-decoration:line-through;">৳' + p.price + '</span>' : '') + 
             '</div>' +
@@ -1115,17 +1183,27 @@
           document.getElementById('pPrice').value = p.price || '';
           document.getElementById('pDiscount').value = p.discountPrice || '';
           document.getElementById('pPhoto').value = p.photo || '';
-          document.getElementById('pDeliveryType').value = p.deliveryType || 'link';
-          document.getElementById('pDeliveryData').value = p.deliveryData || '';
+          document.getElementById('pLinkData').value = p.linkData || '';
+          document.getElementById('pFileData').value = p.fileData || '';
+          document.getElementById('pCodeData').value = p.codeData || '';
           document.getElementById('pStock').value = p.stock || '';
           previewPhoto();
         }
       } else {
-        ['pTitle','pDesc','pCategory','pPrice','pDiscount','pPhoto','pDeliveryData','pStock'].forEach(i => document.getElementById(i).value = '');
-        document.getElementById('pDeliveryType').value = 'link';
+        ['pTitle','pDesc','pCategory','pPrice','pDiscount','pPhoto','pLinkData','pFileData','pCodeData','pStock'].forEach(i => document.getElementById(i).value = '');
         document.getElementById('photoPreview').classList.remove('show');
       }
+      checkDeliveries();
       document.getElementById('productModal').classList.add('show');
+    }
+    function checkDeliveries() {
+      const link = document.getElementById('pLinkData').value.trim();
+      const file = document.getElementById('pFileData').value.trim();
+      const code = document.getElementById('pCodeData').value.trim();
+      const hasAny = link || file || code;
+      
+      document.getElementById('deliveryWarning').style.display = hasAny ? 'none' : 'block';
+      document.getElementById('deliverySuccess').style.display = hasAny ? 'block' : 'none';
     }
     function closeProductModal() {
       editingProductId = null;
@@ -1139,6 +1217,10 @@
     }
     async function saveProduct() {
       const btn = document.getElementById('saveProductBtn');
+      const linkData = document.getElementById('pLinkData').value.trim();
+      const fileData = document.getElementById('pFileData').value.trim();
+      const codeData = document.getElementById('pCodeData').value.trim();
+      
       const body = {
         title: document.getElementById('pTitle').value.trim(),
         description: document.getElementById('pDesc').value.trim(),
@@ -1146,14 +1228,15 @@
         price: document.getElementById('pPrice').value,
         discountPrice: document.getElementById('pDiscount').value,
         photo: document.getElementById('pPhoto').value.trim(),
-        deliveryType: document.getElementById('pDeliveryType').value,
-        deliveryData: document.getElementById('pDeliveryData').value.trim(),
+        linkData,
+        fileData,
+        codeData,
         stock: document.getElementById('pStock').value
       };
       
       if (!body.title) return showToast('❌ Title দিন', true);
       if (!body.price) return showToast('❌ Price দিন', true);
-      if (!body.deliveryData) return showToast('❌ Delivery Data দিন', true);
+      if (!linkData && !fileData && !codeData) return showToast('❌ কমপক্ষে একটা Delivery option দিন', true);
       
       btn.disabled = true;
       btn.textContent = '💾 Saving...';
@@ -1319,182 +1402,30 @@
 
     // ===== CONTENT EDITOR =====
     const CONTENT_LABELS = {
-      wallet: {
-        title: "💰 Wallet Page",
-        desc: "Wallet page এর সব লেখা এখান থেকে পরিবর্তন করুন",
-        icon: "💰",
-        fields: {
-          title: "Page Title",
-          balanceLabel: "Balance Label",
-          safeText: "Safe Text",
-          giftTitle: "Gift Section Title",
-          giftDesc: "Gift Description",
-          giftPlaceholder: "Gift Placeholder",
-          giftButton: "Gift Button",
-          addMoneyTab: "Add Money Tab",
-          historyTab: "History Tab",
-          howToTitle: "How To Title",
-          howToInfo: "How To Info",
-          sendLabel: "Send Money Label",
-          copyBtn: "Copy Button",
-          amountLabel: "Amount Label",
-          amountPlaceholder: "Amount Placeholder",
-          bkashLabel: "bKash Label",
-          bkashPlaceholder: "bKash Placeholder",
-          trxLabel: "TRX Label",
-          trxPlaceholder: "TRX Placeholder",
-          screenshotLabel: "Screenshot Label",
-          screenshotPlaceholder: "Screenshot Placeholder",
-          submitBtn: "Submit Button",
-          noHistory: "No History Text",
-          loadingText: "Loading Text"
-        }
-      },
-      referral: {
-        title: "📢 Referral Section",
-        desc: "Referral section এর সব লেখা",
-        icon: "📢",
-        fields: {
-          title: "Section Heading",
-          subtitle: "Section Subtitle",
-          copyBtn: "Copy Button",
-          referralsLabel: "Referrals Label",
-          earnedLabel: "Earned Label",
-          whatsappBtn: "WhatsApp Button",
-          telegramBtn: "Telegram Button",
-          facebookBtn: "Facebook Button",
-          whoJoinedTitle: "Who Joined Title",
-          shareMessage: "Share Message"
-        }
-      },
-      shop: {
-        title: "🛍 Shop Page",
-        desc: "Shop page এর সব লেখা",
-        icon: "🛍",
-        fields: {
-          logoText: "Logo Text",
-          searchPlaceholder: "Search Placeholder",
-          walletBtn: "Wallet Button",
-          ordersBtn: "Orders Button",
-          cartBtn: "Cart Button",
-          meBtn: "Me Button",
-          heroBadge: "Hero Badge",
-          heroHeading: "Hero Heading",
-          heroSubtitle: "Hero Subtitle",
-          heroButton: "Hero Button",
-          featuredTitle: "Featured Section Title",
-          allProductsTitle: "All Products Title",
-          seeAllText: "See All Text",
-          buyNowText: "Buy Now Button",
-          addToCartText: "Add to Cart Button",
-          noProductsText: "No Products Text",
-          tryDifferentText: "Try Different Text",
-          footerCopyright: "Footer Copyright",
-          footerText: "Footer Text",
-          filterBtn: "Filter Button",
-          sortNewest: "Sort: Newest",
-          sortPriceLow: "Sort: Price Low",
-          sortPriceHigh: "Sort: Price High",
-          sortPopular: "Sort: Popular"
-        }
-      },
-      product: {
-        title: "📄 Product Details",
-        desc: "Product details page এর লেখা",
-        icon: "📄",
-        fields: {
-          backBtn: "Back Button",
-          buyNowBtn: "Buy Now Button",
-          loginToBuyBtn: "Login to Buy Button",
-          confirmPurchaseTitle: "Confirm Title",
-          currentBalanceLabel: "Current Balance Label",
-          afterPurchaseLabel: "After Purchase Label",
-          confirmBtn: "Confirm Button",
-          cancelBtn: "Cancel Button",
-          purchasedTitle: "Purchased Title",
-          paidLabel: "Paid Label",
-          newBalanceLabel: "New Balance Label",
-          deliveryReadyText: "Delivery Ready Text",
-          downloadBtn: "Download Button",
-          copyLinkBtn: "Copy Link Button",
-          backToShopBtn: "Back to Shop Button",
-          contactSupportBtn: "Contact Support Button",
-          descriptionLabel: "Description Label",
-          categoryLabel: "Category Label",
-          tagsLabel: "Tags Label",
-          insufficientBalanceMsg: "Insufficient Balance Msg",
-          loginRequiredMsg: "Login Required Msg"
-        }
-      },
-      login: {
-        title: "📝 Login Page",
-        desc: "Login/Signup page এর লেখা",
-        icon: "📝",
-        fields: {
-          title: "Welcome Title",
-          subtitle: "Welcome Subtitle",
-          signinTab: "Sign In Tab",
-          signupTab: "Sign Up Tab",
-          emailLabel: "Email Label",
-          emailPlaceholder: "Email Placeholder",
-          passwordLabel: "Password Label",
-          passwordPlaceholder: "Password Placeholder",
-          nameLabel: "Name Label",
-          namePlaceholder: "Name Placeholder",
-          signinButton: "Sign In Button",
-          signupButton: "Sign Up Button",
-          backBtn: "Back Button",
-          termsText: "Terms Text"
-        }
-      },
-      dashboard: {
-        title: "📊 Dashboard",
-        desc: "User Dashboard এর লেখা",
-        icon: "📊",
-        fields: {
-          title: "Page Title",
-          subtitle: "Page Subtitle",
-          pagesLabel: "Pages Label",
-          viewsLabel: "Views Label",
-          walletLabel: "Wallet Label",
-          hostPageBtn: "Host Page Button",
-          shopBtn: "Shop Button",
-          walletBtn: "Wallet Button",
-          myPagesTitle: "My Pages Title",
-          noPagesText: "No Pages Text",
-          hostFirstText: "Host First Text"
-        }
-      },
-      home: {
-        title: "🏠 Home Page",
-        desc: "Home page এর লেখা",
-        icon: "🏠",
-        fields: {
-          title: "Title",
-          heroBadge: "Hero Badge",
-          heroHeading: "Hero Heading",
-          heroSubtitle: "Hero Subtitle",
-          hostBtn: "Host Button",
-          shopBtn: "Shop Button",
-          loginBtn: "Login Button",
-          htmlPlaceholder: "HTML Placeholder",
-          titleLabel: "Title Label",
-          titlePlaceholder: "Title Placeholder",
-          slugLabel: "Slug Label",
-          slugPlaceholder: "Slug Placeholder"
-        }
-      },
-      colors: {
-        title: "🎨 Colors",
-        desc: "Site এর রঙ পরিবর্তন করুন (Advanced)",
-        icon: "🎨",
-        fields: {
-          primary: "Primary Color",
-          accent: "Accent Color",
-          buttonText: "Button Text Color",
-          heroGradient: "Hero Gradient (CSS)"
-        }
-      }
+      wallet: { title: "💰 Wallet Page", desc: "Wallet page এর সব লেখা", icon: "💰", fields: {
+        title: "Page Title", balanceLabel: "Balance Label", safeText: "Safe Text", giftTitle: "Gift Section Title", giftDesc: "Gift Description", giftPlaceholder: "Gift Placeholder", giftButton: "Gift Button", addMoneyTab: "Add Money Tab", historyTab: "History Tab", howToTitle: "How To Title", howToInfo: "How To Info", sendLabel: "Send Money Label", copyBtn: "Copy Button", amountLabel: "Amount Label", amountPlaceholder: "Amount Placeholder", bkashLabel: "bKash Label", bkashPlaceholder: "bKash Placeholder", trxLabel: "TRX Label", trxPlaceholder: "TRX Placeholder", screenshotLabel: "Screenshot Label", screenshotPlaceholder: "Screenshot Placeholder", submitBtn: "Submit Button", noHistory: "No History Text", loadingText: "Loading Text"
+      }},
+      referral: { title: "📢 Referral Section", desc: "Referral section এর লেখা", icon: "📢", fields: {
+        title: "Section Heading", subtitle: "Section Subtitle", copyBtn: "Copy Button", referralsLabel: "Referrals Label", earnedLabel: "Earned Label", whatsappBtn: "WhatsApp Button", telegramBtn: "Telegram Button", facebookBtn: "Facebook Button", whoJoinedTitle: "Who Joined Title", shareMessage: "Share Message"
+      }},
+      shop: { title: "🛍 Shop Page", desc: "Shop page এর লেখা", icon: "🛍", fields: {
+        logoText: "Logo Text", searchPlaceholder: "Search Placeholder", walletBtn: "Wallet Button", ordersBtn: "Orders Button", cartBtn: "Cart Button", meBtn: "Me Button", heroBadge: "Hero Badge", heroHeading: "Hero Heading", heroSubtitle: "Hero Subtitle", heroButton: "Hero Button", featuredTitle: "Featured Title", allProductsTitle: "All Products Title", seeAllText: "See All Text", buyNowText: "Buy Now Button", addToCartText: "Add to Cart", noProductsText: "No Products Text", tryDifferentText: "Try Different Text", footerCopyright: "Footer Copyright", footerText: "Footer Text", filterBtn: "Filter Button", sortNewest: "Sort Newest", sortPriceLow: "Sort Price Low", sortPriceHigh: "Sort Price High", sortPopular: "Sort Popular"
+      }},
+      product: { title: "📄 Product Details", desc: "Product page এর লেখা", icon: "📄", fields: {
+        backBtn: "Back Button", buyNowBtn: "Buy Now Button", loginToBuyBtn: "Login to Buy", confirmPurchaseTitle: "Confirm Title", currentBalanceLabel: "Current Balance Label", afterPurchaseLabel: "After Purchase Label", confirmBtn: "Confirm Button", cancelBtn: "Cancel Button", purchasedTitle: "Purchased Title", paidLabel: "Paid Label", newBalanceLabel: "New Balance Label", deliveryReadyText: "Delivery Ready Text", downloadBtn: "Download Button", copyLinkBtn: "Copy Link Button", copyCodeBtn: "Copy Code Button", openLinkBtn: "Open Link Button", backToShopBtn: "Back to Shop", contactSupportBtn: "Contact Support", descriptionLabel: "Description Label", categoryLabel: "Category Label", tagsLabel: "Tags Label", linkSectionTitle: "Link Section Title", codeSectionTitle: "Code Section Title", fileSectionTitle: "File Section Title"
+      }},
+      login: { title: "📝 Login Page", desc: "Login page এর লেখা", icon: "📝", fields: {
+        title: "Welcome Title", subtitle: "Welcome Subtitle", signinTab: "Sign In Tab", signupTab: "Sign Up Tab", emailLabel: "Email Label", emailPlaceholder: "Email Placeholder", passwordLabel: "Password Label", passwordPlaceholder: "Password Placeholder", nameLabel: "Name Label", namePlaceholder: "Name Placeholder", signinButton: "Sign In Button", signupButton: "Sign Up Button", backBtn: "Back Button", termsText: "Terms Text"
+      }},
+      dashboard: { title: "📊 Dashboard", desc: "User Dashboard এর লেখা", icon: "📊", fields: {
+        title: "Page Title", subtitle: "Page Subtitle", pagesLabel: "Pages Label", viewsLabel: "Views Label", walletLabel: "Wallet Label", hostPageBtn: "Host Page Button", shopBtn: "Shop Button", walletBtn: "Wallet Button", myPagesTitle: "My Pages Title", noPagesText: "No Pages Text", hostFirstText: "Host First Text"
+      }},
+      home: { title: "🏠 Home Page", desc: "Home page এর লেখা", icon: "🏠", fields: {
+        title: "Title", heroBadge: "Hero Badge", heroHeading: "Hero Heading", heroSubtitle: "Hero Subtitle", hostBtn: "Host Button", shopBtn: "Shop Button", loginBtn: "Login Button", htmlPlaceholder: "HTML Placeholder", titleLabel: "Title Label", titlePlaceholder: "Title Placeholder", slugLabel: "Slug Label", slugPlaceholder: "Slug Placeholder"
+      }},
+      colors: { title: "🎨 Colors", desc: "Site এর রঙ (Advanced)", icon: "🎨", fields: {
+        primary: "Primary Color", accent: "Accent Color", buttonText: "Button Text Color", heroGradient: "Hero Gradient (CSS)"
+      }}
     };
 
     async function loadContent() {
