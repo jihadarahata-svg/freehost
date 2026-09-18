@@ -4,8 +4,6 @@ const bcrypt = require('bcryptjs');
 const { MongoClient, ObjectId } = require('mongodb');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const app = express();
 app.use(cors());
@@ -14,14 +12,12 @@ app.use(express.static('public'));
 
 const MONGO_URI = process.env.MONGO_URI;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-please';
 const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 
 let pages, users, products, deposits, purchases, settings, db;
 
-// Flexible ID query — string & ObjectId handle করবে
+// Flexible ID query
 function makeIdQuery(id) {
   const queries = [{ _id: id }];
   try { queries.push({ _id: new ObjectId(id) }); } catch (e) {}
@@ -67,55 +63,8 @@ app.use(session({
   cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.serializeUser((user, done) => done(null, user._id.toString()));
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    let user = null;
-    try { user = await users.findOne({ _id: new ObjectId(id) }); } catch (e) {}
-    if (!user) user = await users.findOne({ _id: id });
-    if (user && user.banned) return done(null, false);
-    done(null, user);
-  } catch (err) { done(err, null); }
-});
-
-passport.use(new GoogleStrategy({
-  clientID: GOOGLE_CLIENT_ID,
-  clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: BASE_URL + '/auth/google/callback'
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-    if (!email) return done(new Error('No email'), null);
-    let user = await users.findOne({ email });
-    if (user && user.banned) return done(new Error('Banned'), null);
-    if (!user) {
-      const result = await users.insertOne({
-        email,
-        name: profile.displayName || email.split('@')[0],
-        photo: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
-        googleId: profile.id,
-        banned: false,
-        wallet: 0,
-        totalSpent: 0,
-        createdAt: new Date(),
-        lastLogin: new Date()
-      });
-      user = await users.findOne({ _id: result.insertedId });
-    } else {
-      await users.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
-      user = await users.findOne({ _id: user._id });
-    }
-    return done(null, user);
-  } catch (err) { return done(err, null); }
-}));
-
 function requireAuth(req, res, next) {
-  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-    if (req.user.banned) return res.status(403).json({ error: 'Banned' });
+  if (req.session && req.session.userId) {
     return next();
   }
   if (req.path.startsWith('/api/')) return res.status(401).json({ error: 'Login required' });
@@ -129,42 +78,120 @@ function adminAuth(req, res, next) {
   next();
 }
 
-// ============ AUTH ============
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login?error=1' }),
-  (req, res) => res.redirect('/dashboard')
-);
-app.get('/auth/logout', (req, res) => req.logout(() => res.redirect('/')));
+async function getUser(req) {
+  if (!req.session || !req.session.userId) return null;
+  try {
+    let user = null;
+    try { user = await users.findOne({ _id: new ObjectId(req.session.userId) }); } catch (e) {}
+    if (!user) user = await users.findOne({ _id: req.session.userId });
+    return user;
+  } catch (e) { return null; }
+}
 
-app.get('/api/me', (req, res) => {
-  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-    if (req.user.banned) return res.status(403).json({ error: 'Banned' });
-    res.json({
-      email: req.user.email,
-      name: req.user.name,
-      photo: req.user.photo,
-      wallet: req.user.wallet || 0,
-      totalSpent: req.user.totalSpent || 0,
-      id: req.user._id.toString()
+// ============ AUTH ROUTES ============
+
+app.post('/api/auth/signup', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email, password required' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be 6+ characters' });
+    }
+    const cleanEmail = email.toLowerCase().trim();
+    
+    const existing = await users.findOne({ email: cleanEmail });
+    if (existing) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+    
+    const hash = await bcrypt.hash(password, 10);
+    const result = await users.insertOne({
+      name: name.trim(),
+      email: cleanEmail,
+      password: hash,
+      banned: false,
+      wallet: 0,
+      totalSpent: 0,
+      photo: null,
+      createdAt: new Date(),
+      lastLogin: new Date()
     });
-  } else {
-    res.status(401).json({ error: 'Not logged in' });
+    
+    req.session.userId = result.insertedId.toString();
+    res.json({ success: true, userId: result.insertedId.toString() });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
-// ============ PAGES ============
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+    const cleanEmail = email.toLowerCase().trim();
+    const user = await users.findOne({ email: cleanEmail });
+    
+    if (!user) return res.status(401).json({ error: 'Email or password wrong' });
+    if (user.banned) return res.status(403).json({ error: 'Account banned' });
+    if (!user.password) return res.status(401).json({ error: 'Use Google login (deprecated) — please sign up again' });
+    
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(401).json({ error: 'Email or password wrong' });
+    
+    await users.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
+    req.session.userId = user._id.toString();
+    
+    res.json({ success: true, user: {
+      id: user._id.toString(),
+      email: user.email,
+      name: user.name,
+      wallet: user.wallet || 0,
+      totalSpent: user.totalSpent || 0
+    }});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  req.session.destroy(() => res.json({ success: true }));
+});
+
+app.get('/api/me', async (req, res) => {
+  const user = await getUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  if (user.banned) return res.status(403).json({ error: 'Banned' });
+  res.json({
+    email: user.email,
+    name: user.name,
+    photo: user.photo,
+    wallet: user.wallet || 0,
+    totalSpent: user.totalSpent || 0,
+    id: user._id.toString()
+  });
+});
+
+// ============ PAGE ROUTES ============
+
 app.post('/api/create', async (req, res) => {
   try {
     const { html, slug, password, title } = req.body;
     if (!html) return res.status(400).json({ error: 'HTML required' });
+    
+    const user = await getUser(req);
     let userId = null;
-    if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-      if (req.user.banned) return res.status(403).json({ error: 'Banned' });
-      userId = req.user._id.toString();
+    if (user) {
+      if (user.banned) return res.status(403).json({ error: 'Banned' });
+      userId = user._id.toString();
     }
+    
     const id = slug ? slug.trim() : Math.random().toString(36).slice(2, 10);
     const hash = password ? await bcrypt.hash(password, 10) : null;
+    
     await pages.insertOne({
       _id: id,
       title: title || 'Untitled',
@@ -216,13 +243,15 @@ app.get('/embed/:id', async (req, res) => {
 
 // ============ USER ============
 app.get('/api/my-pages', requireAuth, async (req, res) => {
-  const userId = req.user._id.toString();
+  const user = await getUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const userId = user._id.toString();
   const list = await pages.find({ userId }, { projection: { html: 0, password: 0 } })
     .sort({ createdAt: -1 }).toArray();
   res.json(list);
 });
 
-// ============ SHOP (Public) ============
+// ============ SHOP (public) ============
 app.get('/api/shop/products', async (req, res) => {
   try {
     const { category, search, sort } = req.query;
@@ -280,26 +309,28 @@ app.get('/api/shop/settings', async (req, res) => {
 // ============ PURCHASE ============
 app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
   try {
+    const user = await getUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+    
     const q = makeIdQuery(req.params.id);
     q.active = true;
     const product = await products.findOne(q);
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
     const alreadyBought = await purchases.findOne({
-      userId: req.user._id.toString(),
+      userId: user._id.toString(),
       productId: req.params.id
     });
     if (alreadyBought) {
       return res.json({
-        success: true,
-        alreadyOwned: true,
+        success: true, alreadyOwned: true,
         deliveryType: product.deliveryType,
         deliveryData: product.deliveryData
       });
     }
 
     const price = product.discountPrice || product.price;
-    const userWallet = req.user.wallet || 0;
+    const userWallet = user.wallet || 0;
 
     if (userWallet < price) {
       return res.status(400).json({
@@ -310,13 +341,13 @@ app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
     }
 
     await users.updateOne(
-      { _id: req.user._id },
+      { _id: user._id },
       { $inc: { wallet: -price, totalSpent: price } }
     );
 
     await purchases.insertOne({
-      userId: req.user._id.toString(),
-      userEmail: req.user.email,
+      userId: user._id.toString(),
+      userEmail: user.email,
       productId: req.params.id,
       productTitle: product.title,
       price: price,
@@ -336,8 +367,9 @@ app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
 
 app.get('/api/shop/access/:id', requireAuth, async (req, res) => {
   try {
+    const user = await getUser(req);
     const purchase = await purchases.findOne({
-      userId: req.user._id.toString(),
+      userId: user._id.toString(),
       productId: req.params.id
     });
     if (!purchase) return res.status(403).json({ error: 'Not purchased' });
@@ -353,7 +385,8 @@ app.get('/api/shop/access/:id', requireAuth, async (req, res) => {
 
 app.get('/api/shop/my-purchases', requireAuth, async (req, res) => {
   try {
-    const list = await purchases.find({ userId: req.user._id.toString() })
+    const user = await getUser(req);
+    const list = await purchases.find({ userId: user._id.toString() })
       .sort({ purchasedAt: -1 }).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -362,6 +395,7 @@ app.get('/api/shop/my-purchases', requireAuth, async (req, res) => {
 // ============ DEPOSIT ============
 app.post('/api/deposit/request', requireAuth, async (req, res) => {
   try {
+    const user = await getUser(req);
     const { amount, senderNumber, transactionId, screenshot } = req.body;
     const config = await settings.findOne({ _id: 'config' });
     const minDep = config?.minDeposit || 50;
@@ -372,9 +406,9 @@ app.post('/api/deposit/request', requireAuth, async (req, res) => {
     if (!senderNumber) return res.status(400).json({ error: 'Sender number required' });
 
     const result = await deposits.insertOne({
-      userId: req.user._id.toString(),
-      userEmail: req.user.email,
-      userName: req.user.name,
+      userId: user._id.toString(),
+      userEmail: user.email,
+      userName: user.name,
       amount: Number(amount),
       method: 'bKash',
       senderNumber,
@@ -390,7 +424,8 @@ app.post('/api/deposit/request', requireAuth, async (req, res) => {
 
 app.get('/api/deposit/my-list', requireAuth, async (req, res) => {
   try {
-    const list = await deposits.find({ userId: req.user._id.toString() })
+    const user = await getUser(req);
+    const list = await deposits.find({ userId: user._id.toString() })
       .sort({ createdAt: -1 }).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -412,7 +447,7 @@ app.get('/api/admin/list-full', adminAuth, async (req, res) => {
 });
 
 app.get('/api/admin/list-users', adminAuth, async (req, res) => {
-  const list = await users.find({}, { projection: { googleId: 0 } })
+  const list = await users.find({}, { projection: { password: 0 } })
     .sort({ createdAt: -1 }).toArray();
   res.json(list);
 });
@@ -481,8 +516,7 @@ app.post('/api/admin/product', adminAuth, async (req, res) => {
       deliveryType: String(deliveryType || 'link'),
       deliveryData: String(deliveryData),
       stock: stock ? Number(stock) : 999,
-      sold: 0,
-      active: true,
+      sold: 0, active: true,
       createdAt: new Date()
     });
     res.json({ success: true, id: result.insertedId.toString() });
@@ -506,7 +540,7 @@ app.put('/api/admin/product/:id', adminAuth, async (req, res) => {
 
     const q = makeIdQuery(req.params.id);
     const result = await products.updateOne(q, { $set: update });
-    if (result.matchedCount === 0) return res.status(404).json({ error: 'Product not found in DB' });
+    if (result.matchedCount === 0) return res.status(404).json({ error: 'Not found' });
     res.json({ success: true, modified: result.modifiedCount });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -515,9 +549,7 @@ app.delete('/api/admin/product/:id', adminAuth, async (req, res) => {
   try {
     const q = makeIdQuery(req.params.id);
     const result = await products.deleteOne(q);
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ error: 'Product not found in DB' });
-    }
+    if (result.deletedCount === 0) return res.status(404).json({ error: 'Not found' });
     res.json({ success: true, deleted: result.deletedCount });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -587,7 +619,7 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   });
 });
 
-// ============ HTML ROUTES ============
+// ============ HTML ============
 app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
 app.get('/dashboard', requireAuth, (req, res) => res.sendFile(__dirname + '/public/dashboard.html'));
 app.get('/shop', (req, res) => res.sendFile(__dirname + '/public/shop.html'));
