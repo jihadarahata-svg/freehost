@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,628 +8,238 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-    background: #0a0a0f;
-    color: #fff;
-    min-height: 100vh;
+    background: #0a0a0f; color: #fff; min-height: 100vh;
     -webkit-font-smoothing: antialiased;
-    line-height: 1.5;
   }
-  
   .glow {
-    position: fixed;
-    top: -200px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 1000px;
-    height: 700px;
+    position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 600px;
     background: radial-gradient(ellipse at center, rgba(139,92,246,0.15), transparent 70%);
-    pointer-events: none;
-    z-index: 0;
+    pointer-events: none; z-index: 0;
   }
+  .wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 20px; }
   
-  .wrap {
-    position: relative;
-    z-index: 1;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 24px 20px 80px;
-  }
-  
-  /* Nav */
   .nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 0 20px;
-    margin-bottom: 32px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    flex-wrap: wrap;
-    gap: 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 32px;
   }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: -0.3px;
-    text-decoration: none;
-    color: #fff;
-  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 16px; }
   .brand-mark {
-    width: 28px;
-    height: 28px;
+    width: 30px; height: 30px; border-radius: 9px;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
   }
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .nav-btn {
-    padding: 8px 14px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    color: #a1a1aa;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: 0.15s;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-  .nav-btn.logout:hover {
-    background: rgba(239,68,68,0.1);
-    color: #f87171;
-    border-color: rgba(239,68,68,0.3);
-  }
-  .nav-btn.shop {
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
-    color: #fff;
-    border: none;
-  }
-  .nav-btn.bell-btn {
-    position: relative;
-    padding: 8px 14px;
-    font-size: 15px;
-  }
-  .nav-btn.referral-btn {
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
-    color: #fff;
-    border: none;
-    padding: 8px 14px;
-    font-size: 12px;
-  }
-  .nav-btn.referral-btn:hover {
-    background: linear-gradient(135deg, #ea580c, #dc2626);
-    color: #fff;
-  }
-  .bell-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: #ef4444;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 20px;
-    min-width: 18px;
-    text-align: center;
-    display: none;
-    box-shadow: 0 0 10px rgba(239,68,68,0.5);
-  }
-  .bell-badge.show { display: inline-block; }
-  
-  /* Header */
-  .page-header {
-    margin-bottom: 28px;
-  }
-  .page-header h1 {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    margin-bottom: 6px;
-  }
-  .page-header p {
-    color: #a1a1aa;
-    font-size: 14px;
-  }
-  
-  /* User card */
-  .user-card {
-    background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(99,102,241,0.1));
-    border: 1px solid rgba(139,92,246,0.3);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .user-info { display: flex; align-items: center; gap: 10px; }
   .user-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
+    width: 36px; height: 36px; border-radius: 50%;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: 800;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
   }
-  .user-info { flex: 1; min-width: 150px; }
-  .user-info h2 {
-    font-size: 18px;
-    font-weight: 800;
-    margin-bottom: 2px;
+  .user-name { font-size: 13px; font-weight: 600; }
+  .user-email { font-size: 11px; color: #71717a; }
+  .logout-btn {
+    padding: 8px 14px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1); color: #a1a1aa;
+    border-radius: 8px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
   }
-  .user-info p {
-    font-size: 13px;
-    color: #a1a1aa;
-  }
-  .wallet-badge {
-    background: linear-gradient(135deg, #10b981, #059669);
-    padding: 10px 16px;
-    border-radius: 12px;
-    font-weight: 800;
-    font-size: 15px;
-    white-space: nowrap;
-  }
+  .logout-btn:hover { background: rgba(239,68,68,0.1); color: #f87171; }
+  @media (max-width: 500px) { .user-name, .user-email { display: none; } }
   
-  /* Stats */
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 12px;
-    margin-bottom: 28px;
-  }
+  h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px; }
+  .welcome-sub { color: #a1a1aa; font-size: 14px; margin-bottom: 32px; }
+  
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+  @media (max-width: 600px) { .stats { grid-template-columns: 1fr; } }
   .stat {
     background: linear-gradient(180deg, #101018, #0d0d14);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 18px;
-    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 20px;
   }
-  .stat-num {
-    font-size: 26px;
-    font-weight: 900;
+  .stat-label { font-size: 11px; color: #71717a; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 8px; }
+  .stat-value {
+    font-size: 26px; font-weight: 800; letter-spacing: -1px;
     background: linear-gradient(135deg, #c4b5fd, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -1px;
-  }
-  .stat-lbl {
-    font-size: 11px;
-    color: #71717a;
-    margin-top: 4px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
   
-  /* Actions */
-  .actions {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-  }
+  .actions { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
   .btn-primary {
-    flex: 1;
-    min-width: 180px;
-    padding: 15px 22px;
+    flex: 1; min-width: 180px; padding: 16px 24px;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-shadow: 0 12px 30px -8px rgba(139,92,246,0.5);
-    transition: 0.2s;
-    font-family: inherit;
+    color: #fff; border: none; border-radius: 12px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    text-decoration: none; text-align: center;
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; box-shadow: 0 12px 30px -8px rgba(139,92,246,0.5);
+    transition: 0.2s; font-family: inherit;
   }
   .btn-primary:hover { transform: translateY(-2px); }
-  .btn-primary.shop-btn {
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
-    box-shadow: 0 12px 30px -8px rgba(245,158,11,0.5);
-  }
-  .btn-primary.referral-btn {
-    background: linear-gradient(135deg, #10b981, #059669);
-    box-shadow: 0 12px 30px -8px rgba(16,185,129,0.5);
-  }
   
-  /* Section title */
   .section-title {
-    font-size: 13px;
-    font-weight: 800;
-    color: #71717a;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .section-title .count {
-    color: #a1a1aa;
-    font-weight: 600;
+    font-size: 13px; font-weight: 700; color: #71717a;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;
   }
   
-  /* Page cards */
   .page-card {
     background: linear-gradient(180deg, #101018, #0d0d14);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 12px;
-    transition: 0.2s;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 18px; margin-bottom: 12px;
   }
-  .page-card:hover { border-color: rgba(139,92,246,0.3); }
-  .page-card-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .page-title {
-    font-size: 15px;
-    font-weight: 800;
-    margin-bottom: 6px;
-    letter-spacing: -0.2px;
-  }
-  .page-url {
-    color: #c4b5fd;
-    font-size: 12px;
-    font-family: 'SF Mono', monospace;
-    text-decoration: none;
-    word-break: break-all;
-    display: block;
-  }
+  .page-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .page-url { color: #c4b5fd; font-size: 12px; font-family: monospace; text-decoration: none; word-break: break-all; }
   .page-url:hover { text-decoration: underline; }
-  .page-meta {
-    display: flex;
-    gap: 14px;
-    font-size: 11px;
-    color: #71717a;
-    margin-top: 8px;
-    flex-wrap: wrap;
-  }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-  }
-  .badge.live { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-  .badge.banned { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-  .badge.locked { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
-  
-  .page-actions {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-  }
+  .page-meta { display: flex; gap: 16px; font-size: 12px; color: #71717a; margin-top: 10px; flex-wrap: wrap; }
+  .page-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   .mini-btn {
-    padding: 7px 12px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: #d4d4d8;
-    border-radius: 7px;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: 0.15s;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+    padding: 7px 12px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1); color: #d4d4d8;
+    border-radius: 7px; font-size: 11px; font-weight: 600;
+    cursor: pointer; font-family: inherit; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 5px;
   }
-  .mini-btn:hover {
-    background: rgba(139,92,246,0.2);
-    color: #c4b5fd;
-    border-color: rgba(139,92,246,0.4);
-  }
-  .mini-btn.danger:hover {
-    background: rgba(239,68,68,0.15);
-    color: #f87171;
-    border-color: rgba(239,68,68,0.3);
-  }
+  .mini-btn:hover { background: rgba(139,92,246,0.2); color: #c4b5fd; }
+  .mini-btn.danger:hover { background: rgba(239,68,68,0.15); color: #f87171; }
   
-  /* Empty state */
   .empty {
-    text-align: center;
-    padding: 50px 20px;
+    text-align: center; padding: 60px 20px;
     background: linear-gradient(180deg, #101018, #0d0d14);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.06);
     border-radius: 14px;
   }
-  .empty-icon { font-size: 44px; margin-bottom: 12px; opacity: 0.6; }
-  .empty-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-  .empty-desc { color: #71717a; font-size: 13px; margin-bottom: 18px; }
-  
-  /* Loading */
-  .loading { text-align: center; padding: 40px; color: #71717a; }
-  .spinner {
-    display: inline-block;
-    width: 28px;
-    height: 28px;
-    border: 3px solid rgba(139,92,246,0.2);
-    border-top-color: #8b5cf6;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 10px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: #16a34a;
-    color: #fff;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    transition: transform 0.3s;
-    z-index: 9999;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.6; }
+  .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .empty-desc { color: #71717a; font-size: 14px; }
 </style>
 </head>
 <body>
-
   <div class="glow"></div>
-
   <div class="wrap">
-
-    <!-- Nav -->
+    
     <nav class="nav">
-      <a href="/" class="brand">
+      <div class="brand">
         <div class="brand-mark">◆</div>
         <span>FreeHost</span>
-      </a>
+      </div>
       <div class="nav-right">
-        <a href="/shop" class="nav-btn shop">🛍 Shop</a>
-        <a href="/wallet" class="nav-btn">💰 Wallet</a>
-        <a href="/orders" class="nav-btn">📦 Orders</a>
-        <a href="/notifications" class="nav-btn bell-btn">
-          🔔 <span class="bell-badge" id="bellBadge"></span>
-        </a>
-        <a href="/referral" class="nav-btn referral-btn">🎁 Refer</a>
-        <a href="/api/auth/logout" class="nav-btn logout">🚪 Logout</a>
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div>
+            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-email" id="userEmail"></div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()">Logout</button>
       </div>
     </nav>
-
-    <!-- Header -->
-    <div class="page-header">
-      <h1>My Dashboard</h1>
-      <p>Manage your hosted pages & shop purchases</p>
-    </div>
-
-    <!-- User card -->
-    <div class="user-card" id="userCard">
-      <div class="user-avatar" id="userAvatar">?</div>
-      <div class="user-info">
-        <h2 id="userName">Loading...</h2>
-        <p id="userEmail"></p>
-      </div>
-      <div class="wallet-badge" id="userWallet">💰 ৳0</div>
-    </div>
-
-    <!-- Stats -->
+    
+    <h1>My Dashboard</h1>
+    <p class="welcome-sub">Manage all your hosted pages</p>
+    
     <div class="stats">
       <div class="stat">
-        <div class="stat-num" id="statPages">0</div>
-        <div class="stat-lbl">Total Pages</div>
+        <div class="stat-label">Total Pages</div>
+        <div class="stat-value" id="statPages">0</div>
       </div>
       <div class="stat">
-        <div class="stat-num" id="statViews">0</div>
-        <div class="stat-lbl">Total Views</div>
+        <div class="stat-label">Total Views</div>
+        <div class="stat-value" id="statViews">0</div>
       </div>
       <div class="stat">
-        <div class="stat-num" id="statLive">0</div>
-        <div class="stat-lbl">Live Now</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num" id="statReferrals">0</div>
-        <div class="stat-lbl">Referrals</div>
+        <div class="stat-label">Wallet Balance</div>
+        <div class="stat-value" id="statWallet">৳0</div>
       </div>
     </div>
-
-    <!-- Actions -->
+    
     <div class="actions">
-      <a href="/" class="btn-primary">➕ Host New Page</a>
-      <a href="/shop" class="btn-primary shop-btn">🛍 Go to Shop</a>
-      <a href="/referral" class="btn-primary referral-btn">🎁 Invite Friends</a>
+      <a href="/" class="btn-primary">+ Host New Page</a>
+      <a href="/shop" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669);">🛍 Visit Shop</a>
     </div>
-
-    <!-- Pages -->
-    <div class="section-title">
-      <span>Your Pages</span>
-      <span class="count" id="pagesCount">0</span>
-    </div>
-
+    
+    <div class="section-title">My Pages</div>
     <div id="pagesContainer">
-      <div class="loading">
-        <div class="spinner"></div>
-        <div>Loading your pages...</div>
+      <div class="empty">
+        <div class="empty-icon">⏳</div>
+        <div class="empty-title">Loading...</div>
       </div>
     </div>
-
   </div>
-
-  <div class="toast" id="toast"></div>
-
+  
   <script>
-    let allPages = [];
-    let user = null;
-
-    function showToast(msg, color) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.style.background = color || '#16a34a';
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2000);
-    }
-
     async function loadUser() {
       try {
         const res = await fetch('/api/me');
-        if (!res.ok) {
-          window.location.href = '/login';
-          return;
-        }
-        user = await res.json();
-        
+        if (!res.ok) { window.location.href = '/login'; return null; }
+        const user = await res.json();
         document.getElementById('userName').textContent = user.name || 'User';
         document.getElementById('userEmail').textContent = user.email || '';
-        document.getElementById('userAvatar').textContent = (user.name || 'U')[0].toUpperCase();
-        document.getElementById('userWallet').textContent = '💰 ৳' + (user.wallet || 0);
-        document.getElementById('statReferrals').textContent = user.referralCount || 0;
+        document.getElementById('userAvatar').textContent = (user.name || 'U').charAt(0).toUpperCase();
+        document.getElementById('statWallet').textContent = '৳' + (user.wallet || 0);
+        return user;
       } catch (e) {
         window.location.href = '/login';
+        return null;
       }
     }
-
+    
     async function loadPages() {
       try {
         const res = await fetch('/api/my-pages');
         if (!res.ok) throw new Error('Failed');
-        allPages = await res.json();
+        const pages = await res.json();
         
-        document.getElementById('statPages').textContent = allPages.length;
-        const totalViews = allPages.reduce((sum, p) => sum + (p.views || 0), 0);
-        document.getElementById('statViews').textContent = totalViews;
-        const live = allPages.filter(p => !p.banned).length;
-        document.getElementById('statLive').textContent = live;
-        document.getElementById('pagesCount').textContent = allPages.length;
+        document.getElementById('statPages').textContent = pages.length;
+        document.getElementById('statViews').textContent = pages.reduce((s, p) => s + (p.views || 0), 0);
         
-        renderPages();
+        const c = document.getElementById('pagesContainer');
+        if (!pages.length) {
+          c.innerHTML = '<div class="empty"><div class="empty-icon">📄</div><div class="empty-title">No pages yet</div><div class="empty-desc">Host your first HTML page</div></div>';
+          return;
+        }
+        
+        c.innerHTML = pages.map(p => {
+          const url = location.origin + '/p/' + p._id;
+          return '<div class="page-card">' +
+            '<h3>' + esc(p.title) + '</h3>' +
+            '<a class="page-url" href="' + url + '" target="_blank">' + url + '</a>' +
+            '<div class="page-meta">' +
+              '<span>👁 ' + (p.views || 0) + ' views</span>' +
+              '<span>📅 ' + new Date(p.createdAt).toLocaleDateString() + '</span>' +
+            '</div>' +
+            '<div class="page-actions">' +
+              '<a href="' + url + '" target="_blank" class="mini-btn">🔗 Open</a>' +
+              '<button class="mini-btn" onclick="copyLink(\'' + url + '\', this)">📋 Copy</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
       } catch (e) {
-        document.getElementById('pagesContainer').innerHTML =
-          '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Failed to load</div></div>';
+        document.getElementById('pagesContainer').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Failed to load</div></div>';
       }
     }
-
-    function renderPages() {
-      const container = document.getElementById('pagesContainer');
-      
-      if (allPages.length === 0) {
-        container.innerHTML = `
-          <div class="empty">
-            <div class="empty-icon">📄</div>
-            <div class="empty-title">No pages yet</div>
-            <div class="empty-desc">Host your first HTML page to get started</div>
-            <a href="/" class="btn-primary" style="display:inline-flex; text-decoration:none; max-width:220px; margin:0 auto;">➕ Host Now</a>
-          </div>
-        `;
-        return;
-      }
-      
-      container.innerHTML = allPages.map(p => {
-        const url = location.origin + '/p/' + p._id;
-        const badge = p.banned
-          ? '<span class="badge banned">⛔ Banned</span>'
-          : (p.password ? '<span class="badge locked">🔒 Locked</span>' : '<span class="badge live">● Live</span>');
-        
-        return `
-          <div class="page-card">
-            <div class="page-card-head">
-              <div>
-                <div class="page-title">${esc(p.title || 'Untitled')}</div>
-                <a href="${url}" target="_blank" class="page-url">${url}</a>
-                <div style="margin-top:8px;">${badge}</div>
-              </div>
-            </div>
-            <div class="page-meta">
-              <span>👁 ${p.views || 0} views</span>
-              <span>📅 ${new Date(p.createdAt).toLocaleDateString()}</span>
-            </div>
-            <div class="page-actions">
-              <a href="${url}" target="_blank" class="mini-btn">🔗 Open</a>
-              <button class="mini-btn" onclick="copyLink('${url}', this)">📋 Copy Link</button>
-              <button class="mini-btn danger" onclick="deletePage('${p._id}', '${esc(p.title || 'Untitled')}')">🗑 Delete</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
+    
     function copyLink(url, btn) {
       navigator.clipboard.writeText(url);
       const old = btn.textContent;
-      btn.textContent = '✓ Copied';
+      btn.textContent = '✅ Copied';
       setTimeout(() => btn.textContent = old, 1500);
     }
-
-    async function deletePage(id, title) {
-      if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-      try {
-        const res = await fetch('/api/my-pages/' + id, { method: 'DELETE' });
-        if (!res.ok) throw new Error('Failed');
-        showToast('🗑 Deleted');
-        loadPages();
-      } catch (e) {
-        showToast('❌ Failed to delete', '#dc2626');
-      }
+    
+    async function doLogout() {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/';
     }
-
-    async function checkNotifications() {
-      try {
-        const res = await fetch('/api/notifications/unread-count');
-        if (res.ok) {
-          const data = await res.json();
-          const badge = document.getElementById('bellBadge');
-          if (data.count > 0) {
-            badge.textContent = data.count > 99 ? '99+' : data.count;
-            badge.classList.add('show');
-          } else {
-            badge.classList.remove('show');
-          }
-        }
-      } catch (e) {}
-    }
-
+    
     function esc(s) {
-      return String(s || '').replace(/[&<>"]/g, c => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
-      }[c]));
+      return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
-
-    loadUser();
-    loadPages();
-    checkNotifications();
-    setInterval(checkNotifications, 30000);
+    
+    async function init() {
+      const user = await loadUser();
+      if (user) loadPages();
+    }
+    init();
   </script>
-
 </body>
 </html>
