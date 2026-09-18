@@ -57,7 +57,11 @@
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 14px; padding: 20px;
   }
-  .stat-label { font-size: 11px; color: #71717a; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 8px; }
+  .stat-label {
+    font-size: 11px; color: #71717a;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    font-weight: 600; margin-bottom: 8px;
+  }
   .stat-value {
     font-size: 26px; font-weight: 800; letter-spacing: -1px;
     background: linear-gradient(135deg, #c4b5fd, #8b5cf6);
@@ -69,8 +73,8 @@
     flex: 1; min-width: 180px; padding: 16px 24px;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
     color: #fff; border: none; border-radius: 12px;
-    font-size: 14px; font-weight: 700; cursor: pointer;
-    text-decoration: none; text-align: center;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; text-decoration: none; text-align: center;
     display: flex; align-items: center; justify-content: center;
     gap: 8px; box-shadow: 0 12px 30px -8px rgba(139,92,246,0.5);
     transition: 0.2s; font-family: inherit;
@@ -88,7 +92,10 @@
     border-radius: 14px; padding: 18px; margin-bottom: 12px;
   }
   .page-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-  .page-url { color: #c4b5fd; font-size: 12px; font-family: monospace; text-decoration: none; word-break: break-all; }
+  .page-url {
+    color: #c4b5fd; font-size: 12px; font-family: monospace;
+    text-decoration: none; word-break: break-all;
+  }
   .page-url:hover { text-decoration: underline; }
   .page-meta { display: flex; gap: 16px; font-size: 12px; color: #71717a; margin-top: 10px; flex-wrap: wrap; }
   .page-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
@@ -107,7 +114,7 @@
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 14px;
   }
-  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.6; }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.6; display: block; }
   .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
   .empty-desc { color: #71717a; font-size: 14px; }
 </style>
@@ -133,40 +140,64 @@
       </div>
     </nav>
     
-    <h1>My Dashboard</h1>
-    <p class="welcome-sub">Manage all your hosted pages</p>
+    <h1 id="dashTitle">My Dashboard</h1>
+    <p class="welcome-sub" id="dashSubtitle">Manage all your hosted pages</p>
     
     <div class="stats">
       <div class="stat">
-        <div class="stat-label">Total Pages</div>
+        <div class="stat-label" id="pagesLabel">Total Pages</div>
         <div class="stat-value" id="statPages">0</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Total Views</div>
+        <div class="stat-label" id="viewsLabel">Total Views</div>
         <div class="stat-value" id="statViews">0</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Wallet Balance</div>
+        <div class="stat-label" id="walletLabel">Wallet Balance</div>
         <div class="stat-value" id="statWallet">৳0</div>
       </div>
     </div>
     
     <div class="actions">
-      <a href="/" class="btn-primary">+ Host New Page</a>
-      <a href="/shop" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669);">🛍 Visit Shop</a>
-      <a href="/wallet" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰 My Wallet</a>
+      <a href="/" class="btn-primary" id="hostBtn">+ Host New Page</a>
+      <a href="/shop" class="btn-primary" id="shopBtn" style="background: linear-gradient(135deg, #10b981, #059669);">🛍 Visit Shop</a>
+      <a href="/wallet" class="btn-primary" id="walletBtn" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰 My Wallet</a>
     </div>
     
-    <div class="section-title">My Pages</div>
+    <div class="section-title" id="myPagesTitle">My Pages</div>
     <div id="pagesContainer">
       <div class="empty">
-        <div class="empty-icon">⏳</div>
+        <span class="empty-icon">⏳</span>
         <div class="empty-title">Loading...</div>
       </div>
     </div>
   </div>
   
   <script>
+    let content = {};
+    
+    async function loadContent() {
+      try {
+        const res = await fetch('/api/content');
+        content = await res.json();
+        const d = content.dashboard || {};
+        
+        if (d.title) document.getElementById('dashTitle').textContent = d.title;
+        if (d.subtitle) document.getElementById('dashSubtitle').textContent = d.subtitle;
+        if (d.pagesLabel) document.getElementById('pagesLabel').textContent = d.pagesLabel;
+        if (d.viewsLabel) document.getElementById('viewsLabel').textContent = d.viewsLabel;
+        if (d.walletLabel) document.getElementById('walletLabel').textContent = d.walletLabel;
+        if (d.hostPageBtn) document.getElementById('hostBtn').textContent = d.hostPageBtn;
+        if (d.shopBtn) document.getElementById('shopBtn').textContent = d.shopBtn;
+        if (d.walletBtn) document.getElementById('walletBtn').textContent = d.walletBtn;
+        if (d.myPagesTitle) document.getElementById('myPagesTitle').textContent = d.myPagesTitle;
+        
+        if (d.title) document.title = d.title + ' — FreeHost';
+      } catch (e) {
+        console.error('Content load failed:', e);
+      }
+    }
+    
     async function loadUser() {
       try {
         const res = await fetch('/api/me');
@@ -188,13 +219,14 @@
         const res = await fetch('/api/my-pages');
         if (!res.ok) throw new Error('Failed');
         const pages = await res.json();
+        const d = content.dashboard || {};
         
         document.getElementById('statPages').textContent = pages.length;
         document.getElementById('statViews').textContent = pages.reduce((s, p) => s + (p.views || 0), 0);
         
         const c = document.getElementById('pagesContainer');
         if (!pages.length) {
-          c.innerHTML = '<div class="empty"><div class="empty-icon">📄</div><div class="empty-title">No pages yet</div><div class="empty-desc">Host your first HTML page</div></div>';
+          c.innerHTML = '<div class="empty"><span class="empty-icon">📄</span><div class="empty-title">' + (d.noPagesText || 'No pages yet') + '</div><div class="empty-desc">' + (d.hostFirstText || 'Host your first HTML page') + '</div></div>';
           return;
         }
         
@@ -214,7 +246,7 @@
           '</div>';
         }).join('');
       } catch (e) {
-        document.getElementById('pagesContainer').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Failed to load</div></div>';
+        document.getElementById('pagesContainer').innerHTML = '<div class="empty"><span class="empty-icon">⚠️</span><div class="empty-title">Failed to load</div></div>';
       }
     }
     
@@ -235,6 +267,7 @@
     }
     
     async function init() {
+      await loadContent();
       const user = await loadUser();
       if (user) loadPages();
     }
