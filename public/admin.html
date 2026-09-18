@@ -12,36 +12,26 @@
   h1 { font-size: 22px; margin-bottom: 16px; }
   input, textarea, select { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; font-family: inherit; }
   textarea { resize: vertical; min-height: 100px; }
-  select { cursor: pointer; }
-  input:disabled { opacity: 0.6; cursor: not-allowed; }
-  button { padding: 12px 18px; background: #fff; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 12px; font-family: inherit; font-size: 13px; transition: 0.15s; }
-  button:hover:not(:disabled) { transform: translateY(-1px); opacity: 0.9; }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button { padding: 12px 18px; background: #fff; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 12px; font-family: inherit; font-size: 13px; }
   button.full { width: 100%; }
   button.red { background: #dc2626; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
-  button.red:hover { background: #b91c1c; }
   button.sm { padding: 6px 10px; font-size: 12px; margin: 0; background: #222; color: #fff; }
-  button.sm:hover { background: #333; }
   button.green { background: #16a34a; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
-  button.green:hover { background: #15803d; }
   button.blue { background: #2563eb; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
-  button.blue:hover { background: #1d4ed8; }
   button.orange { background: #ea580c; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
-  button.orange:hover { background: #c2410c; }
-  button.gold { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; padding: 12px; font-size: 14px; margin: 0; }
+  button.purple { background: #8b5cf6; color: #fff; padding: 6px 10px; font-size: 12px; margin: 0; }
   
   #dash { display: none; }
   #dash.show { display: block; }
   
   .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-bottom: 20px; }
   .card { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; }
-  .num { font-size: 24px; font-weight: 700; color: #4ade80; }
+  .num { font-size: 22px; font-weight: 700; color: #4ade80; }
   .lbl { font-size: 11px; color: #888; margin-top: 2px; }
   
   .tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
-  .tab { padding: 10px 16px; background: #1a1a1a; border: 1px solid #222; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: #a1a1aa; transition: 0.15s; }
-  .tab:hover { background: #222; color: #fff; }
+  .tab { padding: 10px 16px; background: #1a1a1a; border: 1px solid #222; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: #a1a1aa; }
   .tab.active { background: #2563eb; color: #fff; border-color: #2563eb; }
   
   .search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
@@ -50,7 +40,6 @@
   .page-item { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
   .page-item h3 { font-size: 15px; margin-bottom: 6px; }
   .page-item .link { color: #4ade80; font-size: 12px; word-break: break-all; display: block; margin-bottom: 8px; text-decoration: none; }
-  .page-item .link:hover { text-decoration: underline; }
   .page-item .meta { font-size: 11px; color: #888; margin-bottom: 10px; }
   .page-item .btns { display: flex; gap: 6px; flex-wrap: wrap; }
   .empty { text-align: center; color: #666; padding: 40px; font-size: 14px; }
@@ -66,7 +55,6 @@
     padding: 12px 24px; border-radius: 10px;
     font-size: 14px; font-weight: 600;
     transition: transform 0.3s; z-index: 9999;
-    max-width: 90vw; text-align: center;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
   
@@ -75,7 +63,6 @@
     background: rgba(0,0,0,0.85);
     display: none; align-items: center; justify-content: center;
     z-index: 1000; padding: 16px;
-    backdrop-filter: blur(4px);
   }
   .modal-overlay.show { display: flex; }
   .modal {
@@ -87,18 +74,42 @@
   .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #222; }
   .modal-head h2 { font-size: 18px; }
   .modal-close { background: transparent; color: #888; border: none; font-size: 24px; cursor: pointer; padding: 4px 12px; margin: 0; }
-  .modal-close:hover { background: #222; color: #fff; }
   .modal-field { margin-bottom: 14px; }
   .modal-field label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; text-transform: uppercase; font-weight: 600; }
   .modal-btns { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #222; }
   .modal-btns button { flex: 1; margin: 0; }
   
+  .product-card { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; }
   .product-photo { width: 60px; height: 60px; border-radius: 8px; background: #222; object-fit: cover; flex-shrink: 0; }
+  .product-info { flex: 1; min-width: 0; }
+  .product-info h4 { font-size: 14px; margin-bottom: 4px; }
+  .product-info p { font-size: 11px; color: #888; }
+  .product-price { font-size: 16px; font-weight: 700; color: #4ade80; }
+  
+  .deposit-card { background: #151515; border: 1px solid #222; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .badge-pending { background: #ea580c; color: #fff; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+  .badge-approved { background: #16a34a; color: #fff; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+  .badge-rejected { background: #dc2626; color: #fff; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+  
+  /* Referral */
+  .ref-card {
+    background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(99,102,241,0.04));
+    border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 12px; padding: 14px; margin-bottom: 10px;
+  }
+  .ref-arrow { font-size: 20px; color: #8b5cf6; }
+  .ref-user { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px; }
+  .ref-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .ref-avatar.green { background: linear-gradient(135deg, #16a34a, #059669); }
 </style>
 </head>
 <body>
 
-  <!-- LOGIN -->
   <div class="login" id="login">
     <h1>🔐 Admin Login</h1>
     <input id="pass" type="password" placeholder="Password" onkeypress="if(event.key==='Enter') doLogin()">
@@ -106,7 +117,6 @@
     <p id="err" style="color:#f87171;font-size:13px;margin-top:10px"></p>
   </div>
 
-  <!-- DASHBOARD -->
   <div id="dash">
     <div class="head">
       <h1 style="font-size:20px">📊 Admin Panel</h1>
@@ -120,6 +130,7 @@
       <div class="card"><div class="num" id="tp">0</div><div class="lbl">Pages</div></div>
       <div class="card"><div class="num" id="tv">0</div><div class="lbl">Views</div></div>
       <div class="card"><div class="num" id="tu">0</div><div class="lbl">Users</div></div>
+      <div class="card"><div class="num" id="tref">0</div><div class="lbl">Referrals</div></div>
       <div class="card"><div class="num" id="tprod">0</div><div class="lbl">Products</div></div>
       <div class="card"><div class="num" id="tpend">0</div><div class="lbl">Pending 💰</div></div>
       <div class="card"><div class="num" id="trev">0</div><div class="lbl">Revenue ৳</div></div>
@@ -128,15 +139,14 @@
     <div class="tabs">
       <div class="tab active" onclick="showTab('pages')" id="tab-pages">📄 Pages</div>
       <div class="tab" onclick="showTab('users')" id="tab-users">👥 Users</div>
+      <div class="tab" onclick="showTab('referrals')" id="tab-referrals">📢 Referrals</div>
       <div class="tab" onclick="showTab('products')" id="tab-products">🛍 Products</div>
-      <div class="tab" onclick="showTab('gifts')" id="tab-gifts">🎁 Gift Codes</div>
-      <div class="tab" onclick="showTab('coupons')" id="tab-coupons">🎟️ Coupons</div>
       <div class="tab" onclick="showTab('deposits')" id="tab-deposits">💰 Deposits</div>
       <div class="tab" onclick="showTab('orders')" id="tab-orders">📦 Orders</div>
       <div class="tab" onclick="showTab('settings')" id="tab-settings">⚙️ Settings</div>
     </div>
 
-    <!-- PAGES TAB -->
+    <!-- PAGES -->
     <div id="tab-content-pages">
       <div class="search-bar">
         <input id="searchInput" placeholder="🔍 Search pages..." oninput="filterPages()">
@@ -144,7 +154,7 @@
       <div id="list"><div class="empty">Loading...</div></div>
     </div>
 
-    <!-- USERS TAB -->
+    <!-- USERS -->
     <div id="tab-content-users" style="display:none;">
       <div class="search-bar">
         <input id="userSearchInput" placeholder="🔍 Search users..." oninput="filterUsers()">
@@ -152,25 +162,18 @@
       <div id="userList"><div class="empty">Loading...</div></div>
     </div>
 
-    <!-- PRODUCTS TAB -->
+    <!-- REFERRALS -->
+    <div id="tab-content-referrals" style="display:none;">
+      <div id="referralList"><div class="empty">Loading...</div></div>
+    </div>
+
+    <!-- PRODUCTS -->
     <div id="tab-content-products" style="display:none;">
-      <button class="blue" style="width:100%; margin-bottom:16px; padding:12px;" onclick="openProductModal()">➕ Add New Product</button>
+      <button class="blue" style="width:100%; margin-bottom:16px;" onclick="openProductModal()">➕ Add New Product</button>
       <div id="productList"><div class="empty">Loading...</div></div>
     </div>
 
-    <!-- GIFT CODES TAB -->
-    <div id="tab-content-gifts" style="display:none;">
-      <button class="gold" style="width:100%; margin-bottom:16px;" onclick="openGiftModal()">➕ Create Gift Code</button>
-      <div id="giftCodeList"><div class="empty">Loading...</div></div>
-    </div>
-
-    <!-- COUPONS TAB -->
-    <div id="tab-content-coupons" style="display:none;">
-      <button class="blue" style="width:100%; margin-bottom:16px; padding:12px;" onclick="openCouponModal()">➕ Create New Coupon</button>
-      <div id="couponList"><div class="empty">Loading...</div></div>
-    </div>
-
-    <!-- DEPOSITS TAB -->
+    <!-- DEPOSITS -->
     <div id="tab-content-deposits" style="display:none;">
       <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
         <button class="sm" onclick="loadDeposits('pending')">⏳ Pending</button>
@@ -181,12 +184,12 @@
       <div id="depositList"><div class="empty">Loading...</div></div>
     </div>
 
-    <!-- ORDERS TAB -->
+    <!-- ORDERS -->
     <div id="tab-content-orders" style="display:none;">
       <div id="orderList"><div class="empty">Loading...</div></div>
     </div>
 
-    <!-- SETTINGS TAB -->
+    <!-- SETTINGS -->
     <div id="tab-content-settings" style="display:none;">
       <div class="page-item">
         <h3>💳 bKash Settings</h3>
@@ -219,6 +222,18 @@
       </div>
 
       <div class="page-item">
+        <h3>🎁 Referral Bonuses</h3>
+        <div class="modal-field">
+          <label>Welcome Bonus (৳) — নতুন user পাবে</label>
+          <input id="setWelcome" type="number" placeholder="20">
+        </div>
+        <div class="modal-field">
+          <label>Referral Bonus (৳) — যে invite করলো পাবে</label>
+          <input id="setReferral" type="number" placeholder="10">
+        </div>
+      </div>
+
+      <div class="page-item">
         <h3>💵 Deposit Limits</h3>
         <div class="modal-field">
           <label>Minimum Deposit (৳)</label>
@@ -227,29 +242,6 @@
         <div class="modal-field">
           <label>Maximum Deposit (৳)</label>
           <input id="setMax" type="number" placeholder="10000">
-        </div>
-      </div>
-
-      <div class="page-item">
-        <h3>👥 Referral Settings</h3>
-        <div class="modal-field">
-          <label>Referral Enabled</label>
-          <select id="setRefEnabled">
-            <option value="true">✅ Yes</option>
-            <option value="false">❌ No</option>
-          </select>
-        </div>
-        <div class="modal-field">
-          <label>Referrer Bonus (৳)</label>
-          <input id="setRefBonusReferrer" type="number" placeholder="50">
-        </div>
-        <div class="modal-field">
-          <label>New User Bonus (৳)</label>
-          <input id="setRefBonusNewUser" type="number" placeholder="25">
-        </div>
-        <div class="modal-field">
-          <label>First Purchase Bonus (৳)</label>
-          <input id="setRefBonusFP" type="number" placeholder="25">
         </div>
       </div>
 
@@ -269,7 +261,7 @@
         </div>
       </div>
 
-      <button class="blue" style="width:100%; padding:12px;" onclick="saveSettings()">💾 Save Settings</button>
+      <button class="blue" style="width:100%;" onclick="saveSettings()">💾 Save Settings</button>
     </div>
   </div>
 
@@ -353,124 +345,30 @@
     </div>
   </div>
 
-  <!-- GIFT CODE MODAL -->
-  <div class="modal-overlay" id="giftModal">
-    <div class="modal">
-      <div class="modal-head">
-        <h2 id="giftModalTitle">🎁 Create Gift Code</h2>
-        <button class="modal-close" onclick="closeGiftModal()">✕</button>
-      </div>
-      <div class="modal-field">
-        <label>Gift Code *</label>
-        <input id="gCode" placeholder="GIFT100" style="text-transform:uppercase;">
-      </div>
-      <div class="modal-field">
-        <label>Amount (৳) * — কত টাকা Wallet এ যোগ হবে</label>
-        <input id="gValue" type="number" placeholder="100">
-      </div>
-      <div class="modal-field">
-        <label>Usage Limit (total users) — optional</label>
-        <input id="gLimit" type="number" placeholder="100">
-      </div>
-      <div class="modal-field">
-        <label>Expiry Date — optional</label>
-        <input id="gExpiry" type="date">
-      </div>
-      <div class="modal-field">
-        <label>Description — optional</label>
-        <input id="gDesc" placeholder="Welcome gift for users">
-      </div>
-      <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:12px;font-size:12px;color:#fbbf24;line-height:1.6;margin-top:8px;">
-        ℹ️ <strong>Info:</strong> প্রতি user এই code শুধু <strong>একবারই</strong> claim করতে পারবে।
-      </div>
-      <div class="modal-btns">
-        <button class="sm" onclick="closeGiftModal()">Cancel</button>
-        <button class="blue" onclick="saveGiftCode()" id="saveGiftBtn">💾 Save Gift Code</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- COUPON MODAL -->
-  <div class="modal-overlay" id="couponModal">
-    <div class="modal">
-      <div class="modal-head">
-        <h2 id="couponModalTitle">➕ Create Coupon</h2>
-        <button class="modal-close" onclick="closeCouponModal()">✕</button>
-      </div>
-      <div class="modal-field">
-        <label>Coupon Code *</label>
-        <input id="cCode" placeholder="WELCOME20" style="text-transform:uppercase;">
-      </div>
-      <div class="modal-field">
-        <label>Type *</label>
-        <select id="cType">
-          <option value="percentage">📊 Percentage (%)</option>
-          <option value="fixed">💵 Fixed Amount (৳)</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Value * (number only)</label>
-        <input id="cValue" type="number" placeholder="20 (for 20% or ৳20)">
-      </div>
-      <div class="modal-field">
-        <label>Minimum Purchase (৳) — optional</label>
-        <input id="cMin" type="number" placeholder="100">
-      </div>
-      <div class="modal-field">
-        <label>Maximum Discount (৳) — optional (for % type)</label>
-        <input id="cMax" type="number" placeholder="500">
-      </div>
-      <div class="modal-field">
-        <label>Usage Limit (total uses) — optional</label>
-        <input id="cLimit" type="number" placeholder="100">
-      </div>
-      <div class="modal-field">
-        <label>Expiry Date — optional</label>
-        <input id="cExpiry" type="date">
-      </div>
-      <div class="modal-field">
-        <label>Description — optional</label>
-        <input id="cDesc" placeholder="Welcome offer for new users">
-      </div>
-      <div class="modal-field" style="display:flex; align-items:center; gap:10px;">
-        <input id="cSingle" type="checkbox" style="width:auto; margin:0;">
-        <label for="cSingle" style="margin:0; text-transform:none;">Single use per user</label>
-      </div>
-      <div class="modal-btns">
-        <button class="sm" onclick="closeCouponModal()">Cancel</button>
-        <button class="blue" onclick="saveCoupon()" id="saveCouponBtn">💾 Save Coupon</button>
-      </div>
-    </div>
-  </div>
-
   <div class="toast" id="toast"></div>
 
   <script>
     let token = localStorage.getItem('adm_token');
-    let allPages = [], allUsers = [], allProducts = [], allDeposits = [], allOrders = [], allCoupons = [], allGiftCodes = [];
+    let allPages = [], allUsers = [], allProducts = [], allDeposits = [], allOrders = [], allReferrals = [];
     let currentTab = 'pages';
-    let editingId = null, editingProductId = null, editingCouponId = null, editingGiftId = null;
+    let editingId = null, editingProductId = null;
 
     if (token) showDash();
 
     async function doLogin() {
       const password = document.getElementById('pass').value;
-      try {
-        const res = await fetch('/api/admin/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password })
-        });
-        const data = await res.json();
-        if (data.success) {
-          token = data.token;
-          localStorage.setItem('adm_token', token);
-          showDash();
-        } else {
-          document.getElementById('err').textContent = '❌ ভুল পাসওয়ার্ড';
-        }
-      } catch (e) {
-        document.getElementById('err').textContent = '❌ Failed to login';
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        token = data.token;
+        localStorage.setItem('adm_token', token);
+        showDash();
+      } else {
+        document.getElementById('err').textContent = '❌ ভুল পাসওয়ার্ড';
       }
     }
 
@@ -490,51 +388,44 @@
       t.textContent = msg;
       t.style.background = color || '#16a34a';
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2500);
+      setTimeout(() => t.classList.remove('show'), 2000);
     }
 
     function showTab(tab) {
       currentTab = tab;
-      const tabs = ['pages','users','products','gifts','coupons','deposits','orders','settings'];
-      tabs.forEach(t => {
-        const content = document.getElementById('tab-content-' + t);
-        const btn = document.getElementById('tab-' + t);
-        if (content) content.style.display = t === tab ? 'block' : 'none';
-        if (btn) btn.classList.toggle('active', t === tab);
+      ['pages','users','referrals','products','deposits','orders','settings'].forEach(t => {
+        document.getElementById('tab-content-' + t).style.display = t === tab ? 'block' : 'none';
+        document.getElementById('tab-' + t).classList.toggle('active', t === tab);
       });
       
       if (tab === 'users' && !allUsers.length) loadUsers();
+      if (tab === 'referrals' && !allReferrals.length) loadReferrals();
       if (tab === 'products' && !allProducts.length) loadProducts();
-      if (tab === 'gifts' && !allGiftCodes.length) loadGiftCodes();
-      if (tab === 'coupons' && !allCoupons.length) loadCoupons();
       if (tab === 'deposits' && !allDeposits.length) loadDeposits('pending');
       if (tab === 'orders' && !allOrders.length) loadOrders();
       if (tab === 'settings') loadSettings();
     }
 
     async function load() {
-      try {
-        const h = { 'x-admin-token': token };
-        const [pRes, sRes] = await Promise.all([
-          fetch('/api/admin/list-full', { headers: h }),
-          fetch('/api/admin/stats', { headers: h })
-        ]);
-        if (pRes.status === 401) return logout();
-        
-        allPages = await pRes.json();
-        const stats = await sRes.json();
-        
-        document.getElementById('tp').textContent = stats.totalPages || 0;
-        document.getElementById('tv').textContent = stats.totalViews || 0;
-        document.getElementById('tu').textContent = stats.totalUsers || 0;
-        document.getElementById('tprod').textContent = stats.totalProducts || 0;
-        document.getElementById('tpend').textContent = stats.pendingDeposits || 0;
-        document.getElementById('trev').textContent = stats.totalRevenue || 0;
-        
-        renderPages(allPages);
-      } catch (e) {
-        showToast('❌ Failed to load', '#dc2626');
-      }
+      const h = { 'x-admin-token': token };
+      const [pRes, sRes] = await Promise.all([
+        fetch('/api/admin/list-full', { headers: h }),
+        fetch('/api/admin/stats', { headers: h })
+      ]);
+      if (pRes.status === 401) return logout();
+      
+      allPages = await pRes.json();
+      const stats = await sRes.json();
+      
+      document.getElementById('tp').textContent = stats.totalPages || 0;
+      document.getElementById('tv').textContent = stats.totalViews || 0;
+      document.getElementById('tu').textContent = stats.totalUsers || 0;
+      document.getElementById('tref').textContent = stats.totalReferrals || 0;
+      document.getElementById('tprod').textContent = stats.totalProducts || 0;
+      document.getElementById('tpend').textContent = stats.pendingDeposits || 0;
+      document.getElementById('trev').textContent = stats.totalRevenue || 0;
+      
+      renderPages(allPages);
     }
 
     // ===== PAGES =====
@@ -551,42 +442,31 @@
         '<div class="page-item">' +
           '<h3>' + esc(p.title) + '</h3>' +
           '<a class="link" href="/p/' + p._id + '" target="_blank">/p/' + p._id + '</a>' +
-          '<div class="meta">👁 ' + (p.views || 0) + ' · ' + new Date(p.createdAt).toLocaleDateString() + (p.password ? ' · 🔒' : '') + (p.banned ? ' · ⛔' : '') + '</div>' +
+          '<div class="meta">👁 ' + p.views + ' · ' + new Date(p.createdAt).toLocaleDateString() + (p.password ? ' · 🔒' : '') + (p.banned ? ' · ⛔' : '') + '</div>' +
           '<div class="btns">' +
             '<button class="blue" onclick="openEdit(\'' + p._id + '\')">📝 Edit</button>' +
             '<button class="green" onclick="toggleCode(\'' + p._id + '\')">📄 Code</button>' +
-            '<button class="sm" onclick="copyLink(\'' + p._id + '\')">🔗 Copy</button>' +
-            '<button class="red" onclick="delPage(\'' + p._id + '\', \'' + esc(p.title) + '\')">🗑 Delete</button>' +
+            '<button class="sm" onclick="copy(\'' + p._id + '\')">🔗 Copy</button>' +
+            '<button class="red" onclick="del(\'' + p._id + '\')">🗑</button>' +
           '</div>' +
           '<div class="code-box" id="code-' + p._id + '"><pre>' + esc(p.html || '') + '</pre></div>' +
         '</div>'
       ).join('');
     }
 
-    function toggleCode(id) { 
-      const box = document.getElementById('code-' + id);
-      if (box) box.classList.toggle('show');
-    }
-    
-    function copyLink(id) { 
-      navigator.clipboard.writeText(location.origin + '/p/' + id); 
-      showToast('✅ Link copied!'); 
-    }
+    function toggleCode(id) { document.getElementById('code-' + id).classList.toggle('show'); }
+    function copy(id) { navigator.clipboard.writeText(location.origin + '/p/' + id); showToast('✅ Copied!'); }
 
     function openEdit(id) {
       const p = allPages.find(x => x._id === id);
-      if (!p) return showToast('❌ Page not found', '#dc2626');
+      if (!p) return;
       editingId = id;
       document.getElementById('editTitle').value = p.title || '';
       document.getElementById('editHtml').value = p.html || '';
       document.getElementById('editPassword').value = '';
       document.getElementById('editModal').classList.add('show');
     }
-    
-    function closeEditModal() { 
-      editingId = null; 
-      document.getElementById('editModal').classList.remove('show'); 
-    }
+    function closeEditModal() { editingId = null; document.getElementById('editModal').classList.remove('show'); }
 
     async function saveEdit() {
       if (!editingId) return;
@@ -597,67 +477,40 @@
       const pass = document.getElementById('editPassword').value;
       if (pass) body.password = pass;
       
-      try {
-        const res = await fetch('/api/admin/page/' + editingId, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-          body: JSON.stringify(body)
-        });
-        if (res.ok) { 
-          showToast('✅ Saved!'); 
-          closeEditModal(); 
-          load(); 
-        } else {
-          showToast('❌ Failed', '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
+      const res = await fetch('/api/admin/page/' + editingId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) { showToast('✅ Saved!'); closeEditModal(); load(); }
+      else showToast('❌ Failed', '#dc2626');
     }
 
-    async function delPage(id, title) {
-      if (!confirm('"' + title + '" page delete করবে?')) return;
-      try {
-        const res = await fetch('/api/admin/delete/' + id, {
-          method: 'DELETE',
-          headers: { 'x-admin-token': token }
-        });
-        if (res.ok) {
-          showToast('🗑 Page deleted');
-          load();
-        } else {
-          showToast('❌ Failed to delete', '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed to delete', '#dc2626');
-      }
+    async function del(id) {
+      if (!confirm('Delete করবে?')) return;
+      await fetch('/api/admin/delete/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
+      showToast('🗑 Deleted'); load();
     }
 
     // ===== USERS =====
     async function loadUsers() {
-      try {
-        const res = await fetch('/api/admin/list-users', { headers: { 'x-admin-token': token } });
-        allUsers = await res.json();
-        renderUsers(allUsers);
-      } catch (e) {
-        document.getElementById('userList').innerHTML = '<div class="empty">Failed to load</div>';
-      }
+      const res = await fetch('/api/admin/list-users', { headers: { 'x-admin-token': token } });
+      allUsers = await res.json();
+      renderUsers(allUsers);
     }
-    
     function filterUsers() {
       const q = document.getElementById('userSearchInput').value.toLowerCase();
       if (!q) return renderUsers(allUsers);
       renderUsers(allUsers.filter(u => (u.email||'').toLowerCase().includes(q) || (u.name||'').toLowerCase().includes(q)));
     }
-    
     function renderUsers(users) {
       const list = document.getElementById('userList');
-      if (!users.length) { list.innerHTML = '<div class="empty">কোনো user নেই</div>'; return; }
+      if (!users.length) { list.innerHTML = '<div class="empty">No users</div>'; return; }
       list.innerHTML = users.map(u => 
         '<div class="page-item">' +
           '<h3>' + esc(u.name || 'User') + '</h3>' +
           '<div class="meta">📧 ' + esc(u.email) + '</div>' +
-          '<div class="meta">💰 ৳' + (u.wallet || 0) + ' · Spent: ৳' + (u.totalSpent || 0) + (u.referralCount ? ' · 👥 ' + u.referralCount + ' refs' : '') + (u.banned ? ' · ⛔ BANNED' : '') + '</div>' +
+          '<div class="meta">💰 ৳' + (u.wallet || 0) + ' · Spent: ৳' + (u.totalSpent || 0) + (u.referrals ? ' · 📢 ' + u.referrals + ' refs' : '') + (u.banned ? ' · ⛔ BANNED' : '') + '</div>' +
           '<div class="btns">' +
             (u.banned 
               ? '<button class="green" onclick="banUser(\'' + u._id + '\', false)">✅ Unban</button>'
@@ -667,81 +520,68 @@
         '</div>'
       ).join('');
     }
-    
     async function banUser(id, ban) {
       if (ban && !confirm('Ban করবে?')) return;
-      try {
-        const res = await fetch('/api/admin/user/' + id + '/ban', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-          body: JSON.stringify({ banned: ban })
-        });
-        if (res.ok) {
-          showToast(ban ? '🚫 Banned' : '✅ Unbanned');
-          loadUsers();
-        } else {
-          showToast('❌ Failed', '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
+      await fetch('/api/admin/user/' + id + '/ban', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({ banned: ban })
+      });
+      showToast(ban ? '🚫 Banned' : '✅ Unbanned'); loadUsers();
     }
-    
     async function delUser(id, email) {
-      if (!confirm('"' + email + '" এর account এবং সব data delete করবে? এটা ফেরানো যাবে না!')) return;
-      try {
-        const res = await fetch('/api/admin/user/' + id, {
-          method: 'DELETE',
-          headers: { 'x-admin-token': token }
-        });
-        if (res.ok) {
-          showToast('🗑 User deleted');
-          loadUsers();
-        } else {
-          showToast('❌ Failed', '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
+      if (!confirm('"' + email + '" delete করবে?')) return;
+      await fetch('/api/admin/user/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
+      showToast('🗑 Deleted'); loadUsers();
+    }
+
+    // ===== REFERRALS =====
+    async function loadReferrals() {
+      const res = await fetch('/api/admin/referrals', { headers: { 'x-admin-token': token } });
+      allReferrals = await res.json();
+      const list = document.getElementById('referralList');
+      if (!allReferrals.length) { list.innerHTML = '<div class="empty">এখনো কোনো referral হয়নি</div>'; return; }
+      
+      list.innerHTML = allReferrals.map(r => 
+        '<div class="ref-card">' +
+          '<div class="ref-user">' +
+            '<div class="ref-avatar green">' + (r.name || 'U').charAt(0).toUpperCase() + '</div>' +
+            '<span><strong>' + esc(r.name || 'User') + '</strong> · ' + esc(r.email) + '</span>' +
+          '</div>' +
+          '<div style="font-size:12px;color:#888;margin-bottom:6px;">invited by →</div>' +
+          '<div class="ref-user">' +
+            '<div class="ref-avatar">' + (r.referrerName || 'U').charAt(0).toUpperCase() + '</div>' +
+            '<span><strong>' + esc(r.referrerName || 'Unknown') + '</strong> · ' + esc(r.referrerEmail || '') + '</span>' +
+          '</div>' +
+          '<div style="font-size:11px;color:#71717a;margin-top:8px;">🕐 ' + new Date(r.createdAt).toLocaleString() + '</div>' +
+        '</div>'
+      ).join('');
     }
 
     // ===== PRODUCTS =====
     async function loadProducts() {
-      try {
-        const res = await fetch('/api/admin/products', { headers: { 'x-admin-token': token } });
-        allProducts = await res.json();
-        renderProducts();
-      } catch (e) {
-        document.getElementById('productList').innerHTML = '<div class="empty">Failed to load</div>';
-      }
+      const res = await fetch('/api/admin/products', { headers: { 'x-admin-token': token } });
+      allProducts = await res.json();
+      renderProducts();
     }
-    
     function renderProducts() {
       const list = document.getElementById('productList');
-      if (!allProducts.length) { 
-        list.innerHTML = '<div class="empty">🛍 কোনো product নেই<br><br>উপরে "Add New Product" চাপো</div>'; 
-        return; 
-      }
-      list.innerHTML = allProducts.map(p => {
-        const photoHtml = p.photo 
-          ? '<img src="' + esc(p.photo) + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'">' 
-          : '<div style="width:60px;height:60px;border-radius:8px;background:#222;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">📦</div>';
-        
-        return '<div class="page-item" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">' +
-          photoHtml +
-          '<div style="flex:1;min-width:180px;">' +
-            '<h3 style="font-size:14px;">' + esc(p.title) + '</h3>' +
-            '<div class="meta">📁 ' + esc(p.category || 'Other') + ' · Sold: ' + (p.sold || 0) + ' · Stock: ' + (p.stock || 0) + '</div>' +
-            '<div style="font-size:16px;font-weight:700;color:#4ade80;margin-top:4px;">৳' + (p.discountPrice || p.price) + (p.discountPrice ? ' <span style="color:#888;font-size:12px;text-decoration:line-through;">৳' + p.price + '</span>' : '') + '</div>' +
+      if (!allProducts.length) { list.innerHTML = '<div class="empty">কোনো product নেই</div>'; return; }
+      list.innerHTML = allProducts.map(p => 
+        '<div class="product-card">' +
+          (p.photo ? '<img src="' + esc(p.photo) + '" class="product-photo" onerror="this.style.display=\'none\'">' : '<div class="product-photo"></div>') +
+          '<div class="product-info">' +
+            '<h4>' + esc(p.title) + '</h4>' +
+            '<p>📁 ' + esc(p.category || 'Other') + ' · Sold: ' + (p.sold||0) + '</p>' +
+            '<div class="product-price">৳' + (p.discountPrice || p.price) + (p.discountPrice ? ' <span style="color:#888;font-size:12px;text-decoration:line-through;">৳' + p.price + '</span>' : '') + '</div>' +
           '</div>' +
-          '<div class="btns" style="width:100%;">' +
-            '<button class="blue" onclick="openProductModal(\'' + p._id + '\')">📝 Edit</button>' +
-            '<button class="red" onclick="delProduct(\'' + p._id + '\', \'' + esc(p.title) + '\')">🗑 Delete</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
+        '</div>' +
+        '<div class="btns" style="margin-bottom:10px;">' +
+          '<button class="blue" onclick="openProductModal(\'' + p._id + '\')">📝 Edit</button>' +
+          '<button class="red" onclick="delProduct(\'' + p._id + '\')">🗑 Delete</button>' +
+        '</div>'
+      ).join('');
     }
-    
     function openProductModal(id) {
       editingProductId = id || null;
       document.getElementById('productModalTitle').textContent = id ? '📝 Edit Product' : '➕ Add Product';
@@ -765,12 +605,7 @@
       }
       document.getElementById('productModal').classList.add('show');
     }
-    
-    function closeProductModal() { 
-      editingProductId = null; 
-      document.getElementById('productModal').classList.remove('show'); 
-    }
-    
+    function closeProductModal() { editingProductId = null; document.getElementById('productModal').classList.remove('show'); }
     async function saveProduct() {
       const body = {
         title: document.getElementById('pTitle').value,
@@ -783,445 +618,39 @@
         deliveryData: document.getElementById('pDeliveryData').value,
         stock: document.getElementById('pStock').value
       };
+      if (!body.title || !body.price || !body.deliveryData) return showToast('❌ Title, Price, Delivery Data দাও', '#dc2626');
       
-      if (!body.title || !body.price || !body.deliveryData) {
-        return showToast('❌ Title, Price, Delivery Data দাও', '#dc2626');
-      }
+      const url = editingProductId ? '/api/admin/product/' + editingProductId : '/api/admin/product';
+      const method = editingProductId ? 'PUT' : 'POST';
       
-      const btn = document.getElementById('saveProductBtn');
-      btn.disabled = true;
-      btn.textContent = '💾 Saving...';
-      
-      try {
-        const url = editingProductId ? '/api/admin/product/' + editingProductId : '/api/admin/product';
-        const method = editingProductId ? 'PUT' : 'POST';
-        
-        const res = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-          body: JSON.stringify(body)
-        });
-        
-        if (res.ok) { 
-          showToast('✅ Product saved!'); 
-          closeProductModal(); 
-          allProducts = [];
-          loadProducts(); 
-        } else {
-          const data = await res.json();
-          showToast('❌ ' + (data.error || 'Failed'), '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed to save', '#dc2626');
-      }
-      
-      btn.disabled = false;
-      btn.textContent = '💾 Save';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) { showToast('✅ Saved!'); closeProductModal(); loadProducts(); }
+      else showToast('❌ Failed', '#dc2626');
     }
-    
-    async function delProduct(id, title) {
-      if (!confirm('"' + title + '" product delete করবে?')) return;
-      
-      try {
-        const res = await fetch('/api/admin/product/' + id, {
-          method: 'DELETE',
-          headers: { 'x-admin-token': token }
-        });
-        
-        if (res.ok) {
-          showToast('🗑 Product deleted');
-          allProducts = [];
-          loadProducts();
-        } else {
-          const data = await res.json();
-          showToast('❌ ' + (data.error || 'Failed to delete'), '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed to delete', '#dc2626');
-      }
-    }
-
-    // ===== GIFT CODES =====
-    async function loadGiftCodes() {
-      try {
-        const res = await fetch('/api/admin/gift-codes', {
-          headers: { 'x-admin-token': token }
-        });
-        if (res.status === 401) return logout();
-        allGiftCodes = await res.json();
-        renderGiftCodes();
-      } catch (e) {
-        document.getElementById('giftCodeList').innerHTML = '<div class="empty">Failed to load</div>';
-      }
-    }
-
-    function renderGiftCodes() {
-      const list = document.getElementById('giftCodeList');
-      if (!allGiftCodes.length) {
-        list.innerHTML = '<div class="empty">🎁 কোনো gift code নেই<br><br>উপরে "Create Gift Code" চাপো</div>';
-        return;
-      }
-
-      list.innerHTML = allGiftCodes.map(g => {
-        const expired = g.expiresAt && new Date(g.expiresAt) < new Date();
-        const limitReached = g.usageLimit && g.usedCount >= g.usageLimit;
-        const inactive = !g.active;
-        
-        let statusBadge = '<span style="color:#34d399;font-size:11px;font-weight:700;">● Active</span>';
-        if (inactive) statusBadge = '<span style="color:#888;font-size:11px;font-weight:700;">○ Inactive</span>';
-        if (expired) statusBadge = '<span style="color:#f87171;font-size:11px;font-weight:700;">⏰ Expired</span>';
-        if (limitReached) statusBadge = '<span style="color:#fbbf24;font-size:11px;font-weight:700;">🎯 Limit reached</span>';
-
-        const expiryStr = g.expiresAt ? new Date(g.expiresAt).toLocaleDateString() : 'Never';
-        const limitStr = g.usageLimit ? (g.usedCount + '/' + g.usageLimit) : (g.usedCount + '/∞');
-
-        return '<div class="page-item">' +
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
-            '<div>' +
-              '<h3 style="font-family:monospace;font-size:16px;color:#fbbf24;letter-spacing:1px;">🎁 ' + esc(g.code) + '</h3>' +
-              '<div style="font-size:18px;font-weight:900;color:#4ade80;margin-top:4px;">৳' + g.value + '</div>' +
-            '</div>' +
-            '<div style="text-align:right;">' + statusBadge + '</div>' +
-          '</div>' +
-          (g.description ? '<div style="font-size:11px;color:#888;margin-bottom:8px;">' + esc(g.description) + '</div>' : '') +
-          '<div class="meta">' +
-            '👥 Claimed: ' + limitStr + ' · ' +
-            '⏰ Expiry: ' + expiryStr +
-          '</div>' +
-          '<div class="btns" style="margin-top:10px;">' +
-            '<button class="blue" onclick="openGiftModal(\'' + g._id + '\')">📝 Edit</button>' +
-            '<button class="sm" onclick="toggleGiftCode(\'' + g._id + '\', ' + !g.active + ')">' + (g.active ? '⏸ Deactivate' : '▶️ Activate') + '</button>' +
-            '<button class="sm" onclick="viewGiftClaims(\'' + g._id + '\', \'' + esc(g.code) + '\')">📋 Claims</button>' +
-            '<button class="red" onclick="delGiftCode(\'' + g._id + '\', \'' + esc(g.code) + '\')">🗑 Delete</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-    }
-
-    function openGiftModal(id) {
-      editingGiftId = id || null;
-      document.getElementById('giftModalTitle').textContent = id ? '📝 Edit Gift Code' : '🎁 Create Gift Code';
-      
-      if (id) {
-        const g = allGiftCodes.find(x => x._id === id);
-        if (g) {
-          document.getElementById('gCode').value = g.code;
-          document.getElementById('gCode').disabled = true;
-          document.getElementById('gValue').value = g.value || '';
-          document.getElementById('gLimit').value = g.usageLimit || '';
-          document.getElementById('gExpiry').value = g.expiresAt ? new Date(g.expiresAt).toISOString().split('T')[0] : '';
-          document.getElementById('gDesc').value = g.description || '';
-        }
-      } else {
-        ['gCode','gValue','gLimit','gExpiry','gDesc'].forEach(i => document.getElementById(i).value = '');
-        document.getElementById('gCode').disabled = false;
-      }
-      document.getElementById('giftModal').classList.add('show');
-    }
-
-    function closeGiftModal() {
-      editingGiftId = null;
-      document.getElementById('giftModal').classList.remove('show');
-    }
-
-    async function saveGiftCode() {
-      const code = document.getElementById('gCode').value.trim().toUpperCase();
-      const value = document.getElementById('gValue').value;
-      
-      if (!code || !value) return showToast('❌ Code & Amount দিন', '#dc2626');
-      
-      const body = {
-        code,
-        value: Number(value),
-        usageLimit: document.getElementById('gLimit').value || null,
-        expiresAt: document.getElementById('gExpiry').value || null,
-        description: document.getElementById('gDesc').value || ''
-      };
-      
-      const btn = document.getElementById('saveGiftBtn');
-      btn.disabled = true;
-      btn.textContent = '💾 Saving...';
-      
-      try {
-        const url = editingGiftId ? '/api/admin/gift-code/' + editingGiftId : '/api/admin/gift-code';
-        const method = editingGiftId ? 'PUT' : 'POST';
-        
-        const res = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        
-        showToast('✅ Gift code saved!');
-        closeGiftModal();
-        allGiftCodes = [];
-        loadGiftCodes();
-      } catch (e) {
-        showToast('❌ ' + e.message, '#dc2626');
-      }
-      
-      btn.disabled = false;
-      btn.textContent = '💾 Save Gift Code';
-    }
-
-    async function toggleGiftCode(id, active) {
-      try {
-        const res = await fetch('/api/admin/gift-code/' + id, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-          body: JSON.stringify({ active })
-        });
-        if (res.ok) {
-          showToast(active ? '▶️ Activated' : '⏸ Deactivated');
-          allGiftCodes = [];
-          loadGiftCodes();
-        } else {
-          showToast('❌ Failed', '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
-    }
-
-    async function delGiftCode(id, code) {
-      if (!confirm('"' + code + '" gift code delete করবে?')) return;
-      try {
-        const res = await fetch('/api/admin/gift-code/' + id, {
-          method: 'DELETE',
-          headers: { 'x-admin-token': token }
-        });
-        if (res.ok) {
-          showToast('🗑 Deleted');
-          allGiftCodes = [];
-          loadGiftCodes();
-        } else {
-          showToast('❌ Failed', '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
-    }
-
-    async function viewGiftClaims(id, code) {
-      try {
-        const res = await fetch('/api/admin/gift-code/' + id + '/claims', {
-          headers: { 'x-admin-token': token }
-        });
-        const list = await res.json();
-        
-        if (!list.length) {
-          return alert('এই code এখনো কেউ claim করেনি');
-        }
-        
-        const text = list.map((c, i) => 
-          (i+1) + '. ' + c.userEmail + ' — ৳' + c.amount + ' — ' + new Date(c.claimedAt).toLocaleString()
-        ).join('\n');
-        
-        alert('🎁 ' + code + ' Claims (' + list.length + '):\n\n' + text);
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
-    }
-
-    // ===== COUPONS =====
-    async function loadCoupons() {
-      try {
-        const res = await fetch('/api/admin/coupons', {
-          headers: { 'x-admin-token': token }
-        });
-        if (res.status === 401) return logout();
-        allCoupons = await res.json();
-        renderCoupons();
-      } catch (e) {
-        document.getElementById('couponList').innerHTML = '<div class="empty">Failed to load</div>';
-      }
-    }
-
-    function renderCoupons() {
-      const list = document.getElementById('couponList');
-      if (!allCoupons.length) {
-        list.innerHTML = '<div class="empty">🎟️ কোনো coupon নেই<br><br>উপরে "Create New Coupon" চাপো</div>';
-        return;
-      }
-
-      list.innerHTML = allCoupons.map(c => {
-        const expired = c.expiresAt && new Date(c.expiresAt) < new Date();
-        const limitReached = c.usageLimit && c.usedCount >= c.usageLimit;
-        const inactive = !c.active;
-        
-        let statusBadge = '<span style="color:#34d399;font-size:11px;font-weight:700;">● Active</span>';
-        if (inactive) statusBadge = '<span style="color:#888;font-size:11px;font-weight:700;">○ Inactive</span>';
-        if (expired) statusBadge = '<span style="color:#f87171;font-size:11px;font-weight:700;">⏰ Expired</span>';
-        if (limitReached) statusBadge = '<span style="color:#fbbf24;font-size:11px;font-weight:700;">🎯 Limit</span>';
-
-        const typeStr = c.type === 'percentage' ? c.value + '%' : '৳' + c.value;
-        const expiryStr = c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : 'Never';
-        const limitStr = c.usageLimit ? (c.usedCount + '/' + c.usageLimit) : (c.usedCount + '/∞');
-
-        return '<div class="page-item">' +
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
-            '<div>' +
-              '<h3 style="font-family:monospace;font-size:16px;color:#c4b5fd;letter-spacing:1px;">🎟️ ' + esc(c.code) + '</h3>' +
-              '<div style="font-size:12px;color:#a1a1aa;margin-top:4px;">' +
-                typeStr + ' off · Min: ' + (c.minPurchase ? '৳' + c.minPurchase : 'None') + 
-                (c.maxDiscount ? ' · Max: ৳' + c.maxDiscount : '') +
-              '</div>' +
-            '</div>' +
-            '<div style="text-align:right;">' + statusBadge + '</div>' +
-          '</div>' +
-          (c.description ? '<div style="font-size:11px;color:#888;margin-bottom:8px;">' + esc(c.description) + '</div>' : '') +
-          '<div class="meta">' +
-            '📊 Used: ' + limitStr + ' · ' +
-            '⏰ Expiry: ' + expiryStr +
-            (c.singleUse ? ' · 🔒 Single use' : '') +
-          '</div>' +
-          '<div class="btns" style="margin-top:10px;">' +
-            '<button class="blue" onclick="openCouponModal(\'' + c._id + '\')">📝 Edit</button>' +
-            '<button class="sm" onclick="toggleCoupon(\'' + c._id + '\', ' + !c.active + ')">' + (c.active ? '⏸ Deactivate' : '▶️ Activate') + '</button>' +
-            '<button class="red" onclick="delCoupon(\'' + c._id + '\', \'' + esc(c.code) + '\')">🗑 Delete</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-    }
-
-    function openCouponModal(id) {
-      editingCouponId = id || null;
-      document.getElementById('couponModalTitle').textContent = id ? '📝 Edit Coupon' : '➕ Create Coupon';
-      
-      if (id) {
-        const c = allCoupons.find(x => x._id === id);
-        if (c) {
-          document.getElementById('cCode').value = c.code;
-          document.getElementById('cCode').disabled = true;
-          document.getElementById('cType').value = c.type || 'percentage';
-          document.getElementById('cValue').value = c.value || '';
-          document.getElementById('cMin').value = c.minPurchase || '';
-          document.getElementById('cMax').value = c.maxDiscount || '';
-          document.getElementById('cLimit').value = c.usageLimit || '';
-          document.getElementById('cExpiry').value = c.expiresAt ? new Date(c.expiresAt).toISOString().split('T')[0] : '';
-          document.getElementById('cDesc').value = c.description || '';
-          document.getElementById('cSingle').checked = !!c.singleUse;
-        }
-      } else {
-        ['cCode','cValue','cMin','cMax','cLimit','cExpiry','cDesc'].forEach(i => document.getElementById(i).value = '');
-        document.getElementById('cCode').disabled = false;
-        document.getElementById('cType').value = 'percentage';
-        document.getElementById('cSingle').checked = false;
-      }
-      document.getElementById('couponModal').classList.add('show');
-    }
-
-    function closeCouponModal() {
-      editingCouponId = null;
-      document.getElementById('couponModal').classList.remove('show');
-    }
-
-    async function saveCoupon() {
-      const code = document.getElementById('cCode').value.trim().toUpperCase();
-      const type = document.getElementById('cType').value;
-      const value = document.getElementById('cValue').value;
-      
-      if (!code || !value) return showToast('❌ Code & Value দিন', '#dc2626');
-      
-      const body = {
-        code, type,
-        value: Number(value),
-        minPurchase: document.getElementById('cMin').value || null,
-        maxDiscount: document.getElementById('cMax').value || null,
-        usageLimit: document.getElementById('cLimit').value || null,
-        expiresAt: document.getElementById('cExpiry').value || null,
-        description: document.getElementById('cDesc').value || '',
-        singleUse: document.getElementById('cSingle').checked
-      };
-      
-      const btn = document.getElementById('saveCouponBtn');
-      btn.disabled = true;
-      btn.textContent = '💾 Saving...';
-      
-      try {
-        const url = editingCouponId ? '/api/admin/coupon/' + editingCouponId : '/api/admin/coupon';
-        const method = editingCouponId ? 'PUT' : 'POST';
-        
-        const res = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        
-        showToast('✅ Coupon saved!');
-        closeCouponModal();
-        allCoupons = [];
-        loadCoupons();
-      } catch (e) {
-        showToast('❌ ' + e.message, '#dc2626');
-      }
-      
-      btn.disabled = false;
-      btn.textContent = '💾 Save Coupon';
-    }
-
-    async function toggleCoupon(id, active) {
-      try {
-        const res = await fetch('/api/admin/coupon/' + id, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-          body: JSON.stringify({ active })
-        });
-        if (res.ok) {
-          showToast(active ? '▶️ Activated' : '⏸ Deactivated');
-          allCoupons = [];
-          loadCoupons();
-        } else {
-          showToast('❌ Failed', '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
-    }
-
-    async function delCoupon(id, code) {
-      if (!confirm('"' + code + '" coupon delete করবে?')) return;
-      try {
-        const res = await fetch('/api/admin/coupon/' + id, {
-          method: 'DELETE',
-          headers: { 'x-admin-token': token }
-        });
-        if (res.ok) {
-          showToast('🗑 Deleted');
-          allCoupons = [];
-          loadCoupons();
-        } else {
-          showToast('❌ Failed', '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
+    async function delProduct(id) {
+      if (!confirm('Delete করবে?')) return;
+      await fetch('/api/admin/product/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
+      showToast('🗑 Deleted'); loadProducts();
     }
 
     // ===== DEPOSITS =====
     async function loadDeposits(status) {
-      try {
-        const res = await fetch('/api/admin/deposits?status=' + (status || 'pending'), { headers: { 'x-admin-token': token } });
-        allDeposits = await res.json();
-        renderDeposits();
-      } catch (e) {
-        document.getElementById('depositList').innerHTML = '<div class="empty">Failed to load</div>';
-      }
+      const res = await fetch('/api/admin/deposits?status=' + (status || 'pending'), { headers: { 'x-admin-token': token } });
+      allDeposits = await res.json();
+      renderDeposits();
     }
-    
     function renderDeposits() {
       const list = document.getElementById('depositList');
       if (!allDeposits.length) { list.innerHTML = '<div class="empty">কোনো deposit নেই</div>'; return; }
       list.innerHTML = allDeposits.map(d => {
-        let badge = '<span style="background:#ea580c;color:#fff;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;">⏳ PENDING</span>';
-        if (d.status === 'approved') badge = '<span style="background:#16a34a;color:#fff;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;">✅ APPROVED</span>';
-        if (d.status === 'rejected') badge = '<span style="background:#dc2626;color:#fff;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;">❌ REJECTED</span>';
-        
-        return '<div class="page-item">' +
+        const badge = d.status === 'pending' ? '<span class="badge-pending">⏳ PENDING</span>' 
+                    : d.status === 'approved' ? '<span class="badge-approved">✅ APPROVED</span>' 
+                    : '<span class="badge-rejected">❌ REJECTED</span>';
+        return '<div class="deposit-card">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
             '<h3 style="font-size:14px;">💰 ৳' + d.amount + '</h3>' +
             badge +
@@ -1242,98 +671,69 @@
         '</div>';
       }).join('');
     }
-    
     async function reviewDeposit(id, action) {
       if (!confirm(action === 'approve' ? 'Approve করলে user এর wallet এ টাকা যোগ হবে। ঠিক আছে?' : 'Reject করবে?')) return;
-      try {
-        const res = await fetch('/api/admin/deposit/' + id, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-          body: JSON.stringify({ action })
-        });
-        if (res.ok) {
-          showToast(action === 'approve' ? '✅ Approved' : '❌ Rejected');
-          allDeposits = [];
-          loadDeposits('pending');
-          load();
-        } else {
-          showToast('❌ Failed', '#dc2626');
-        }
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
+      const res = await fetch('/api/admin/deposit/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({ action })
+      });
+      if (res.ok) { showToast(action === 'approve' ? '✅ Approved & Balance Added' : '❌ Rejected'); loadDeposits('pending'); load(); }
+      else showToast('❌ Failed', '#dc2626');
     }
 
     // ===== ORDERS =====
     async function loadOrders() {
-      try {
-        const res = await fetch('/api/admin/purchases', { headers: { 'x-admin-token': token } });
-        allOrders = await res.json();
-        const list = document.getElementById('orderList');
-        if (!allOrders.length) { list.innerHTML = '<div class="empty">কোনো order নেই</div>'; return; }
-        list.innerHTML = allOrders.map(o => 
-          '<div class="page-item">' +
-            '<h3>📦 ' + esc(o.productTitle) + '</h3>' +
-            '<div class="meta">👤 ' + esc(o.userEmail) + ' · 💰 ৳' + o.price + (o.couponCode ? ' · 🎟️ ' + esc(o.couponCode) : '') + '</div>' +
-            '<div class="meta">🕐 ' + new Date(o.purchasedAt).toLocaleString() + '</div>' +
-          '</div>'
-        ).join('');
-      } catch (e) {
-        document.getElementById('orderList').innerHTML = '<div class="empty">Failed to load</div>';
-      }
+      const res = await fetch('/api/admin/purchases', { headers: { 'x-admin-token': token } });
+      allOrders = await res.json();
+      const list = document.getElementById('orderList');
+      if (!allOrders.length) { list.innerHTML = '<div class="empty">কোনো order নেই</div>'; return; }
+      list.innerHTML = allOrders.map(o => 
+        '<div class="page-item">' +
+          '<h3>📦 ' + esc(o.productTitle) + '</h3>' +
+          '<div class="meta">👤 ' + esc(o.userEmail) + ' · 💰 ৳' + o.price + '</div>' +
+          '<div class="meta">🕐 ' + new Date(o.purchasedAt).toLocaleString() + '</div>' +
+        '</div>'
+      ).join('');
     }
 
     // ===== SETTINGS =====
     async function loadSettings() {
-      try {
-        const res = await fetch('/api/admin/settings', { headers: { 'x-admin-token': token } });
-        const s = await res.json();
-        document.getElementById('setBkash').value = s.bkashNumber || '';
-        document.getElementById('setBkashType').value = s.bkashType || 'Personal';
-        document.getElementById('setNagad').value = s.nagadNumber || '';
-        document.getElementById('setNagadActive').value = s.nagadActive ? 'true' : 'false';
-        document.getElementById('setMin').value = s.minDeposit || 50;
-        document.getElementById('setMax').value = s.maxDeposit || 10000;
-        document.getElementById('setRefEnabled').value = s.referralEnabled !== false ? 'true' : 'false';
-        document.getElementById('setRefBonusReferrer').value = s.referralBonusReferrer || 50;
-        document.getElementById('setRefBonusNewUser').value = s.referralBonusNewUser || 25;
-        document.getElementById('setRefBonusFP').value = s.referralBonusFirstPurchase || 25;
-        document.getElementById('setEmail').value = s.supportEmail || '';
-        document.getElementById('setWhatsapp').value = s.supportWhatsapp || '';
-        document.getElementById('setTelegram').value = s.supportTelegram || '';
-      } catch (e) {
-        showToast('❌ Failed to load settings', '#dc2626');
-      }
+      const res = await fetch('/api/admin/settings', { headers: { 'x-admin-token': token } });
+      const s = await res.json();
+      document.getElementById('setBkash').value = s.bkashNumber || '';
+      document.getElementById('setBkashType').value = s.bkashType || 'Personal';
+      document.getElementById('setNagad').value = s.nagadNumber || '';
+      document.getElementById('setNagadActive').value = s.nagadActive ? 'true' : 'false';
+      document.getElementById('setWelcome').value = s.welcomeBonus || 20;
+      document.getElementById('setReferral').value = s.referralBonus || 10;
+      document.getElementById('setMin').value = s.minDeposit || 50;
+      document.getElementById('setMax').value = s.maxDeposit || 10000;
+      document.getElementById('setEmail').value = s.supportEmail || '';
+      document.getElementById('setWhatsapp').value = s.supportWhatsapp || '';
+      document.getElementById('setTelegram').value = s.supportTelegram || '';
     }
-    
     async function saveSettings() {
       const body = {
         bkashNumber: document.getElementById('setBkash').value,
         bkashType: document.getElementById('setBkashType').value,
         nagadNumber: document.getElementById('setNagad').value,
         nagadActive: document.getElementById('setNagadActive').value === 'true',
+        welcomeBonus: Number(document.getElementById('setWelcome').value) || 20,
+        referralBonus: Number(document.getElementById('setReferral').value) || 10,
         minDeposit: Number(document.getElementById('setMin').value) || 50,
         maxDeposit: Number(document.getElementById('setMax').value) || 10000,
-        referralEnabled: document.getElementById('setRefEnabled').value === 'true',
-        referralBonusReferrer: Number(document.getElementById('setRefBonusReferrer').value) || 50,
-        referralBonusNewUser: Number(document.getElementById('setRefBonusNewUser').value) || 25,
-        referralBonusFirstPurchase: Number(document.getElementById('setRefBonusFP').value) || 25,
         supportEmail: document.getElementById('setEmail').value,
         supportWhatsapp: document.getElementById('setWhatsapp').value,
         supportTelegram: document.getElementById('setTelegram').value
       };
-      
-      try {
-        const res = await fetch('/api/admin/settings', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-          body: JSON.stringify(body)
-        });
-        if (res.ok) showToast('✅ Settings Saved!');
-        else showToast('❌ Failed', '#dc2626');
-      } catch (e) {
-        showToast('❌ Failed', '#dc2626');
-      }
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) showToast('✅ Settings Saved!');
+      else showToast('❌ Failed', '#dc2626');
     }
 
     function esc(s) {
