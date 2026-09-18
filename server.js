@@ -15,6 +15,10 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-please';
 const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 
+// 🎁 Referral Bonuses
+const WELCOME_BONUS = 20;    // নতুন user কে
+const REFERRAL_BONUS = 10;   // যে invite করলো
+
 let pages, users, products, deposits, purchases, settings, db;
 
 // Flexible ID query
@@ -46,6 +50,8 @@ async function connectDB() {
       nagadActive: false,
       minDeposit: 50,
       maxDeposit: 10000,
+      welcomeBonus: 20,
+      referralBonus: 10,
       supportEmail: 'support@freehost.com',
       supportWhatsapp: '',
       supportTelegram: '',
@@ -64,9 +70,7 @@ app.use(session({
 }));
 
 function requireAuth(req, res, next) {
-  if (req.session && req.session.userId) {
-    return next();
-  }
+  if (req.session && req.session.userId) return next();
   if (req.path.startsWith('/api/')) return res.status(401).json({ error: 'Login required' });
   res.redirect('/login');
 }
@@ -88,11 +92,11 @@ async function getUser(req) {
   } catch (e) { return null; }
 }
 
-// ============ AUTH ROUTES ============
+// ============ AUTH ============
 
 app.post('/api/auth/signup', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, referralCode } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email, password required' });
     }
@@ -102,9 +106,21 @@ app.post('/api/auth/signup', async (req, res) => {
     const cleanEmail = email.toLowerCase().trim();
     
     const existing = await users.findOne({ email: cleanEmail });
-    if (existing) {
-      return res.status(400).json({ error: 'Email already registered' });
+    if (existing) return res.status(400).json({ error: 'Email already registered' });
+    
+    // 🎁 Referral check
+    let referrerId = null;
+    if (referralCode) {
+      try {
+        const referrer = await users.findOne({ _id: new ObjectId(referralCode) });
+        if (referrer && !referrer.banned) referrerId = referrer._id.toString();
+      } catch (e) {}
     }
+    
+    // Settings থেকে bonus নাও
+    const config = await settings.findOne({ _id: 'config' });
+    const welcomeBonus = referrerId ? (config?.welcomeBonus || WELCOME_BONUS) : 0;
+    const referralBonus = config?.referralBonus || REFERRAL_BONUS;
     
     const hash = await bcrypt.hash(password, 10);
     const result = await users.insertOne({
@@ -112,15 +128,30 @@ app.post('/api/auth/signup', async (req, res) => {
       email: cleanEmail,
       password: hash,
       banned: false,
-      wallet: 0,
+      wallet: welcomeBonus,
       totalSpent: 0,
       photo: null,
+      referredBy: referrerId,
+      referrals: 0,
       createdAt: new Date(),
       lastLogin: new Date()
     });
     
+    // 🎁 Referrer কে bonus
+    if (referrerId) {
+      await users.updateOne(
+        { _id: new ObjectId(referrerId) },
+        { $inc: { wallet: referralBonus, referrals: 1 } }
+      );
+    }
+    
     req.session.userId = result.insertedId.toString();
-    res.json({ success: true, userId: result.insertedId.toString() });
+    res.json({ 
+      success: true, 
+      userId: result.insertedId.toString(),
+      welcomeBonus: welcomeBonus,
+      referred: !!referrerId
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -129,15 +160,14 @@ app.post('/api/auth/signup', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
-    }
+    if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+    
     const cleanEmail = email.toLowerCase().trim();
     const user = await users.findOne({ email: cleanEmail });
     
     if (!user) return res.status(401).json({ error: 'Email or password wrong' });
     if (user.banned) return res.status(403).json({ error: 'Account banned' });
-    if (!user.password) return res.status(401).json({ error: 'Use Google login (deprecated) — please sign up again' });
+    if (!user.password) return res.status(401).json({ error: 'Please sign up again' });
     
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(401).json({ error: 'Email or password wrong' });
@@ -166,16 +196,49 @@ app.get('/api/me', async (req, res) => {
   if (!user) return res.status(401).json({ error: 'Not logged in' });
   if (user.banned) return res.status(403).json({ error: 'Banned' });
   res.json({
+    id: user._id.toString(),
     email: user.email,
     name: user.name,
     photo: user.photo,
     wallet: user.wallet || 0,
     totalSpent: user.totalSpent || 0,
-    id: user._id.toString()
+    referrals: user.referrals || 0,
+    referredBy: user.referredBy || null
   });
 });
 
-// ============ PAGE ROUTES ============
+// ============ REFERRAL ============
+
+app.get('/api/referral/info', requireAuth, async (req, res) => {
+  try {
+    const user = await getUser(req);
+    if (!user) return res.status(401).json({ error: 'Not logged in' });
+    
+    const config = await settings.findOne({ _id: 'config' });
+    const referralBonus = config?.referralBonus || REFERRAL_BONUS;
+    const welcomeBonus = config?.welcomeBonus || WELCOME_BONUS;
+    
+    // কারা এই user দিয়ে referred হয়েছে
+    const referred = await users.find(
+      { referredBy: user._id.toString() },
+      { projection: { email: 1, name: 1, createdAt: 1 } }
+    ).sort({ createdAt: -1 }).limit(20).toArray();
+    
+    res.json({
+      link: BASE_URL + '/login?ref=' + user._id.toString(),
+      code: user._id.toString(),
+      referrals: user.referrals || 0,
+      totalEarned: (user.referrals || 0) * referralBonus,
+      referralBonus,
+      welcomeBonus,
+      referredUsers: referred
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============ PAGES ============
 
 app.post('/api/create', async (req, res) => {
   try {
@@ -251,7 +314,7 @@ app.get('/api/my-pages', requireAuth, async (req, res) => {
   res.json(list);
 });
 
-// ============ SHOP (public) ============
+// ============ SHOP (Public) ============
 app.get('/api/shop/products', async (req, res) => {
   try {
     const { category, search, sort } = req.query;
@@ -299,6 +362,8 @@ app.get('/api/shop/settings', async (req, res) => {
       nagadActive: s?.nagadActive || false,
       minDeposit: s?.minDeposit || 50,
       maxDeposit: s?.maxDeposit || 10000,
+      welcomeBonus: s?.welcomeBonus || 20,
+      referralBonus: s?.referralBonus || 10,
       supportEmail: s?.supportEmail || '',
       supportWhatsapp: s?.supportWhatsapp || '',
       supportTelegram: s?.supportTelegram || ''
@@ -602,6 +667,32 @@ app.get('/api/admin/purchases', adminAuth, async (req, res) => {
   res.json(list);
 });
 
+// ===== ADMIN REFERRALS =====
+app.get('/api/admin/referrals', adminAuth, async (req, res) => {
+  try {
+    const list = await users.find(
+      { referredBy: { $ne: null } },
+      { projection: { email: 1, name: 1, referredBy: 1, createdAt: 1, wallet: 1 } }
+    ).sort({ createdAt: -1 }).limit(200).toArray();
+    
+    // Referrer এর info যোগ করো
+    for (let i = 0; i < list.length; i++) {
+      try {
+        const ref = await users.findOne(
+          { _id: new ObjectId(list[i].referredBy) },
+          { projection: { email: 1, name: 1 } }
+        );
+        if (ref) {
+          list[i].referrerEmail = ref.email;
+          list[i].referrerName = ref.name;
+        }
+      } catch (e) {}
+    }
+    
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ===== ADMIN STATS =====
 app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const totalPages = await pages.countDocuments();
@@ -609,11 +700,12 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const totalProducts = await products.countDocuments();
   const pendingDeposits = await deposits.countDocuments({ status: 'pending' });
   const totalPurchases = await purchases.countDocuments();
+  const totalReferrals = await users.countDocuments({ referredBy: { $ne: null } });
   const revenueAgg = await purchases.aggregate([{ $group: { _id: null, t: { $sum: '$price' } } }]).toArray();
   const v = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
   res.json({
     totalPages, totalUsers, totalProducts,
-    pendingDeposits, totalPurchases,
+    pendingDeposits, totalPurchases, totalReferrals,
     totalRevenue: revenueAgg[0]?.t || 0,
     totalViews: v[0]?.v || 0
   });
