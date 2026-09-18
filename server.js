@@ -7,7 +7,7 @@ const MongoStore = require('connect-mongo');
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static('public'));
 
 const MONGO_URI = process.env.MONGO_URI;
@@ -20,7 +20,7 @@ const REFERRAL_BONUS = 10;
 
 let pages, users, products, deposits, purchases, settings, db;
 
-// ===== DEFAULT CONTENT (A-Z Editable Text) =====
+// ===== DEFAULT CONTENT (A-Z Editable) =====
 const DEFAULT_CONTENT = {
   wallet: {
     title: "My Wallet",
@@ -42,7 +42,7 @@ const DEFAULT_CONTENT = {
     bkashPlaceholder: "01XXXXXXXXX",
     trxLabel: "Transaction ID (ঐচ্ছিক)",
     trxPlaceholder: "TRX...",
-    screenshotLabel: "Screenshot URL (bKash Payment এর ছবি)",
+    screenshotLabel: "Screenshot URL",
     screenshotPlaceholder: "https://photo-url.jpg",
     submitBtn: "🚀 Submit Request",
     noHistory: "এখনো কোনো history নেই",
@@ -101,11 +101,16 @@ const DEFAULT_CONTENT = {
     deliveryReadyText: "Your Product is Ready!",
     downloadBtn: "📥 Download Now",
     copyLinkBtn: "🔗 Copy Link",
+    copyCodeBtn: "📋 Copy Code",
+    openLinkBtn: "🔗 Open Link",
     backToShopBtn: "🏠 Back to Shop",
     contactSupportBtn: "💬 Contact Support",
     descriptionLabel: "📝 Description",
     categoryLabel: "📦 Category",
     tagsLabel: "🏷 Tags",
+    linkSectionTitle: "🔗 Download Link",
+    codeSectionTitle: "💻 Source Code",
+    fileSectionTitle: "📁 File Download",
     insufficientBalanceMsg: "❌ Insufficient balance",
     loginRequiredMsg: "❌ Login required"
   },
@@ -142,9 +147,9 @@ const DEFAULT_CONTENT = {
     title: "FreeHost",
     heroBadge: "✨ New products available",
     heroHeading: "Premium Digital Products",
-    heroSubtitle: "Templates, Code, Design — সব এক জায়গায়। তাৎক্ষণিক ডাউনলোড।",
+    heroSubtitle: "Host HTML instantly and shop premium digital products",
     hostBtn: "🚀 Host Now",
-    shopBtn: "🛍 Visit Shop",
+    shopBtn: "🛍 Shop",
     loginBtn: "Sign In",
     htmlPlaceholder: "<h1>Hello World</h1>",
     titleLabel: "Title",
@@ -160,7 +165,6 @@ const DEFAULT_CONTENT = {
   }
 };
 
-// Helper: merge content with defaults
 function mergeContent(saved) {
   const result = {};
   for (const section in DEFAULT_CONTENT) {
@@ -482,7 +486,10 @@ app.get('/api/shop/products', async (req, res) => {
     if (sort === 'price-low') sortObj = { price: 1 };
     if (sort === 'price-high') sortObj = { price: -1 };
     if (sort === 'popular') sortObj = { sold: -1 };
-    const list = await products.find(query, { projection: { deliveryData: 0 } }).sort(sortObj).toArray();
+    // Hide delivery data
+    const list = await products.find(query, { 
+      projection: { linkData: 0, codeData: 0, fileData: 0, deliveryData: 0 } 
+    }).sort(sortObj).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -491,7 +498,9 @@ app.get('/api/shop/product/:id', async (req, res) => {
   try {
     const q = makeIdQuery(req.params.id);
     q.active = true;
-    const product = await products.findOne(q, { projection: { deliveryData: 0 } });
+    const product = await products.findOne(q, { 
+      projection: { linkData: 0, codeData: 0, fileData: 0, deliveryData: 0 } 
+    });
     if (!product) return res.status(404).json({ error: 'Not found' });
     res.json(product);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -541,6 +550,9 @@ app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
     if (alreadyBought) {
       return res.json({
         success: true, alreadyOwned: true,
+        linkData: product.linkData || '',
+        codeData: product.codeData || '',
+        fileData: product.fileData || '',
         deliveryType: product.deliveryType,
         deliveryData: product.deliveryData
       });
@@ -575,6 +587,9 @@ app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
 
     res.json({
       success: true,
+      linkData: product.linkData || '',
+      codeData: product.codeData || '',
+      fileData: product.fileData || '',
       deliveryType: product.deliveryType,
       deliveryData: product.deliveryData,
       newBalance: userWallet - price
@@ -594,6 +609,9 @@ app.get('/api/shop/access/:id', requireAuth, async (req, res) => {
     const product = await products.findOne(q);
     if (!product) return res.status(404).json({ error: 'Product gone' });
     res.json({
+      linkData: product.linkData || '',
+      codeData: product.codeData || '',
+      fileData: product.fileData || '',
       deliveryType: product.deliveryType,
       deliveryData: product.deliveryData
     });
@@ -711,7 +729,7 @@ app.delete('/api/admin/user/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ===== ADMIN PRODUCTS =====
+// ===== ADMIN PRODUCTS (Multi-Delivery) =====
 app.get('/api/admin/products', adminAuth, async (req, res) => {
   const list = await products.find({}).sort({ createdAt: -1 }).toArray();
   res.json(list);
@@ -719,9 +737,12 @@ app.get('/api/admin/products', adminAuth, async (req, res) => {
 
 app.post('/api/admin/product', adminAuth, async (req, res) => {
   try {
-    const { title, description, category, price, discountPrice, photo, deliveryType, deliveryData, stock } = req.body;
-    if (!title || !price || !deliveryData) {
-      return res.status(400).json({ error: 'Required: title, price, deliveryData' });
+    const { title, description, category, price, discountPrice, photo, linkData, codeData, fileData, stock } = req.body;
+    if (!title || !price) {
+      return res.status(400).json({ error: 'Title এবং Price দিতে হবে' });
+    }
+    if (!linkData && !codeData && !fileData) {
+      return res.status(400).json({ error: 'কমপক্ষে একটা Delivery (Link/Code/File) দিতে হবে' });
     }
     const result = await products.insertOne({
       title: String(title),
@@ -730,8 +751,11 @@ app.post('/api/admin/product', adminAuth, async (req, res) => {
       price: Number(price),
       discountPrice: discountPrice ? Number(discountPrice) : null,
       photo: String(photo || ''),
-      deliveryType: String(deliveryType || 'link'),
-      deliveryData: String(deliveryData),
+      linkData: String(linkData || ''),
+      codeData: String(codeData || ''),
+      fileData: String(fileData || ''),
+      deliveryType: linkData ? 'link' : (fileData ? 'file' : 'code'),
+      deliveryData: linkData || fileData || codeData || '',
       stock: stock ? Number(stock) : 999,
       sold: 0, active: true,
       createdAt: new Date()
@@ -742,7 +766,7 @@ app.post('/api/admin/product', adminAuth, async (req, res) => {
 
 app.put('/api/admin/product/:id', adminAuth, async (req, res) => {
   try {
-    const { title, description, category, price, discountPrice, photo, deliveryType, deliveryData, stock, active } = req.body;
+    const { title, description, category, price, discountPrice, photo, linkData, codeData, fileData, stock, active } = req.body;
     const update = { updatedAt: new Date() };
     if (title !== undefined) update.title = String(title);
     if (description !== undefined) update.description = String(description);
@@ -750,10 +774,16 @@ app.put('/api/admin/product/:id', adminAuth, async (req, res) => {
     if (price !== undefined) update.price = Number(price);
     if (discountPrice !== undefined) update.discountPrice = discountPrice ? Number(discountPrice) : null;
     if (photo !== undefined) update.photo = String(photo);
-    if (deliveryType !== undefined) update.deliveryType = String(deliveryType);
-    if (deliveryData !== undefined) update.deliveryData = String(deliveryData);
+    if (linkData !== undefined) update.linkData = String(linkData);
+    if (codeData !== undefined) update.codeData = String(codeData);
+    if (fileData !== undefined) update.fileData = String(fileData);
     if (stock !== undefined) update.stock = Number(stock);
     if (active !== undefined) update.active = !!active;
+    
+    if (linkData || fileData || codeData) {
+      update.deliveryType = linkData ? 'link' : (fileData ? 'file' : 'code');
+      update.deliveryData = linkData || fileData || codeData || '';
+    }
 
     const q = makeIdQuery(req.params.id);
     const result = await products.updateOne(q, { $set: update });
