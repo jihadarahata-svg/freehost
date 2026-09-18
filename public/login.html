@@ -35,6 +35,33 @@
   h1 { font-size: 24px; font-weight: 800; margin-bottom: 6px; text-align: center; letter-spacing: -0.5px; }
   .sub { color: #a1a1aa; font-size: 13px; margin-bottom: 24px; text-align: center; }
   
+  /* 🎁 Referral Banner */
+  .ref-banner {
+    background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1));
+    border: 1px solid rgba(16,185,129,0.4);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+  }
+  .ref-banner.show { display: flex; }
+  .ref-banner-icon { font-size: 28px; }
+  .ref-banner-text { flex: 1; }
+  .ref-banner-text strong {
+    display: block;
+    font-size: 14px;
+    color: #34d399;
+    margin-bottom: 3px;
+    font-weight: 700;
+  }
+  .ref-banner-text span {
+    font-size: 11px;
+    color: #a1a1aa;
+    line-height: 1.4;
+  }
+  
   .tabs {
     display: flex;
     background: rgba(255,255,255,0.03);
@@ -109,6 +136,21 @@
     font-size: 13px; text-decoration: none;
   }
   .back:hover { color: #fff; }
+  
+  .bonus-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(16,185,129,0.15);
+    color: #34d399;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 6px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
 </style>
 </head>
 <body>
@@ -116,6 +158,15 @@
     <div class="logo">◆</div>
     <h1>Welcome to FreeHost</h1>
     <p class="sub">Sign in or create account to continue</p>
+    
+    <!-- 🎁 Referral Banner -->
+    <div class="ref-banner" id="refBanner">
+      <div class="ref-banner-icon">🎁</div>
+      <div class="ref-banner-text">
+        <strong>You've been invited!</strong>
+        <span>Sign up and get <strong style="color:#34d399">৳20 bonus</strong> in your wallet instantly!</span>
+      </div>
+    </div>
     
     <div class="tabs">
       <div class="tab active" id="tabLogin" onclick="switchTab('login')">Sign In</div>
@@ -149,7 +200,10 @@
         <input type="email" id="signupEmail" placeholder="your@email.com">
       </div>
       <div class="form-group">
-        <label>Password (6+ characters)</label>
+        <label>
+          Password (6+ characters)
+          <span class="bonus-pill" id="bonusPill" style="display:none;">🎁 +৳20</span>
+        </label>
         <input type="password" id="signupPassword" placeholder="Create password" onkeypress="if(event.key==='Enter') doSignup()">
       </div>
       <button class="btn" id="signupBtn" onclick="doSignup()">Create Account</button>
@@ -159,6 +213,24 @@
   </div>
   
   <script>
+    // 🎁 Referral code capture
+    let refCode = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('ref')) {
+      refCode = urlParams.get('ref');
+      sessionStorage.setItem('refCode', refCode);
+    } else {
+      refCode = sessionStorage.getItem('refCode');
+    }
+    
+    // Referral থাকলে UI দেখাও
+    if (refCode) {
+      document.getElementById('refBanner').classList.add('show');
+      document.getElementById('bonusPill').style.display = 'inline-flex';
+      // Auto signup tab এ switch করো
+      setTimeout(() => switchTab('signup'), 300);
+    }
+    
     function switchTab(tab) {
       if (tab === 'login') {
         document.getElementById('tabLogin').classList.add('active');
@@ -211,10 +283,11 @@
           body: JSON.stringify({ email, password })
         });
         const data = await res.json();
-        
         if (!res.ok) throw new Error(data.error || 'Login failed');
         
         showSuccess('✅ Login successful! Redirecting...');
+        // Referral code clear করো login হলে
+        sessionStorage.removeItem('refCode');
         setTimeout(() => window.location.href = '/dashboard', 800);
       } catch (e) {
         showError('❌ ' + e.message);
@@ -237,17 +310,25 @@
       hideMessages();
       
       try {
+        const body = { name, email, password };
+        if (refCode) body.referralCode = refCode;
+        
         const res = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password })
+          body: JSON.stringify(body)
         });
         const data = await res.json();
-        
         if (!res.ok) throw new Error(data.error || 'Signup failed');
         
-        showSuccess('✅ Account created! Redirecting...');
-        setTimeout(() => window.location.href = '/dashboard', 800);
+        let msg = '✅ Account created!';
+        if (data.welcomeBonus) {
+          msg += ` 🎁 ৳${data.welcomeBonus} welcome bonus added!`;
+        }
+        showSuccess(msg + ' Redirecting...');
+        
+        sessionStorage.removeItem('refCode');
+        setTimeout(() => window.location.href = '/dashboard', 1200);
       } catch (e) {
         showError('❌ ' + e.message);
         btn.disabled = false;
