@@ -21,7 +21,7 @@ const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 
 let pages, users, products, deposits, purchases, settings, db;
 
-// ===== Helper: Flexible ID finder =====
+// Flexible ID query — string & ObjectId handle করবে
 function makeIdQuery(id) {
   const queries = [{ _id: id }];
   try { queries.push({ _id: new ObjectId(id) }); } catch (e) {}
@@ -38,7 +38,6 @@ async function connectDB() {
   deposits = db.collection('deposits');
   purchases = db.collection('purchases');
   settings = db.collection('settings');
-  
   await users.createIndex({ email: 1 }, { unique: true });
   
   const existing = await settings.findOne({ _id: 'config' });
@@ -91,10 +90,8 @@ passport.use(new GoogleStrategy({
   try {
     const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
     if (!email) return done(new Error('No email'), null);
-    
     let user = await users.findOne({ email });
     if (user && user.banned) return done(new Error('Banned'), null);
-    
     if (!user) {
       const result = await users.insertOne({
         email,
@@ -121,6 +118,7 @@ function requireAuth(req, res, next) {
     if (req.user.banned) return res.status(403).json({ error: 'Banned' });
     return next();
   }
+  if (req.path.startsWith('/api/')) return res.status(401).json({ error: 'Login required' });
   res.redirect('/login');
 }
 
@@ -131,7 +129,7 @@ function adminAuth(req, res, next) {
   next();
 }
 
-// ============ GOOGLE AUTH ============
+// ============ AUTH ============
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login?error=1' }),
@@ -155,7 +153,7 @@ app.get('/api/me', (req, res) => {
   }
 });
 
-// ============ PAGE ROUTES ============
+// ============ PAGES ============
 app.post('/api/create', async (req, res) => {
   try {
     const { html, slug, password, title } = req.body;
@@ -224,7 +222,7 @@ app.get('/api/my-pages', requireAuth, async (req, res) => {
   res.json(list);
 });
 
-// ============ SHOP ============
+// ============ SHOP (Public) ============
 app.get('/api/shop/products', async (req, res) => {
   try {
     const { category, search, sort } = req.query;
@@ -247,10 +245,9 @@ app.get('/api/shop/products', async (req, res) => {
 
 app.get('/api/shop/product/:id', async (req, res) => {
   try {
-    const product = await products.findOne(
-      { _id: req.params.id, active: true },
-      { projection: { deliveryData: 0 } }
-    );
+    const q = makeIdQuery(req.params.id);
+    q.active = true;
+    const product = await products.findOne(q, { projection: { deliveryData: 0 } });
     if (!product) return res.status(404).json({ error: 'Not found' });
     res.json(product);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -283,7 +280,9 @@ app.get('/api/shop/settings', async (req, res) => {
 // ============ PURCHASE ============
 app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
   try {
-    const product = await products.findOne({ _id: req.params.id, active: true });
+    const q = makeIdQuery(req.params.id);
+    q.active = true;
+    const product = await products.findOne(q);
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
     const alreadyBought = await purchases.findOne({
@@ -318,7 +317,7 @@ app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
     await purchases.insertOne({
       userId: req.user._id.toString(),
       userEmail: req.user.email,
-      productId: product._id,
+      productId: req.params.id,
       productTitle: product.title,
       price: price,
       purchasedAt: new Date()
@@ -342,7 +341,8 @@ app.get('/api/shop/access/:id', requireAuth, async (req, res) => {
       productId: req.params.id
     });
     if (!purchase) return res.status(403).json({ error: 'Not purchased' });
-    const product = await products.findOne({ _id: req.params.id });
+    const q = makeIdQuery(req.params.id);
+    const product = await products.findOne(q);
     if (!product) return res.status(404).json({ error: 'Product gone' });
     res.json({
       deliveryType: product.deliveryType,
@@ -519,9 +519,7 @@ app.delete('/api/admin/product/:id', adminAuth, async (req, res) => {
       return res.status(404).json({ error: 'Product not found in DB' });
     }
     res.json({ success: true, deleted: result.deletedCount });
-  } catch (err) { 
-    res.status(500).json({ error: err.message }); 
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ===== ADMIN DEPOSITS =====
@@ -589,7 +587,7 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   });
 });
 
-// ============ HTML ============
+// ============ HTML ROUTES ============
 app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
 app.get('/dashboard', requireAuth, (req, res) => res.sendFile(__dirname + '/public/dashboard.html'));
 app.get('/shop', (req, res) => res.sendFile(__dirname + '/public/shop.html'));
