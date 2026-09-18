@@ -15,13 +15,160 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-please';
 const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 
-// 🎁 Referral Bonuses
-const WELCOME_BONUS = 20;    // নতুন user কে
-const REFERRAL_BONUS = 10;   // যে invite করলো
+const WELCOME_BONUS = 20;
+const REFERRAL_BONUS = 10;
 
 let pages, users, products, deposits, purchases, settings, db;
 
-// Flexible ID query
+// ===== DEFAULT CONTENT (A-Z Editable Text) =====
+const DEFAULT_CONTENT = {
+  wallet: {
+    title: "My Wallet",
+    balanceLabel: "Current Balance",
+    safeText: "🔒 Safe & Secure",
+    giftTitle: "🎁 Redeem Gift Code",
+    giftDesc: "আপনার gift code লিখুন এবং wallet এ টাকা পান!",
+    giftPlaceholder: "GIFT CODE",
+    giftButton: "🎉 Claim",
+    addMoneyTab: "➕ Add Money",
+    historyTab: "📋 History",
+    howToTitle: "💰 How to Add Money",
+    howToInfo: "⚠️ bKash এ Send Money করুন → Screenshot upload করুন → Admin approve করলে Wallet এ যোগ হবে (২-৪ ঘণ্টা)",
+    sendLabel: "Send Money to bKash",
+    copyBtn: "📋 Copy Number",
+    amountLabel: "Amount (৳)",
+    amountPlaceholder: "সর্বনিম্ন 50 টাকা",
+    bkashLabel: "Your bKash Number",
+    bkashPlaceholder: "01XXXXXXXXX",
+    trxLabel: "Transaction ID (ঐচ্ছিক)",
+    trxPlaceholder: "TRX...",
+    screenshotLabel: "Screenshot URL (bKash Payment এর ছবি)",
+    screenshotPlaceholder: "https://photo-url.jpg",
+    submitBtn: "🚀 Submit Request",
+    noHistory: "এখনো কোনো history নেই",
+    loadingText: "Loading..."
+  },
+  referral: {
+    title: "Invite Friends & Earn ৳10",
+    subtitle: "প্রতিটা বন্ধু sign up করলে ৳10 পাবেন + সে পাবে ৳20 bonus",
+    copyBtn: "📋 Copy",
+    referralsLabel: "Referrals",
+    earnedLabel: "Earned",
+    whatsappBtn: "💬 WhatsApp",
+    telegramBtn: "📢 Telegram",
+    facebookBtn: "📘 Facebook",
+    whoJoinedTitle: "🎉 Who Joined",
+    shareMessage: "🎁 Join FreeHost and get ৳20 bonus!"
+  },
+  shop: {
+    logoText: "FreeHost Shop",
+    searchPlaceholder: "🔍 কী খুঁজছেন?",
+    walletBtn: "Wallet",
+    ordersBtn: "Orders",
+    cartBtn: "Cart",
+    meBtn: "Me",
+    heroBadge: "🔥 Limited Time",
+    heroHeading: "HTML Templates Mega Pack",
+    heroSubtitle: "৫০টা প্রিমিয়াম টেমপ্লেট — মাত্র ৳১০০",
+    heroButton: "এখনই কিনুন →",
+    featuredTitle: "⚡ Featured Products",
+    allProductsTitle: "📦 All Products",
+    seeAllText: "See all →",
+    buyNowText: "Buy Now",
+    addToCartText: "Add to Cart",
+    noProductsText: "কোনো product পাওয়া যায়নি",
+    tryDifferentText: "অন্য কিছু খুঁজুন",
+    footerCopyright: "© 2026 FreeHost Shop",
+    footerText: "All rights reserved",
+    filterBtn: "⚙ Filter",
+    sortNewest: "Newest",
+    sortPriceLow: "Price: Low to High",
+    sortPriceHigh: "Price: High to Low",
+    sortPopular: "Most Popular"
+  },
+  product: {
+    backBtn: "← Back to Shop",
+    buyNowBtn: "🛒 Buy Now",
+    loginToBuyBtn: "🔒 Login to Buy",
+    confirmPurchaseTitle: "📦 Confirm Purchase",
+    currentBalanceLabel: "Your Balance",
+    afterPurchaseLabel: "After Purchase",
+    confirmBtn: "✅ Confirm & Buy",
+    cancelBtn: "❌ Cancel",
+    purchasedTitle: "✅ Purchase Successful!",
+    paidLabel: "Paid",
+    newBalanceLabel: "New Balance",
+    deliveryReadyText: "Your Product is Ready!",
+    downloadBtn: "📥 Download Now",
+    copyLinkBtn: "🔗 Copy Link",
+    backToShopBtn: "🏠 Back to Shop",
+    contactSupportBtn: "💬 Contact Support",
+    descriptionLabel: "📝 Description",
+    categoryLabel: "📦 Category",
+    tagsLabel: "🏷 Tags",
+    insufficientBalanceMsg: "❌ Insufficient balance",
+    loginRequiredMsg: "❌ Login required"
+  },
+  login: {
+    title: "Welcome to FreeHost",
+    subtitle: "Sign in or create account to continue",
+    signinTab: "Sign In",
+    signupTab: "Sign Up",
+    emailLabel: "Email",
+    emailPlaceholder: "your@email.com",
+    passwordLabel: "Password",
+    passwordPlaceholder: "Your password",
+    nameLabel: "Full Name",
+    namePlaceholder: "Your name",
+    signinButton: "Sign In",
+    signupButton: "Create Account",
+    backBtn: "← Back to home",
+    termsText: "By signing in, you agree to our Terms of Service"
+  },
+  dashboard: {
+    title: "My Dashboard",
+    subtitle: "Manage all your hosted pages",
+    pagesLabel: "Total Pages",
+    viewsLabel: "Total Views",
+    walletLabel: "Wallet Balance",
+    hostPageBtn: "+ Host New Page",
+    shopBtn: "🛍 Visit Shop",
+    walletBtn: "💰 My Wallet",
+    myPagesTitle: "My Pages",
+    noPagesText: "No pages yet",
+    hostFirstText: "Host your first HTML page"
+  },
+  home: {
+    title: "FreeHost",
+    heroBadge: "✨ New products available",
+    heroHeading: "Premium Digital Products",
+    heroSubtitle: "Templates, Code, Design — সব এক জায়গায়। তাৎক্ষণিক ডাউনলোড।",
+    hostBtn: "🚀 Host Now",
+    shopBtn: "🛍 Visit Shop",
+    loginBtn: "Sign In",
+    htmlPlaceholder: "<h1>Hello World</h1>",
+    titleLabel: "Title",
+    titlePlaceholder: "My Page",
+    slugLabel: "Custom URL",
+    slugPlaceholder: "my-page"
+  },
+  colors: {
+    primary: "#8b5cf6",
+    accent: "#10b981",
+    buttonText: "#ffffff",
+    heroGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+  }
+};
+
+// Helper: merge content with defaults
+function mergeContent(saved) {
+  const result = {};
+  for (const section in DEFAULT_CONTENT) {
+    result[section] = { ...DEFAULT_CONTENT[section], ...(saved?.[section] || {}) };
+  }
+  return result;
+}
+
 function makeIdQuery(id) {
   const queries = [{ _id: id }];
   try { queries.push({ _id: new ObjectId(id) }); } catch (e) {}
@@ -55,6 +202,7 @@ async function connectDB() {
       supportEmail: 'support@freehost.com',
       supportWhatsapp: '',
       supportTelegram: '',
+      content: {},
       updatedAt: new Date()
     });
   }
@@ -108,7 +256,6 @@ app.post('/api/auth/signup', async (req, res) => {
     const existing = await users.findOne({ email: cleanEmail });
     if (existing) return res.status(400).json({ error: 'Email already registered' });
     
-    // 🎁 Referral check
     let referrerId = null;
     if (referralCode) {
       try {
@@ -117,7 +264,6 @@ app.post('/api/auth/signup', async (req, res) => {
       } catch (e) {}
     }
     
-    // Settings থেকে bonus নাও
     const config = await settings.findOne({ _id: 'config' });
     const welcomeBonus = referrerId ? (config?.welcomeBonus || WELCOME_BONUS) : 0;
     const referralBonus = config?.referralBonus || REFERRAL_BONUS;
@@ -137,7 +283,6 @@ app.post('/api/auth/signup', async (req, res) => {
       lastLogin: new Date()
     });
     
-    // 🎁 Referrer কে bonus
     if (referrerId) {
       await users.updateOne(
         { _id: new ObjectId(referrerId) },
@@ -208,7 +353,6 @@ app.get('/api/me', async (req, res) => {
 });
 
 // ============ REFERRAL ============
-
 app.get('/api/referral/info', requireAuth, async (req, res) => {
   try {
     const user = await getUser(req);
@@ -218,7 +362,6 @@ app.get('/api/referral/info', requireAuth, async (req, res) => {
     const referralBonus = config?.referralBonus || REFERRAL_BONUS;
     const welcomeBonus = config?.welcomeBonus || WELCOME_BONUS;
     
-    // কারা এই user দিয়ে referred হয়েছে
     const referred = await users.find(
       { referredBy: user._id.toString() },
       { projection: { email: 1, name: 1, createdAt: 1 } }
@@ -239,7 +382,6 @@ app.get('/api/referral/info', requireAuth, async (req, res) => {
 });
 
 // ============ PAGES ============
-
 app.post('/api/create', async (req, res) => {
   try {
     const { html, slug, password, title } = req.body;
@@ -304,7 +446,7 @@ app.get('/embed/:id', async (req, res) => {
   } catch (err) { res.status(500).send('Error'); }
 });
 
-// ============ USER ============
+// ============ USER PAGES ============
 app.get('/api/my-pages', requireAuth, async (req, res) => {
   const user = await getUser(req);
   if (!user) return res.status(401).json({ error: 'Not logged in' });
@@ -314,7 +456,17 @@ app.get('/api/my-pages', requireAuth, async (req, res) => {
   res.json(list);
 });
 
-// ============ SHOP (Public) ============
+// ============ CONTENT (PUBLIC) ============
+app.get('/api/content', async (req, res) => {
+  try {
+    const s = await settings.findOne({ _id: 'config' });
+    res.json(mergeContent(s?.content));
+  } catch (err) {
+    res.json(mergeContent({}));
+  }
+});
+
+// ============ SHOP (PUBLIC) ============
 app.get('/api/shop/products', async (req, res) => {
   try {
     const { category, search, sort } = req.query;
@@ -661,6 +813,53 @@ app.put('/api/admin/settings', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ===== ADMIN CONTENT =====
+app.get('/api/admin/content', adminAuth, async (req, res) => {
+  try {
+    const s = await settings.findOne({ _id: 'config' });
+    res.json(mergeContent(s?.content));
+  } catch (err) {
+    res.json(mergeContent({}));
+  }
+});
+
+app.put('/api/admin/content', adminAuth, async (req, res) => {
+  try {
+    const { section, data } = req.body;
+    if (!section || !data) return res.status(400).json({ error: 'Section and data required' });
+    if (!DEFAULT_CONTENT[section]) return res.status(400).json({ error: 'Invalid section' });
+    
+    const s = await settings.findOne({ _id: 'config' });
+    const currentContent = (s && s.content) || {};
+    
+    currentContent[section] = { ...(currentContent[section] || {}), ...data };
+    
+    await settings.updateOne(
+      { _id: 'config' },
+      { $set: { content: currentContent, updatedAt: new Date() } },
+      { upsert: true }
+    );
+    
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/admin/content/reset/:section', adminAuth, async (req, res) => {
+  try {
+    const section = req.params.section;
+    const s = await settings.findOne({ _id: 'config' });
+    const currentContent = (s && s.content) || {};
+    delete currentContent[section];
+    
+    await settings.updateOne(
+      { _id: 'config' },
+      { $set: { content: currentContent, updatedAt: new Date() } }
+    );
+    
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ===== ADMIN PURCHASES =====
 app.get('/api/admin/purchases', adminAuth, async (req, res) => {
   const list = await purchases.find({}).sort({ purchasedAt: -1 }).limit(200).toArray();
@@ -675,7 +874,6 @@ app.get('/api/admin/referrals', adminAuth, async (req, res) => {
       { projection: { email: 1, name: 1, referredBy: 1, createdAt: 1, wallet: 1 } }
     ).sort({ createdAt: -1 }).limit(200).toArray();
     
-    // Referrer এর info যোগ করো
     for (let i = 0; i < list.length; i++) {
       try {
         const ref = await users.findOne(
@@ -711,7 +909,7 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   });
 });
 
-// ============ HTML ============
+// ============ HTML ROUTES ============
 app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
 app.get('/dashboard', requireAuth, (req, res) => res.sendFile(__dirname + '/public/dashboard.html'));
 app.get('/shop', (req, res) => res.sendFile(__dirname + '/public/shop.html'));
