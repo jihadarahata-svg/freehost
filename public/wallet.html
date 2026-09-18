@@ -6,115 +6,71 @@
 <title>Wallet — FreeHost</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-    background: #0a0a0f; color: #fff; min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #0a0a0f; color: #fff; min-height: 100vh; }
   .wrap { max-width: 620px; margin: 0 auto; padding: 20px; }
   
-  .nav {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 0; margin-bottom: 24px;
-  }
-  .nav-back {
-    color: #a1a1aa; text-decoration: none; font-size: 20px;
-    padding: 6px 12px; border-radius: 8px;
-  }
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; margin-bottom: 24px; }
+  .nav-back { color: #a1a1aa; text-decoration: none; font-size: 20px; padding: 6px 12px; border-radius: 8px; }
   .nav-back:hover { background: rgba(255,255,255,0.05); color: #fff; }
   .nav-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-  .nav-title span { font-size: 22px; }
   
-  /* Balance Card */
   .balance-card {
     background: linear-gradient(135deg, #10b981, #059669);
     border-radius: 20px; padding: 28px; text-align: center;
-    margin-bottom: 20px;
-    box-shadow: 0 20px 50px -15px rgba(16,185,129,0.5);
+    margin-bottom: 20px; box-shadow: 0 20px 50px -15px rgba(16,185,129,0.5);
     position: relative; overflow: hidden;
   }
   .balance-card::before {
-    content: ''; position: absolute;
-    top: -50px; right: -50px;
-    width: 200px; height: 200px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 50%;
+    content: ''; position: absolute; top: -50px; right: -50px;
+    width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;
   }
   .balance-label { font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 8px; font-weight: 600; }
-  .balance-amount {
-    font-size: 42px; font-weight: 900; letter-spacing: -2px;
-    color: #fff; position: relative; z-index: 1;
-  }
-  .balance-sub {
-    font-size: 12px; color: rgba(255,255,255,0.8);
-    margin-top: 10px; font-weight: 600;
-  }
+  .balance-amount { font-size: 42px; font-weight: 900; letter-spacing: -2px; position: relative; z-index: 1; }
+  .balance-sub { font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 10px; font-weight: 600; }
   
-  /* Gift Code */
   .gift-section {
     background: linear-gradient(135deg, rgba(251,146,60,0.1), rgba(239,68,68,0.05));
     border: 1px solid rgba(251,146,60,0.3);
     border-radius: 16px; padding: 18px; margin-bottom: 20px;
   }
-  .gift-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; color: #fb923c; }
+  .gift-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; color: #fb923c; }
   .gift-desc { font-size: 12px; color: #a1a1aa; margin-bottom: 12px; }
   .gift-form { display: flex; gap: 8px; }
   .gift-form input {
-    flex: 1; padding: 12px 14px;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(251,146,60,0.3);
-    border-radius: 10px; color: #fff;
-    font-size: 14px; outline: none;
-    font-family: inherit;
-    text-transform: uppercase;
+    flex: 1; padding: 12px 14px; background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(251,146,60,0.3); border-radius: 10px;
+    color: #fff; font-size: 14px; outline: none; text-transform: uppercase;
   }
-  .gift-form input::placeholder { color: #52525b; }
   .gift-form button {
-    padding: 12px 22px;
-    background: linear-gradient(135deg, #fb923c, #ea580c);
+    padding: 12px 22px; background: linear-gradient(135deg, #fb923c, #ea580c);
     color: #fff; border: none; border-radius: 10px;
-    font-size: 14px; font-weight: 700;
-    cursor: pointer; font-family: inherit;
-    white-space: nowrap;
+    font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap;
   }
   
-  /* Tabs */
   .tabs {
     display: flex; gap: 8px; margin-bottom: 20px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 12px; padding: 4px;
+    background: rgba(255,255,255,0.03); border-radius: 12px; padding: 4px;
   }
   .tab {
     flex: 1; padding: 12px; text-align: center;
-    border-radius: 9px; font-size: 14px;
-    font-weight: 700; cursor: pointer;
-    color: #a1a1aa; transition: 0.2s;
+    border-radius: 9px; font-size: 14px; font-weight: 700;
+    cursor: pointer; color: #a1a1aa; transition: 0.2s;
   }
-  .tab.active {
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    color: #fff;
-  }
+  .tab.active { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; }
   
   .tab-content { display: none; }
   .tab-content.active { display: block; }
   
-  /* Add Money Form */
   .form-card {
     background: linear-gradient(180deg, #101018, #0d0d14);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px; padding: 20px;
-    margin-bottom: 16px;
+    border-radius: 16px; padding: 20px; margin-bottom: 16px;
   }
-  .form-title {
-    font-size: 16px; font-weight: 800;
-    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
-  }
+  .form-title { font-size: 16px; font-weight: 800; margin-bottom: 16px; }
   .info-box {
-    background: rgba(251,191,36,0.1);
-    border: 1px solid rgba(251,191,36,0.3);
-    border-radius: 10px; padding: 12px;
-    font-size: 12px; color: #fbbf24;
-    margin-bottom: 16px; line-height: 1.5;
+    background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 10px; padding: 12px; font-size: 12px;
+    color: #fbbf24; margin-bottom: 16px; line-height: 1.5;
   }
   
   .bkash-box {
@@ -123,18 +79,13 @@
     text-align: center; margin-bottom: 16px;
   }
   .bkash-label { font-size: 12px; color: rgba(255,255,255,0.85); margin-bottom: 6px; font-weight: 600; }
-  .bkash-number {
-    font-size: 26px; font-weight: 900; letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
+  .bkash-number { font-size: 26px; font-weight: 900; letter-spacing: 1px; margin-bottom: 4px; }
   .bkash-type { font-size: 11px; color: rgba(255,255,255,0.85); margin-bottom: 10px; }
   .copy-bkash {
     padding: 8px 16px; background: rgba(255,255,255,0.2);
     color: #fff; border: none; border-radius: 8px;
-    font-size: 12px; font-weight: 700;
-    cursor: pointer; font-family: inherit;
+    font-size: 12px; font-weight: 700; cursor: pointer;
   }
-  .copy-bkash:hover { background: rgba(255,255,255,0.3); }
   
   .field { margin-bottom: 14px; }
   .field label {
@@ -148,30 +99,18 @@
     border: 1.5px solid rgba(255,255,255,0.08);
     border-radius: 10px; color: #fff;
     font-size: 14px; outline: none;
-    font-family: inherit;
   }
   .field input:focus {
     border-color: rgba(139,92,246,0.6);
     background: rgba(139,92,246,0.05);
-    box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
   }
-  .field input::placeholder { color: #52525b; }
   
-  .quick-amounts {
-    display: flex; gap: 6px; flex-wrap: wrap;
-    margin-top: -8px; margin-bottom: 14px;
-  }
+  .quick-amounts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: -8px; margin-bottom: 14px; }
   .quick-amt {
-    padding: 6px 12px;
-    background: rgba(255,255,255,0.05);
+    padding: 6px 12px; background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 20px; color: #d4d4d8;
-    font-size: 12px; font-weight: 700;
-    cursor: pointer; font-family: inherit;
-  }
-  .quick-amt:hover {
-    background: rgba(139,92,246,0.2);
-    color: #c4b5fd;
+    font-size: 12px; font-weight: 700; cursor: pointer;
   }
   
   .submit-btn {
@@ -179,47 +118,30 @@
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
     color: #fff; border: none; border-radius: 12px;
     font-size: 15px; font-weight: 800;
-    cursor: pointer; font-family: inherit;
-    transition: 0.2s; margin-top: 8px;
+    cursor: pointer; margin-top: 8px;
   }
-  .submit-btn:hover:not(:disabled) { transform: translateY(-2px); }
-  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   
-  /* History */
   .history-item {
     background: linear-gradient(180deg, #101018, #0d0d14);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px; padding: 14px;
-    margin-bottom: 10px;
-    display: flex; justify-content: space-between; align-items: center;
+    border-radius: 12px; padding: 14px; margin-bottom: 10px;
   }
-  .history-left { flex: 1; }
   .history-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
   .history-date { font-size: 11px; color: #71717a; }
-  .history-amount { font-size: 16px; font-weight: 800; text-align: right; }
-  .history-amount.plus { color: #34d399; }
-  .history-amount.minus { color: #f87171; }
+  
   .badge-pending { background: #ea580c; color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
   .badge-approved { background: #16a34a; color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
   .badge-rejected { background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
   
-  /* 📢 REFERRAL SECTION */
+  /* REFERRAL */
   .referral-section {
     background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.04));
     border: 1px solid rgba(16,185,129,0.3);
     border-radius: 16px; padding: 22px; margin-top: 24px;
   }
-  .ref-head {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 18px; padding-bottom: 16px;
-    border-bottom: 1px solid rgba(16,185,129,0.15);
-  }
+  .ref-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid rgba(16,185,129,0.15); }
   .ref-head-icon { font-size: 32px; }
-  .ref-head h2 {
-    font-size: 18px; font-weight: 800;
-    color: #34d399; margin-bottom: 4px;
-    letter-spacing: -0.3px;
-  }
+  .ref-head h2 { font-size: 18px; font-weight: 800; color: #34d399; margin-bottom: 4px; }
   .ref-head p { font-size: 12px; color: #a1a1aa; line-height: 1.5; }
   
   .ref-link-box {
@@ -229,73 +151,34 @@
     border-radius: 10px; padding: 4px;
   }
   .ref-link-box input {
-    flex: 1; padding: 10px 12px;
-    background: transparent; border: none;
-    color: #c4b5fd; font-size: 11px;
-    font-family: monospace; outline: none;
-    min-width: 0;
+    flex: 1; padding: 10px 12px; background: transparent;
+    border: none; color: #c4b5fd; font-size: 11px;
+    font-family: monospace; outline: none; min-width: 0;
   }
   .ref-copy-btn {
-    padding: 10px 16px;
-    background: linear-gradient(135deg, #10b981, #059669);
+    padding: 10px 16px; background: linear-gradient(135deg, #10b981, #059669);
     color: #fff; border: none; border-radius: 8px;
-    font-size: 12px; font-weight: 700;
-    cursor: pointer; font-family: inherit;
-    white-space: nowrap;
+    font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
   }
   
-  .ref-stats {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin-bottom: 14px;
-  }
-  .ref-stat {
-    background: rgba(0,0,0,0.25);
-    border-radius: 10px; padding: 14px;
-    text-align: center;
-  }
-  .ref-stat-num {
-    font-size: 22px; font-weight: 900;
-    color: #34d399; letter-spacing: -0.5px;
-  }
-  .ref-stat-lbl {
-    font-size: 10px; color: #71717a;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    font-weight: 700; margin-top: 4px;
-  }
+  .ref-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .ref-stat { background: rgba(0,0,0,0.25); border-radius: 10px; padding: 14px; text-align: center; }
+  .ref-stat-num { font-size: 22px; font-weight: 900; color: #34d399; }
+  .ref-stat-lbl { font-size: 10px; color: #71717a; text-transform: uppercase; font-weight: 700; margin-top: 4px; }
   
-  .ref-share {
-    display: flex; gap: 6px; flex-wrap: wrap;
-  }
+  .ref-share { display: flex; gap: 6px; flex-wrap: wrap; }
   .share-btn {
-    flex: 1; min-width: 90px;
-    padding: 10px 12px;
+    flex: 1; min-width: 90px; padding: 10px 12px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
     color: #d4d4d8; border-radius: 8px;
     font-size: 11px; font-weight: 700;
-    cursor: pointer; font-family: inherit;
-    text-decoration: none;
-    display: flex; align-items: center; justify-content: center;
-    gap: 4px; transition: 0.15s;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;
   }
-  .share-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-  .share-btn.whatsapp:hover { background: rgba(37,211,102,0.15); color: #25D366; }
-  .share-btn.telegram:hover { background: rgba(0,136,204,0.15); color: #0088cc; }
-  .share-btn.facebook:hover { background: rgba(24,119,242,0.15); color: #1877F2; }
   
-  .referred-list {
-    margin-top: 14px; padding-top: 14px;
-    border-top: 1px solid rgba(16,185,129,0.15);
-  }
-  .referred-title {
-    font-size: 10px; color: #71717a;
-    text-transform: uppercase; letter-spacing: 0.8px;
-    font-weight: 700; margin-bottom: 10px;
-  }
-  .referred-user {
-    display: flex; align-items: center; gap: 10px;
-    padding: 6px 0; font-size: 13px;
-  }
+  .referred-list { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(16,185,129,0.15); }
+  .referred-title { font-size: 10px; color: #71717a; text-transform: uppercase; font-weight: 700; margin-bottom: 10px; }
+  .referred-user { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 13px; }
   .referred-avatar {
     width: 28px; height: 28px; border-radius: 50%;
     background: linear-gradient(135deg, #10b981, #059669);
@@ -311,7 +194,6 @@
     background: #16a34a; color: #fff;
     padding: 12px 24px; border-radius: 10px;
     font-size: 14px; font-weight: 600;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     transition: transform 0.3s; z-index: 9999;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
@@ -323,51 +205,45 @@
     
     <nav class="nav">
       <a href="/dashboard" class="nav-back">←</a>
-      <div class="nav-title"><span>💰</span> My Wallet</div>
+      <div class="nav-title" id="pageTitle"><span>💰</span> <span id="titleText">My Wallet</span></div>
       <div style="width: 40px;"></div>
     </nav>
     
-    <!-- Balance -->
     <div class="balance-card">
-      <div class="balance-label">Current Balance</div>
+      <div class="balance-label" id="balanceLabel">Current Balance</div>
       <div class="balance-amount" id="balance">৳0</div>
-      <div class="balance-sub">🔒 Safe & Secure</div>
+      <div class="balance-sub" id="safeText">🔒 Safe & Secure</div>
     </div>
     
-    <!-- Gift Code -->
     <div class="gift-section">
-      <div class="gift-title">🎁 Redeem Gift Code</div>
-      <div class="gift-desc">আপনার gift code লিখুন এবং wallet এ টাকা পান!</div>
+      <div class="gift-title" id="giftTitle">🎁 Redeem Gift Code</div>
+      <div class="gift-desc" id="giftDesc">আপনার gift code লিখুন...</div>
       <div class="gift-form">
         <input id="giftCode" placeholder="GIFT CODE" onkeypress="if(event.key==='Enter') redeemGift()">
-        <button onclick="redeemGift()">🎉 Claim</button>
+        <button onclick="redeemGift()" id="giftBtn">🎉 Claim</button>
       </div>
     </div>
     
-    <!-- Tabs -->
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('add')">➕ Add Money</div>
-      <div class="tab" onclick="switchTab('history')">📋 History</div>
+      <div class="tab active" id="tabAdd" onclick="switchTab('add')">➕ Add Money</div>
+      <div class="tab" id="tabHistory" onclick="switchTab('history')">📋 History</div>
     </div>
     
-    <!-- Add Money Tab -->
-    <div class="tab-content active" id="tab-add">
+    <!-- ADD MONEY -->
+    <div class="tab-content active" id="contentAdd">
       <div class="form-card">
-        <div class="form-title">💰 How to Add Money</div>
-        
-        <div class="info-box">
-          ⚠️ bKash এ Send Money করুন → Screenshot upload করুন → Admin approve করলে Wallet এ যোগ হবে (২-৪ ঘণ্টা)
-        </div>
+        <div class="form-title" id="howToTitle">💰 How to Add Money</div>
+        <div class="info-box" id="howToInfo">⚠️ bKash এ Send Money করুন...</div>
         
         <div class="bkash-box">
-          <div class="bkash-label">Send Money to bKash</div>
+          <div class="bkash-label" id="sendLabel">Send Money to bKash</div>
           <div class="bkash-number" id="bkashNumber">01631628306</div>
-          <div class="bkash-type">Personal</div>
-          <button class="copy-bkash" onclick="copyBkash()">📋 Copy Number</button>
+          <div class="bkash-type" id="bkashType">Personal</div>
+          <button class="copy-bkash" onclick="copyBkash()" id="copyBtn">📋 Copy Number</button>
         </div>
         
         <div class="field">
-          <label>Amount (৳)</label>
+          <label id="amountLabel">Amount (৳)</label>
           <input id="depAmount" type="number" placeholder="সর্বনিম্ন 50 টাকা" min="50">
         </div>
         
@@ -380,17 +256,17 @@
         </div>
         
         <div class="field">
-          <label>Your bKash Number</label>
+          <label id="bkashLabel">Your bKash Number</label>
           <input id="senderNumber" placeholder="01XXXXXXXXX">
         </div>
         
         <div class="field">
-          <label>Transaction ID (ঐচ্ছিক)</label>
+          <label id="trxLabel">Transaction ID (ঐচ্ছিক)</label>
           <input id="trxId" placeholder="TRX...">
         </div>
         
         <div class="field">
-          <label>Screenshot URL (bKash Payment এর ছবি)</label>
+          <label id="screenshotLabel">Screenshot URL</label>
           <input id="screenshot" placeholder="https://photo-url.jpg">
         </div>
         
@@ -398,47 +274,45 @@
       </div>
     </div>
     
-    <!-- History Tab -->
-    <div class="tab-content" id="tab-history">
-      <div id="historyList">
-        <div style="text-align:center; padding:40px; color:#71717a;">Loading...</div>
-      </div>
+    <!-- HISTORY -->
+    <div class="tab-content" id="contentHistory">
+      <div id="historyList"><div style="text-align:center; padding:40px; color:#71717a;">Loading...</div></div>
     </div>
     
-    <!-- 📢 Referral Section (নিচে) -->
+    <!-- REFERRAL -->
     <div class="referral-section">
       <div class="ref-head">
         <div class="ref-head-icon">📢</div>
         <div>
-          <h2>Invite Friends & Earn ৳10</h2>
-          <p>প্রতিটা বন্ধু sign up করলে ৳10 পাবেন + সে পাবে ৳20 bonus</p>
+          <h2 id="refTitle">Invite Friends & Earn ৳10</h2>
+          <p id="refSubtitle">প্রতিটা বন্ধু sign up করলে...</p>
         </div>
       </div>
       
       <div class="ref-link-box">
         <input type="text" id="refLink" readonly value="Loading...">
-        <button class="ref-copy-btn" onclick="copyRefLink()">📋 Copy</button>
+        <button class="ref-copy-btn" onclick="copyRefLink()" id="refCopyBtn">📋 Copy</button>
       </div>
       
       <div class="ref-stats">
         <div class="ref-stat">
           <div class="ref-stat-num" id="refCount">0</div>
-          <div class="ref-stat-lbl">Referrals</div>
+          <div class="ref-stat-lbl" id="refsLabel">Referrals</div>
         </div>
         <div class="ref-stat">
           <div class="ref-stat-num">৳<span id="refEarned">0</span></div>
-          <div class="ref-stat-lbl">Earned</div>
+          <div class="ref-stat-lbl" id="earnedLabel">Earned</div>
         </div>
       </div>
       
       <div class="ref-share">
-        <button class="share-btn whatsapp" onclick="shareWhatsApp()">💬 WhatsApp</button>
-        <button class="share-btn telegram" onclick="shareTelegram()">📢 Telegram</button>
-        <button class="share-btn facebook" onclick="shareFacebook()">📘 Facebook</button>
+        <button class="share-btn" onclick="shareWhatsApp()" id="waBtn">💬 WhatsApp</button>
+        <button class="share-btn" onclick="shareTelegram()" id="tgBtn">📢 Telegram</button>
+        <button class="share-btn" onclick="shareFacebook()" id="fbBtn">📘 Facebook</button>
       </div>
       
       <div class="referred-list" id="referredList" style="display:none;">
-        <div class="referred-title">🎉 Who Joined</div>
+        <div class="referred-title" id="whoJoinedTitle">🎉 Who Joined</div>
         <div id="referredUsers"></div>
       </div>
     </div>
@@ -449,6 +323,7 @@
   
   <script>
     let refLinkGlobal = '';
+    let content = {};
     
     function showToast(msg, isError) {
       const t = document.getElementById('toast');
@@ -458,19 +333,62 @@
       setTimeout(() => t.classList.remove('show'), 2500);
     }
     
+    // Load content from server
+    async function loadContent() {
+      try {
+        const res = await fetch('/api/content');
+        content = await res.json();
+        
+        // Wallet section
+        const w = content.wallet || {};
+        if (w.title) document.getElementById('titleText').textContent = w.title;
+        if (w.balanceLabel) document.getElementById('balanceLabel').textContent = w.balanceLabel;
+        if (w.safeText) document.getElementById('safeText').textContent = w.safeText;
+        if (w.giftTitle) document.getElementById('giftTitle').textContent = w.giftTitle;
+        if (w.giftDesc) document.getElementById('giftDesc').textContent = w.giftDesc;
+        if (w.giftPlaceholder) document.getElementById('giftCode').placeholder = w.giftPlaceholder;
+        if (w.giftButton) document.getElementById('giftBtn').textContent = w.giftButton;
+        if (w.addMoneyTab) document.getElementById('tabAdd').textContent = w.addMoneyTab;
+        if (w.historyTab) document.getElementById('tabHistory').textContent = w.historyTab;
+        if (w.howToTitle) document.getElementById('howToTitle').textContent = w.howToTitle;
+        if (w.howToInfo) document.getElementById('howToInfo').textContent = w.howToInfo;
+        if (w.sendLabel) document.getElementById('sendLabel').textContent = w.sendLabel;
+        if (w.copyBtn) document.getElementById('copyBtn').textContent = w.copyBtn;
+        if (w.amountLabel) document.getElementById('amountLabel').textContent = w.amountLabel;
+        if (w.amountPlaceholder) document.getElementById('depAmount').placeholder = w.amountPlaceholder;
+        if (w.bkashLabel) document.getElementById('bkashLabel').textContent = w.bkashLabel;
+        if (w.bkashPlaceholder) document.getElementById('senderNumber').placeholder = w.bkashPlaceholder;
+        if (w.trxLabel) document.getElementById('trxLabel').textContent = w.trxLabel;
+        if (w.trxPlaceholder) document.getElementById('trxId').placeholder = w.trxPlaceholder;
+        if (w.screenshotLabel) document.getElementById('screenshotLabel').textContent = w.screenshotLabel;
+        if (w.screenshotPlaceholder) document.getElementById('screenshot').placeholder = w.screenshotPlaceholder;
+        if (w.submitBtn) document.getElementById('submitBtn').textContent = w.submitBtn;
+        
+        // Referral section
+        const r = content.referral || {};
+        if (r.title) document.getElementById('refTitle').textContent = r.title;
+        if (r.subtitle) document.getElementById('refSubtitle').textContent = r.subtitle;
+        if (r.copyBtn) document.getElementById('refCopyBtn').textContent = r.copyBtn;
+        if (r.referralsLabel) document.getElementById('refsLabel').textContent = r.referralsLabel;
+        if (r.earnedLabel) document.getElementById('earnedLabel').textContent = r.earnedLabel;
+        if (r.whatsappBtn) document.getElementById('waBtn').textContent = r.whatsappBtn;
+        if (r.telegramBtn) document.getElementById('tgBtn').textContent = r.telegramBtn;
+        if (r.facebookBtn) document.getElementById('fbBtn').textContent = r.facebookBtn;
+        if (r.whoJoinedTitle) document.getElementById('whoJoinedTitle').textContent = r.whoJoinedTitle;
+      } catch (e) {
+        console.error('Failed to load content:', e);
+      }
+    }
+    
     function switchTab(name) {
-      document.querySelectorAll('.tab').forEach((t, i) => {
-        t.classList.toggle('active', (name === 'add' && i === 0) || (name === 'history' && i === 1));
-      });
-      document.querySelectorAll('.tab-content').forEach((c, i) => {
-        c.classList.toggle('active', (name === 'add' && i === 0) || (name === 'history' && i === 1));
-      });
+      document.getElementById('tabAdd').classList.toggle('active', name === 'add');
+      document.getElementById('tabHistory').classList.toggle('active', name === 'history');
+      document.getElementById('contentAdd').classList.toggle('active', name === 'add');
+      document.getElementById('contentHistory').classList.toggle('active', name === 'history');
       if (name === 'history') loadHistory();
     }
     
-    function setAmt(n) {
-      document.getElementById('depAmount').value = n;
-    }
+    function setAmt(n) { document.getElementById('depAmount').value = n; }
     
     function copyBkash() {
       const num = document.getElementById('bkashNumber').textContent;
@@ -483,30 +401,24 @@
       showToast('✅ Referral link copied!');
     }
     
-    // Load user
     async function loadUser() {
       try {
         const res = await fetch('/api/me');
         if (!res.ok) { window.location.href = '/login'; return; }
         const user = await res.json();
         document.getElementById('balance').textContent = '৳' + (user.wallet || 0);
-      } catch (e) {
-        window.location.href = '/login';
-      }
+      } catch (e) { window.location.href = '/login'; }
     }
     
-    // Load settings (bKash number)
     async function loadSettings() {
       try {
         const res = await fetch('/api/shop/settings');
         const s = await res.json();
-        if (s.bkashNumber) {
-          document.getElementById('bkashNumber').textContent = s.bkashNumber;
-        }
+        if (s.bkashNumber) document.getElementById('bkashNumber').textContent = s.bkashNumber;
+        if (s.bkashType) document.getElementById('bkashType').textContent = s.bkashType;
       } catch (e) {}
     }
     
-    // Submit deposit
     async function submitDeposit() {
       const btn = document.getElementById('submitBtn');
       const amount = document.getElementById('depAmount').value;
@@ -518,7 +430,7 @@
       if (!senderNumber) return showToast('❌ আপনার bKash number দিন', true);
       
       btn.disabled = true;
-      btn.textContent = 'Sending...';
+      btn.textContent = '⏳ Sending...';
       
       try {
         const res = await fetch('/api/deposit/request', {
@@ -529,7 +441,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed');
         
-        showToast('✅ Request submitted! Admin approve করবে');
+        showToast('✅ Request submitted!');
         document.getElementById('depAmount').value = '';
         document.getElementById('senderNumber').value = '';
         document.getElementById('trxId').value = '';
@@ -538,10 +450,9 @@
         showToast('❌ ' + e.message, true);
       }
       btn.disabled = false;
-      btn.textContent = '🚀 Submit Request';
+      btn.textContent = content.wallet?.submitBtn || '🚀 Submit Request';
     }
     
-    // Load history
     async function loadHistory() {
       const container = document.getElementById('historyList');
       container.innerHTML = '<div style="text-align:center; padding:40px; color:#71717a;">Loading...</div>';
@@ -551,7 +462,7 @@
         const list = await res.json();
         
         if (!list.length) {
-          container.innerHTML = '<div style="text-align:center; padding:40px; color:#71717a;">এখনো কোনো history নেই</div>';
+          container.innerHTML = '<div style="text-align:center; padding:40px; color:#71717a;">' + (content.wallet?.noHistory || 'এখনো কোনো history নেই') + '</div>';
           return;
         }
         
@@ -560,10 +471,8 @@
                       : d.status === 'approved' ? '<span class="badge-approved">✅ APPROVED</span>'
                       : '<span class="badge-rejected">❌ REJECTED</span>';
           return '<div class="history-item">' +
-            '<div class="history-left">' +
-              '<div class="history-title">💰 ৳' + d.amount + ' ' + badge + '</div>' +
-              '<div class="history-date">' + new Date(d.createdAt).toLocaleString() + '</div>' +
-            '</div>' +
+            '<div class="history-title">💰 ৳' + d.amount + ' ' + badge + '</div>' +
+            '<div class="history-date">' + new Date(d.createdAt).toLocaleString() + '</div>' +
           '</div>';
         }).join('');
       } catch (e) {
@@ -571,15 +480,13 @@
       }
     }
     
-    // Gift code redeem
-    async function redeemGift() {
+    function redeemGift() {
       const code = document.getElementById('giftCode').value.trim().toUpperCase();
       if (!code) return showToast('❌ Gift code লিখুন', true);
       showToast('🎁 Gift system coming soon!');
       document.getElementById('giftCode').value = '';
     }
     
-    // Referral
     async function loadReferral() {
       try {
         const res = await fetch('/api/referral/info');
@@ -605,11 +512,11 @@
     }
     
     function shareWhatsApp() {
-      const msg = '🎁 Join FreeHost and get ৳20 bonus!\n' + refLinkGlobal;
+      const msg = (content.referral?.shareMessage || '🎁 Join FreeHost and get ৳20 bonus!') + '\n' + refLinkGlobal;
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     }
     function shareTelegram() {
-      const msg = '🎁 Join FreeHost and get ৳20 bonus!';
+      const msg = content.referral?.shareMessage || '🎁 Join FreeHost!';
       window.open('https://t.me/share/url?url=' + encodeURIComponent(refLinkGlobal) + '&text=' + encodeURIComponent(msg), '_blank');
     }
     function shareFacebook() {
@@ -621,9 +528,13 @@
     }
     
     // Init
-    loadUser();
-    loadSettings();
-    loadReferral();
+    async function init() {
+      await loadContent();
+      await loadUser();
+      await loadSettings();
+      await loadReferral();
+    }
+    init();
   </script>
 </body>
 </html>
