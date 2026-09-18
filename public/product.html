@@ -26,10 +26,7 @@
     text-decoration: none; color: #fff;
   }
   
-  .product-main {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 30px; margin-bottom: 32px;
-  }
+  .product-main { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 32px; }
   @media (max-width: 700px) { .product-main { grid-template-columns: 1fr; } }
   
   .product-image {
@@ -64,21 +61,18 @@
   .product-desc {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px; padding: 16px;
-    margin-bottom: 20px;
+    border-radius: 12px; padding: 16px; margin-bottom: 20px;
   }
   .product-desc-title {
     font-size: 12px; font-weight: 700; color: #a1a1aa;
-    text-transform: uppercase; letter-spacing: 0.6px;
-    margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;
   }
   .product-desc-text { font-size: 14px; color: #d4d4d8; line-height: 1.6; }
   
   .balance-info {
     background: rgba(139,92,246,0.08);
     border: 1px solid rgba(139,92,246,0.2);
-    border-radius: 12px; padding: 16px;
-    margin-bottom: 16px;
+    border-radius: 12px; padding: 16px; margin-bottom: 16px;
   }
   .balance-row {
     display: flex; justify-content: space-between;
@@ -93,8 +87,8 @@
     width: 100%; padding: 16px;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
     color: #fff; border: none; border-radius: 12px;
-    font-size: 16px; font-weight: 800;
-    cursor: pointer; margin-bottom: 10px;
+    font-size: 16px; font-weight: 800; cursor: pointer;
+    margin-bottom: 10px;
     box-shadow: 0 12px 30px -8px rgba(139,92,246,0.5);
     font-family: inherit;
   }
@@ -102,32 +96,50 @@
   .buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .buy-btn.login { background: linear-gradient(135deg, #f59e0b, #d97706); }
   
+  /* OWNED SECTION */
   .owned-box {
     background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05));
     border: 2px solid rgba(16,185,129,0.4);
-    border-radius: 16px; padding: 20px;
-    margin-bottom: 16px;
+    border-radius: 16px; padding: 20px; margin-bottom: 16px;
   }
   .owned-title { font-size: 16px; font-weight: 800; color: #34d399; margin-bottom: 12px; }
+  .owned-subtitle { font-size: 12px; color: #a1a1aa; margin-bottom: 16px; }
+  
+  .delivery-item {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 14px;
+    margin-bottom: 12px;
+  }
+  .delivery-item:last-child { margin-bottom: 0; }
+  .delivery-item-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700;
+    color: #c4b5fd; margin-bottom: 10px;
+  }
+  .delivery-item-head .icon { font-size: 16px; }
   .delivery-content {
     background: #000; border: 1px solid #222;
-    border-radius: 10px; padding: 14px;
+    border-radius: 8px; padding: 10px 12px;
     font-family: monospace; font-size: 12px;
     color: #4ade80; word-break: break-all;
-    margin-bottom: 12px; max-height: 200px;
+    margin-bottom: 8px; max-height: 150px;
     overflow: auto;
   }
-  .owned-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .owned-btn {
-    flex: 1; min-width: 120px; padding: 12px;
-    background: rgba(16,185,129,0.2);
-    color: #34d399; border: 1px solid rgba(16,185,129,0.4);
-    border-radius: 10px; font-size: 13px; font-weight: 700;
-    cursor: pointer; text-decoration: none;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    text-align: center;
+  .delivery-content.textarea {
+    color: #e4e4e7; font-size: 11px;
+    white-space: pre-wrap; max-height: 250px;
   }
-  .owned-btn:hover { background: rgba(16,185,129,0.3); }
+  .delivery-btn {
+    width: 100%; padding: 10px;
+    background: rgba(16,185,129,0.15);
+    color: #34d399; border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 8px; font-size: 12px; font-weight: 700;
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px; font-family: inherit;
+  }
+  .delivery-btn:hover { background: rgba(16,185,129,0.25); }
   
   .modal-overlay {
     position: fixed; inset: 0;
@@ -139,20 +151,18 @@
   .modal {
     background: #151515; border: 1px solid #333;
     border-radius: 20px; padding: 24px;
-    width: 100%; max-width: 400px;
-    text-align: center;
+    width: 100%; max-width: 400px; text-align: center;
   }
   .modal h2 { font-size: 20px; margin-bottom: 16px; }
-  .modal p { color: #a1a1aa; margin-bottom: 20px; font-size: 14px; }
+  .modal p { color: #a1a1aa; margin-bottom: 20px; font-size: 14px; white-space: pre-line; }
   .modal-btns { display: flex; gap: 10px; }
   .modal-btns button {
-    flex: 1; padding: 12px;
-    border-radius: 10px; font-size: 14px; font-weight: 700;
+    flex: 1; padding: 12px; border-radius: 10px;
+    font-size: 14px; font-weight: 700;
     cursor: pointer; font-family: inherit; border: none;
   }
   .modal-cancel { background: #222; color: #fff; }
   .modal-confirm { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; }
-  .modal-confirm:hover { background: #7c3aed; }
   
   .toast {
     position: fixed; bottom: 24px; left: 50%;
@@ -166,14 +176,8 @@
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.error { background: #dc2626; }
   
-  .loading {
-    text-align: center; padding: 60px;
-    color: #71717a; font-size: 14px;
-  }
-  .error-box {
-    text-align: center; padding: 60px;
-    color: #f87171; font-size: 14px;
-  }
+  .loading { text-align: center; padding: 60px; color: #71717a; font-size: 14px; }
+  .error-box { text-align: center; padding: 60px; color: #f87171; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -256,7 +260,6 @@
         if (!res.ok) throw new Error('Not found');
         product = await res.json();
         
-        // Check if already purchased
         if (user) {
           const pr = await fetch('/api/shop/access/' + productId);
           if (pr.ok) purchase = await pr.json();
@@ -279,25 +282,11 @@
       const discount = product.discountPrice ? Math.round((1 - product.discountPrice / product.price) * 100) : 0;
       const price = product.discountPrice || product.price;
       
-      // Owned section OR Buy section
       let actionHtml = '';
       if (purchase) {
-        actionHtml = 
-          '<div class="owned-box">' +
-            '<div class="owned-title">' + (p.purchasedTitle || '✅ Purchase Successful!') + '</div>' +
-            '<div style="font-size:12px;color:#a1a1aa;margin-bottom:8px;">' + (p.deliveryReadyText || 'Your Product is Ready!') + '</div>' +
-            '<div class="delivery-content" id="deliveryContent">' + esc(purchase.deliveryData) + '</div>' +
-            '<div class="owned-actions">' +
-              (purchase.deliveryType === 'link' || purchase.deliveryType === 'file'
-                ? '<a href="' + esc(purchase.deliveryData) + '" target="_blank" class="owned-btn">📥 ' + (p.downloadBtn || 'Download Now') + '</a>'
-                : '<button onclick="copyDelivery()" class="owned-btn">📥 ' + (p.downloadBtn || 'Copy Code') + '</button>'
-              ) +
-              '<button onclick="copyDelivery()" class="owned-btn">🔗 ' + (p.copyLinkBtn || 'Copy Link') + '</button>' +
-            '</div>' +
-          '</div>';
+        actionHtml = renderOwned(p);
       } else if (!user) {
-        actionHtml = 
-          '<button class="buy-btn login" onclick="location.href=\'/login\'">' + (p.loginToBuyBtn || '🔒 Login to Buy') + '</button>';
+        actionHtml = '<button class="buy-btn login" onclick="location.href=\'/login\'">' + (p.loginToBuyBtn || '🔒 Login to Buy') + '</button>';
       } else {
         const after = (user.wallet || 0) - price;
         actionHtml = 
@@ -331,11 +320,67 @@
           : '');
     }
     
+    function renderOwned(p) {
+      let html = 
+        '<div class="owned-box">' +
+          '<div class="owned-title">' + (p.purchasedTitle || '✅ Purchase Successful!') + '</div>' +
+          '<div class="owned-subtitle">' + (p.deliveryReadyText || 'Your Product is Ready!') + '</div>';
+      
+      // Link
+      if (purchase.linkData) {
+        html += 
+          '<div class="delivery-item">' +
+            '<div class="delivery-item-head"><span class="icon">🔗</span> ' + (p.linkSectionTitle || 'Download Link') + '</div>' +
+            '<div class="delivery-content">' + esc(purchase.linkData) + '</div>' +
+            '<div style="display:flex; gap:6px;">' +
+              '<a href="' + esc(purchase.linkData) + '" target="_blank" class="delivery-btn" style="flex:1;">' + (p.openLinkBtn || '🔗 Open Link') + '</a>' +
+              '<button class="delivery-btn" onclick="copyText(\'' + escapeJs(purchase.linkData) + '\')" style="flex:1;">📋 Copy</button>' +
+            '</div>' +
+          '</div>';
+      }
+      
+      // File
+      if (purchase.fileData) {
+        html += 
+          '<div class="delivery-item">' +
+            '<div class="delivery-item-head"><span class="icon">📁</span> ' + (p.fileSectionTitle || 'File Download') + '</div>' +
+            '<div class="delivery-content">' + esc(purchase.fileData) + '</div>' +
+            '<div style="display:flex; gap:6px;">' +
+              '<a href="' + esc(purchase.fileData) + '" target="_blank" class="delivery-btn" style="flex:1;" download>' + (p.downloadBtn || '📥 Download') + '</a>' +
+              '<button class="delivery-btn" onclick="copyText(\'' + escapeJs(purchase.fileData) + '\')" style="flex:1;">📋 Copy</button>' +
+            '</div>' +
+          '</div>';
+      }
+      
+      // Code
+      if (purchase.codeData) {
+        const codeId = 'code-' + Date.now();
+        html += 
+          '<div class="delivery-item">' +
+            '<div class="delivery-item-head"><span class="icon">💻</span> ' + (p.codeSectionTitle || 'Source Code') + '</div>' +
+            '<div class="delivery-content textarea" id="' + codeId + '">' + esc(purchase.codeData) + '</div>' +
+            '<button class="delivery-btn" onclick="copyText(document.getElementById(\'' + codeId + '\').textContent)">' + (p.copyCodeBtn || '📋 Copy Code') + '</button>' +
+          '</div>';
+      }
+      
+      html += '</div>';
+      return html;
+    }
+    
+    function escapeJs(str) {
+      return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n');
+    }
+    
+    function copyText(text) {
+      navigator.clipboard.writeText(text);
+      showToast('✅ Copied!');
+    }
+    
     function openConfirm() {
       const p = content.product || {};
       document.getElementById('confirmMsg').textContent = 
         product.title + ' — ৳' + (product.discountPrice || product.price) + 
-        '\n' + (p.currentBalanceLabel || 'Your Balance') + ': ৳' + (user?.wallet || 0);
+        '\n\n' + (p.currentBalanceLabel || 'Your Balance') + ': ৳' + (user?.wallet || 0);
       document.getElementById('confirmModal').classList.add('show');
     }
     
@@ -357,7 +402,6 @@
         showToast('✅ Purchase successful!');
         closeConfirm();
         
-        // Reload user and product
         setTimeout(() => {
           loadUser();
           loadProduct();
@@ -369,14 +413,10 @@
       }
     }
     
-    function copyDelivery() {
-      if (!purchase) return;
-      navigator.clipboard.writeText(purchase.deliveryData);
-      showToast('✅ Copied!');
-    }
-    
     function esc(s) {
-      return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      return String(s || '').replace(/[&<>"']/g, c => ({ 
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' 
+      }[c]));
     }
     
     async function init() {
