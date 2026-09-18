@@ -9,7 +9,6 @@
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
     background: #0a0a0f; color: #fff; min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
   }
   .glow {
     position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
@@ -67,7 +66,7 @@
   
   .actions { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
   .btn-primary {
-    flex: 1; min-width: 160px; padding: 16px 24px;
+    flex: 1; min-width: 180px; padding: 16px 24px;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
     color: #fff; border: none; border-radius: 12px;
     font-size: 14px; font-weight: 700; cursor: pointer;
@@ -81,119 +80,6 @@
   .section-title {
     font-size: 13px; font-weight: 700; color: #71717a;
     text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;
-  }
-  
-  /* 🎁 Referral Section */
-  .referral-box {
-    background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.03));
-    border: 1px solid rgba(16,185,129,0.3);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 32px;
-    position: relative;
-    overflow: hidden;
-  }
-  .referral-box::before {
-    content: '';
-    position: absolute;
-    top: -50px; right: -50px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(16,185,129,0.2), transparent 70%);
-    pointer-events: none;
-  }
-  .ref-header {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 16px; position: relative;
-  }
-  .ref-icon {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, #10b981, #059669);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    box-shadow: 0 8px 20px -5px rgba(16,185,129,0.5);
-  }
-  .ref-title { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
-  .ref-subtitle { font-size: 12px; color: #a1a1aa; margin-top: 2px; }
-  
-  .ref-link-row {
-    display: flex; gap: 8px; margin-bottom: 16px; position: relative;
-  }
-  .ref-link-input {
-    flex: 1;
-    padding: 12px 14px;
-    background: rgba(0,0,0,0.5);
-    border: 1px solid rgba(16,185,129,0.3);
-    border-radius: 10px;
-    color: #34d399;
-    font-size: 12px;
-    font-family: 'SF Mono', Monaco, monospace;
-    outline: none;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .ref-copy-btn {
-    padding: 12px 18px;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    white-space: nowrap;
-    transition: 0.2s;
-  }
-  .ref-copy-btn:hover { transform: translateY(-1px); }
-  
-  .ref-share-row {
-    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
-  }
-  .share-btn {
-    flex: 1; min-width: 120px;
-    padding: 10px 14px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: #e4e4e7;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    text-decoration: none;
-    text-align: center;
-    display: flex; align-items: center; justify-content: center;
-    gap: 6px;
-    transition: 0.15s;
-  }
-  .share-btn:hover { background: rgba(255,255,255,0.1); }
-  .share-btn.wa:hover { background: rgba(37,211,102,0.15); border-color: #25D366; }
-  .share-btn.tg:hover { background: rgba(0,136,204,0.15); border-color: #0088cc; }
-  .share-btn.fb:hover { background: rgba(24,119,242,0.15); border-color: #1877f2; }
-  
-  .ref-stats {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 12px; position: relative;
-  }
-  .ref-stat {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(16,185,129,0.2);
-    border-radius: 12px;
-    padding: 14px;
-    text-align: center;
-  }
-  .ref-stat-num {
-    font-size: 24px; font-weight: 800;
-    color: #34d399;
-    letter-spacing: -0.5px;
-  }
-  .ref-stat-lbl {
-    font-size: 11px; color: #a1a1aa;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    font-weight: 600;
-    margin-top: 4px;
   }
   
   .page-card {
@@ -224,16 +110,6 @@
   .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.6; }
   .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
   .empty-desc { color: #71717a; font-size: 14px; }
-  
-  .toast {
-    position: fixed; bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: #16a34a; color: #fff;
-    padding: 12px 24px; border-radius: 10px;
-    font-size: 14px; font-weight: 600;
-    transition: transform 0.3s; z-index: 9999;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -258,7 +134,7 @@
     </nav>
     
     <h1>My Dashboard</h1>
-    <p class="welcome-sub">Manage your pages, wallet and referrals</p>
+    <p class="welcome-sub">Manage all your hosted pages</p>
     
     <div class="stats">
       <div class="stat">
@@ -270,7 +146,7 @@
         <div class="stat-value" id="statViews">0</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Wallet</div>
+        <div class="stat-label">Wallet Balance</div>
         <div class="stat-value" id="statWallet">৳0</div>
       </div>
     </div>
@@ -278,40 +154,7 @@
     <div class="actions">
       <a href="/" class="btn-primary">+ Host New Page</a>
       <a href="/shop" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669);">🛍 Visit Shop</a>
-      <a href="/wallet" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b, #ea580c);">💰 Wallet</a>
-    </div>
-    
-    <!-- 🎁 Referral Section -->
-    <div class="referral-box">
-      <div class="ref-header">
-        <div class="ref-icon">🎁</div>
-        <div>
-          <div class="ref-title">Invite Friends & Earn</div>
-          <div class="ref-subtitle">প্রতি বন্ধু sign up করলে <strong style="color:#34d399">৳10</strong> পাবেন — তারা পাবে <strong style="color:#34d399">৳20</strong></div>
-        </div>
-      </div>
-      
-      <div class="ref-link-row">
-        <input type="text" class="ref-link-input" id="refLink" readonly value="Loading...">
-        <button class="ref-copy-btn" onclick="copyRefLink()">📋 Copy</button>
-      </div>
-      
-      <div class="ref-share-row">
-        <a class="share-btn wa" id="shareWhatsapp" target="_blank">📱 WhatsApp</a>
-        <a class="share-btn tg" id="shareTelegram" target="_blank">📢 Telegram</a>
-        <a class="share-btn fb" id="shareFacebook" target="_blank">👍 Facebook</a>
-      </div>
-      
-      <div class="ref-stats">
-        <div class="ref-stat">
-          <div class="ref-stat-num" id="refCount">0</div>
-          <div class="ref-stat-lbl">Referrals</div>
-        </div>
-        <div class="ref-stat">
-          <div class="ref-stat-num">৳<span id="refEarned">0</span></div>
-          <div class="ref-stat-lbl">Total Earned</div>
-        </div>
-      </div>
+      <a href="/wallet" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰 My Wallet</a>
     </div>
     
     <div class="section-title">My Pages</div>
@@ -323,26 +166,12 @@
     </div>
   </div>
   
-  <div class="toast" id="toast"></div>
-  
   <script>
-    let userData = null;
-    let refData = null;
-    
-    function showToast(msg, color) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.style.background = color || '#16a34a';
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2000);
-    }
-    
     async function loadUser() {
       try {
         const res = await fetch('/api/me');
         if (!res.ok) { window.location.href = '/login'; return null; }
         const user = await res.json();
-        userData = user;
         document.getElementById('userName').textContent = user.name || 'User';
         document.getElementById('userEmail').textContent = user.email || '';
         document.getElementById('userAvatar').textContent = (user.name || 'U').charAt(0).toUpperCase();
@@ -351,28 +180,6 @@
       } catch (e) {
         window.location.href = '/login';
         return null;
-      }
-    }
-    
-    async function loadReferral() {
-      try {
-        const res = await fetch('/api/referral/info');
-        if (!res.ok) return;
-        refData = await res.json();
-        
-        document.getElementById('refLink').value = refData.link;
-        document.getElementById('refCount').textContent = refData.referrals || 0;
-        document.getElementById('refEarned').textContent = refData.totalEarned || 0;
-        
-        // Share links
-        const shareText = encodeURIComponent('🎁 FreeHost এ যোগ দিন! আমি ব্যবহার করছি — আপনি ৳' + (refData.welcomeBonus || 20) + ' welcome bonus পাবেন।');
-        const shareUrl = encodeURIComponent(refData.link);
-        
-        document.getElementById('shareWhatsapp').href = `https://wa.me/?text=${shareText}%20${shareUrl}`;
-        document.getElementById('shareTelegram').href = `https://t.me/share/url?url=${shareUrl}&text=${shareText}`;
-        document.getElementById('shareFacebook').href = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
-      } catch (e) {
-        console.error('Referral load failed', e);
       }
     }
     
@@ -402,19 +209,13 @@
             '</div>' +
             '<div class="page-actions">' +
               '<a href="' + url + '" target="_blank" class="mini-btn">🔗 Open</a>' +
-              '<button class="mini-btn" onclick="copyLink(\'' + url + '\', this)">📋 Copy Link</button>' +
+              '<button class="mini-btn" onclick="copyLink(\'' + url + '\', this)">📋 Copy</button>' +
             '</div>' +
           '</div>';
         }).join('');
       } catch (e) {
         document.getElementById('pagesContainer').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Failed to load</div></div>';
       }
-    }
-    
-    function copyRefLink() {
-      if (!refData) return;
-      navigator.clipboard.writeText(refData.link);
-      showToast('🎁 Referral link copied!');
     }
     
     function copyLink(url, btn) {
@@ -435,10 +236,7 @@
     
     async function init() {
       const user = await loadUser();
-      if (user) {
-        loadPages();
-        loadReferral();
-      }
+      if (user) loadPages();
     }
     init();
   </script>
