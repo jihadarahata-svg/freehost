@@ -14,7 +14,7 @@
   .login input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; }
   .login button { width: 100%; padding: 12px; background: #fff; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 12px; font-family: inherit; font-size: 14px; }
   
-  /* APP LAYOUT */
+  /* LAYOUT */
   #app { display: none; }
   #app.show { display: flex; min-height: 100vh; }
   
@@ -24,8 +24,7 @@
     border-right: 1px solid #1a1a1a;
     display: flex; flex-direction: column;
     position: fixed; top: 0; left: 0; bottom: 0;
-    transition: transform 0.3s;
-    z-index: 100;
+    transition: transform 0.3s; z-index: 100;
   }
   .sidebar-head {
     padding: 20px; border-bottom: 1px solid #1a1a1a;
@@ -37,26 +36,21 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 16px;
   }
-  .sidebar-head-text { font-weight: 800; font-size: 15px; letter-spacing: -0.3px; }
+  .sidebar-head-text { font-weight: 800; font-size: 15px; }
   
-  .sidebar-nav {
-    flex: 1; overflow-y: auto; padding: 16px 12px;
-  }
+  .sidebar-nav { flex: 1; overflow-y: auto; padding: 16px 12px; }
   .nav-group {
     font-size: 10px; color: #52525b;
     text-transform: uppercase; letter-spacing: 1.2px;
-    font-weight: 700; padding: 0 8px;
-    margin: 16px 0 8px;
+    font-weight: 700; padding: 0 8px; margin: 16px 0 8px;
   }
   .nav-group:first-child { margin-top: 0; }
-  
   .nav-item {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 12px; border-radius: 8px;
     font-size: 13px; font-weight: 600;
     color: #a1a1aa; cursor: pointer;
     margin-bottom: 2px; transition: 0.15s;
-    position: relative;
   }
   .nav-item:hover { background: #151520; color: #fff; }
   .nav-item.active {
@@ -71,9 +65,7 @@
     font-weight: 700;
   }
   
-  .sidebar-foot {
-    padding: 16px 12px; border-top: 1px solid #1a1a1a;
-  }
+  .sidebar-foot { padding: 16px 12px; border-top: 1px solid #1a1a1a; }
   .logout-btn {
     width: 100%; padding: 10px;
     background: rgba(239,68,68,0.1);
@@ -82,18 +74,12 @@
     font-size: 13px; font-weight: 700;
     cursor: pointer; font-family: inherit;
   }
-  .logout-btn:hover { background: rgba(239,68,68,0.2); }
   
   /* MAIN */
-  .main {
-    flex: 1; margin-left: 240px;
-    display: flex; flex-direction: column;
-    min-width: 0;
-  }
+  .main { flex: 1; margin-left: 240px; display: flex; flex-direction: column; min-width: 0; }
   
   .topbar {
-    padding: 14px 20px;
-    background: #0d0d14;
+    padding: 14px 20px; background: #0d0d14;
     border-bottom: 1px solid #1a1a1a;
     display: flex; align-items: center; justify-content: space-between;
     position: sticky; top: 0; z-index: 50;
@@ -104,7 +90,7 @@
     color: #fff; font-size: 22px; cursor: pointer;
     padding: 4px 8px; border-radius: 6px;
   }
-  .topbar h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+  .topbar h1 { font-size: 18px; font-weight: 800; }
   .topbar-right { display: flex; gap: 8px; }
   .topbar-btn {
     padding: 8px 14px; background: #1a1a1a;
@@ -114,12 +100,8 @@
   }
   .topbar-btn:hover { background: #222; color: #fff; }
   
-  .content {
-    flex: 1; padding: 24px 20px;
-    max-width: 100%; overflow-x: hidden;
-  }
+  .content { flex: 1; padding: 24px 20px; overflow-x: hidden; }
   
-  /* PAGE (tab content) */
   .page { display: none; }
   .page.active { display: block; }
   
@@ -160,27 +142,36 @@
   }
   .section-head {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
   }
-  .section-head h2 {
-    font-size: 16px; font-weight: 800;
-    letter-spacing: -0.3px;
-  }
+  .section-head h2 { font-size: 16px; font-weight: 800; }
   
-  /* SEARCH BAR */
-  .search-bar {
-    display: flex; gap: 8px; margin-bottom: 16px;
-  }
+  /* SEARCH */
+  .search-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
   .search-bar input {
-    flex: 1; padding: 12px 14px;
+    flex: 1; min-width: 200px;
+    padding: 12px 14px;
     background: #0a0a0a; border: 1px solid #222;
     border-radius: 10px; color: #fff;
-    font-size: 14px; font-family: inherit;
-    outline: none;
+    font-size: 14px; font-family: inherit; outline: none;
   }
   .search-bar input:focus { border-color: rgba(139,92,246,0.6); }
   
-  /* CARD / ITEM */
+  /* FILTER TABS */
+  .filter-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-tab {
+    padding: 8px 14px; background: #1a1a1a;
+    border: 1px solid #222; color: #a1a1aa;
+    border-radius: 8px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .filter-tab:hover { background: #222; color: #fff; }
+  .filter-tab.active {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #fff; border-color: transparent;
+  }
+  
+  /* ITEM CARD */
   .item-card {
     background: #0d0d14;
     border: 1px solid #1a1a1a;
@@ -191,8 +182,27 @@
   .item-card:hover { border-color: #2a2a2a; }
   .item-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
   .item-title { font-size: 15px; font-weight: 700; }
-  .item-meta { font-size: 12px; color: #888; margin-bottom: 4px; }
+  .item-meta { font-size: 12px; color: #888; margin-bottom: 4px; word-break: break-word; }
   .item-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  
+  /* PRODUCT ROW */
+  .product-row {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 14px; background: #0d0d14;
+    border: 1px solid #1a1a1a; border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .product-img {
+    width: 70px; height: 70px;
+    border-radius: 10px; background: #1a1a1a;
+    object-fit: cover; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+  }
+  .product-info { flex: 1; min-width: 0; }
+  .product-info h4 { font-size: 14px; margin-bottom: 4px; }
+  .product-info p { font-size: 11px; color: #888; margin-bottom: 2px; }
+  .product-price { font-size: 15px; font-weight: 700; color: #4ade80; margin-top: 4px; }
   
   /* BADGES */
   .badge {
@@ -226,16 +236,12 @@
   .btn.red { background: #dc2626; color: #fff; border-color: #dc2626; }
   .btn.red:hover { background: #b91c1c; }
   .btn.orange { background: #ea580c; color: #fff; border-color: #ea580c; }
-  .btn.orange:hover { background: #c2410c; }
   .btn.purple { background: #8b5cf6; color: #fff; border-color: #8b5cf6; }
-  .btn.purple:hover { background: #7c3aed; }
-  .btn.full { width: 100%; padding: 12px; font-size: 13px; }
+  .btn.full { width: 100%; padding: 12px; font-size: 13px; justify-content: center; }
+  .btn.small { padding: 5px 10px; font-size: 11px; }
   
   /* EMPTY */
-  .empty {
-    text-align: center; padding: 40px;
-    color: #666; font-size: 14px;
-  }
+  .empty { text-align: center; padding: 40px; color: #666; font-size: 14px; }
   
   /* CODE BOX */
   .code-box {
@@ -251,6 +257,77 @@
     word-break: break-all; margin: 0;
   }
   
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 16px;
+    overflow-y: auto;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #151515; border: 1px solid #333;
+    border-radius: 16px; padding: 24px;
+    width: 100%; max-width: 650px;
+    max-height: 90vh; overflow-y: auto;
+    margin: auto;
+  }
+  .modal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid #222;
+  }
+  .modal-head h2 { font-size: 18px; }
+  .modal-close {
+    background: transparent; color: #888; border: none;
+    font-size: 24px; cursor: pointer; padding: 4px 12px;
+    margin: 0; line-height: 1;
+  }
+  .modal-close:hover { color: #fff; }
+  
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block; font-size: 11px; color: #888;
+    margin-bottom: 6px; text-transform: uppercase;
+    font-weight: 700; letter-spacing: 0.5px;
+  }
+  .form-group label .required { color: #f87171; }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%; padding: 12px 14px;
+    background: #0a0a0a; border: 1.5px solid #222;
+    border-radius: 10px; color: #fff;
+    font-size: 14px; font-family: inherit;
+    outline: none; transition: 0.15s;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: rgba(139,92,246,0.6);
+    box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-group small { font-size: 11px; color: #666; margin-top: 4px; display: block; }
+  
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+  
+  .photo-preview {
+    margin-top: 8px;
+    width: 100px; height: 100px;
+    border-radius: 10px; border: 1px solid #222;
+    object-fit: cover;
+    display: none;
+  }
+  .photo-preview.show { display: block; }
+  
+  .modal-btns {
+    display: flex; gap: 8px; margin-top: 20px;
+    padding-top: 16px; border-top: 1px solid #222;
+  }
+  .modal-btns .btn { flex: 1; padding: 12px; justify-content: center; font-size: 14px; }
+  
   /* TOAST */
   .toast {
     position: fixed; bottom: 24px; left: 50%;
@@ -260,6 +337,7 @@
     font-size: 14px; font-weight: 600;
     transition: transform 0.3s; z-index: 9999;
     max-width: 90%; text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.error { background: #dc2626; }
@@ -272,22 +350,6 @@
   }
   .overlay.show { display: block; }
   
-  /* ACTIVITY */
-  .activity-item {
-    display: flex; gap: 12px; padding: 12px 0;
-    border-bottom: 1px solid #1a1a1a;
-  }
-  .activity-item:last-child { border-bottom: none; }
-  .activity-icon {
-    width: 36px; height: 36px; border-radius: 10px;
-    background: #1a1a1a;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; flex-shrink: 0;
-  }
-  .activity-text { flex: 1; }
-  .activity-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-  .activity-time { font-size: 11px; color: #71717a; }
-  
   /* MOBILE */
   @media (max-width: 768px) {
     .sidebar { transform: translateX(-100%); }
@@ -297,6 +359,7 @@
     .content { padding: 16px 14px; }
     .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
     .stat-num { font-size: 22px; }
+    .modal { padding: 20px 16px; }
   }
 </style>
 </head>
@@ -372,7 +435,7 @@
           <h1 id="pageTitle">📊 Overview</h1>
         </div>
         <div class="topbar-right">
-          <button class="topbar-btn" onclick="loadAll()">🔄 Refresh</button>
+          <button class="topbar-btn" onclick="refreshPage()">🔄 Refresh</button>
         </div>
       </div>
 
@@ -380,7 +443,7 @@
 
         <!-- OVERVIEW -->
         <div class="page active" id="page-overview">
-          <div class="stats-grid" id="statsGrid">
+          <div class="stats-grid">
             <div class="stat-card">
               <span class="stat-icon">📄</span>
               <div class="stat-num" id="ovPages">0</div>
@@ -428,10 +491,10 @@
               <h2>⚡ Quick Actions</h2>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-              <button class="btn purple full" onclick="showPage('pages')">📄 Manage Pages</button>
-              <button class="btn purple full" onclick="showPage('users')">👥 View Users</button>
+              <button class="btn purple full" onclick="showPage('products')">🛍 Manage Products</button>
               <button class="btn purple full" onclick="showPage('deposits')">💰 Pending Deposits</button>
-              <button class="btn purple full" onclick="showPage('products')">🛍 Add Product</button>
+              <button class="btn purple full" onclick="showPage('users')">👥 View Users</button>
+              <button class="btn purple full" onclick="showPage('orders')">📦 Recent Orders</button>
             </div>
           </div>
         </div>
@@ -439,7 +502,7 @@
         <!-- PAGES -->
         <div class="page" id="page-pages">
           <div class="search-bar">
-            <input id="searchPages" placeholder="🔍 Search pages..." oninput="filterPages()">
+            <input id="searchPages" placeholder="🔍 Search pages by title or slug..." oninput="filterPages()">
           </div>
           <div id="pagesList"><div class="empty">Loading...</div></div>
         </div>
@@ -447,7 +510,7 @@
         <!-- USERS -->
         <div class="page" id="page-users">
           <div class="search-bar">
-            <input id="searchUsers" placeholder="🔍 Search users..." oninput="filterUsers()">
+            <input id="searchUsers" placeholder="🔍 Search users by email or name..." oninput="filterUsers()">
           </div>
           <div id="usersList"><div class="empty">Loading...</div></div>
         </div>
@@ -459,23 +522,26 @@
 
         <!-- PRODUCTS -->
         <div class="page" id="page-products">
-          <button class="btn purple full" style="margin-bottom:16px;" onclick="alert('Product form শীঘ্রই আসছে!')">➕ Add New Product</button>
+          <button class="btn purple full" style="margin-bottom:16px;" onclick="openProductModal()">➕ Add New Product</button>
           <div id="productsList"><div class="empty">Loading...</div></div>
         </div>
 
         <!-- DEPOSITS -->
         <div class="page" id="page-deposits">
-          <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
-            <button class="btn blue" onclick="loadDeposits('pending')">⏳ Pending</button>
-            <button class="btn green" onclick="loadDeposits('approved')">✅ Approved</button>
-            <button class="btn red" onclick="loadDeposits('rejected')">❌ Rejected</button>
-            <button class="btn" onclick="loadDeposits('all')">📋 All</button>
+          <div class="filter-tabs">
+            <button class="filter-tab active" onclick="loadDeposits('pending', this)">⏳ Pending</button>
+            <button class="filter-tab" onclick="loadDeposits('approved', this)">✅ Approved</button>
+            <button class="filter-tab" onclick="loadDeposits('rejected', this)">❌ Rejected</button>
+            <button class="filter-tab" onclick="loadDeposits('all', this)">📋 All</button>
           </div>
           <div id="depositsList"><div class="empty">Loading...</div></div>
         </div>
 
         <!-- ORDERS -->
         <div class="page" id="page-orders">
+          <div class="search-bar">
+            <input id="searchOrders" placeholder="🔍 Search orders by product or email..." oninput="filterOrders()">
+          </div>
           <div id="ordersList"><div class="empty">Loading...</div></div>
         </div>
 
@@ -483,13 +549,13 @@
         <div class="page" id="page-settings">
           <div class="section">
             <h2 style="margin-bottom:16px;">💳 bKash Settings</h2>
-            <div style="margin-bottom:12px;">
-              <label style="display:block; font-size:11px; color:#888; margin-bottom:6px; text-transform:uppercase;">bKash Number</label>
-              <input id="setBkash" style="width:100%; padding:12px; background:#0a0a0a; border:1px solid #222; border-radius:8px; color:#fff;">
+            <div class="form-group">
+              <label>bKash Number</label>
+              <input id="setBkash" placeholder="01XXXXXXXXX">
             </div>
-            <div>
-              <label style="display:block; font-size:11px; color:#888; margin-bottom:6px; text-transform:uppercase;">bKash Type</label>
-              <select id="setBkashType" style="width:100%; padding:12px; background:#0a0a0a; border:1px solid #222; border-radius:8px; color:#fff;">
+            <div class="form-group">
+              <label>bKash Type</label>
+              <select id="setBkashType">
                 <option value="Personal">Personal</option>
                 <option value="Merchant">Merchant</option>
               </select>
@@ -497,42 +563,182 @@
           </div>
           
           <div class="section">
-            <h2 style="margin-bottom:16px;">🎁 Referral Bonuses</h2>
-            <div style="margin-bottom:12px;">
-              <label style="display:block; font-size:11px; color:#888; margin-bottom:6px; text-transform:uppercase;">Welcome Bonus (৳)</label>
-              <input id="setWelcome" type="number" style="width:100%; padding:12px; background:#0a0a0a; border:1px solid #222; border-radius:8px; color:#fff;">
+            <h2 style="margin-bottom:16px;">💳 Nagad Settings</h2>
+            <div class="form-group">
+              <label>Nagad Number (খালি রাখলে দেখাবে না)</label>
+              <input id="setNagad" placeholder="01XXXXXXXXX">
             </div>
-            <div>
-              <label style="display:block; font-size:11px; color:#888; margin-bottom:6px; text-transform:uppercase;">Referral Bonus (৳)</label>
-              <input id="setReferral" type="number" style="width:100%; padding:12px; background:#0a0a0a; border:1px solid #222; border-radius:8px; color:#fff;">
+            <div class="form-group">
+              <label>Nagad Active</label>
+              <select id="setNagadActive">
+                <option value="false">❌ No</option>
+                <option value="true">✅ Yes</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2 style="margin-bottom:16px;">🎁 Referral Bonuses</h2>
+            <div class="form-group">
+              <label>Welcome Bonus (৳) — নতুন user পাবে</label>
+              <input id="setWelcome" type="number" placeholder="20">
+            </div>
+            <div class="form-group">
+              <label>Referral Bonus (৳) — যে invite করলো পাবে</label>
+              <input id="setReferral" type="number" placeholder="10">
+            </div>
+          </div>
+
+          <div class="section">
+            <h2 style="margin-bottom:16px;">💵 Deposit Limits</h2>
+            <div class="form-group">
+              <label>Minimum Deposit (৳)</label>
+              <input id="setMin" type="number" placeholder="50">
+            </div>
+            <div class="form-group">
+              <label>Maximum Deposit (৳)</label>
+              <input id="setMax" type="number" placeholder="10000">
+            </div>
+          </div>
+
+          <div class="section">
+            <h2 style="margin-bottom:16px;">📞 Support Contact</h2>
+            <div class="form-group">
+              <label>Email</label>
+              <input id="setEmail" placeholder="support@freehost.com">
+            </div>
+            <div class="form-group">
+              <label>WhatsApp</label>
+              <input id="setWhatsapp" placeholder="+880 16XXXXXXXX">
+            </div>
+            <div class="form-group">
+              <label>Telegram</label>
+              <input id="setTelegram" placeholder="@freehost_support">
             </div>
           </div>
           
-          <button class="btn purple full" onclick="saveSettings()">💾 Save Settings</button>
+          <button class="btn purple full" style="padding:14px; font-size:15px;" onclick="saveSettings()">💾 Save All Settings</button>
         </div>
 
-        <!-- CONTENT (placeholder) -->
+        <!-- CONTENT -->
         <div class="page" id="page-content">
           <div class="section">
             <h2 style="margin-bottom:12px;">🎨 Content Editor</h2>
             <p style="color:#888; font-size:13px; line-height:1.6;">
-              এই section এ Shop, Wallet এর সব লেখা edit করা যাবে।<br>
-              <strong style="color:#c4b5fd;">Day 3-4 এ যোগ হবে।</strong>
+              এই section এ Shop, Wallet, Referral এর সব লেখা edit করা যাবে।<br>
+              <strong style="color:#c4b5fd;">পরের ধাপে যোগ হবে।</strong>
             </p>
           </div>
         </div>
 
       </div>
     </div>
+  </div>
 
+  <!-- PRODUCT MODAL -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="productModalTitle">➕ Add Product</h2>
+        <button class="modal-close" onclick="closeProductModal()">✕</button>
+      </div>
+      
+      <div class="form-group">
+        <label>Product Title <span class="required">*</span></label>
+        <input id="pTitle" placeholder="HTML Templates Pack" maxlength="100">
+      </div>
+      
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="pDesc" placeholder="Product এর description..."></textarea>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category</label>
+          <input id="pCategory" placeholder="Templates, Code, Design">
+        </div>
+        <div class="form-group">
+          <label>Stock</label>
+          <input id="pStock" type="number" placeholder="999">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price (৳) <span class="required">*</span></label>
+          <input id="pPrice" type="number" placeholder="100">
+        </div>
+        <div class="form-group">
+          <label>Discount Price (৳)</label>
+          <input id="pDiscount" type="number" placeholder="80">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Photo URL</label>
+        <input id="pPhoto" placeholder="https://photo-url.jpg" oninput="previewPhoto()">
+        <img id="photoPreview" class="photo-preview" onerror="this.classList.remove('show')">
+      </div>
+      
+      <div class="form-group">
+        <label>Delivery Type <span class="required">*</span></label>
+        <select id="pDeliveryType">
+          <option value="link">🔗 Link</option>
+          <option value="file">📁 File</option>
+          <option value="code">💻 Code</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Delivery Data <span class="required">*</span></label>
+        <textarea id="pDeliveryData" placeholder="https://drive.google.com/... অথবা HTML Code"></textarea>
+        <small>User কিনলে এই data দেখতে পাবে</small>
+      </div>
+      
+      <div class="modal-btns">
+        <button class="btn" onclick="closeProductModal()">Cancel</button>
+        <button class="btn purple" onclick="saveProduct()" id="saveProductBtn">💾 Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT PAGE MODAL -->
+  <div class="modal-overlay" id="editPageModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>📝 Edit Page</h2>
+        <button class="modal-close" onclick="closeEditPageModal()">✕</button>
+      </div>
+      
+      <div class="form-group">
+        <label>Page Title</label>
+        <input id="editTitle">
+      </div>
+      
+      <div class="form-group">
+        <label>HTML Code</label>
+        <textarea id="editHtml" style="min-height:300px; font-family:monospace; font-size:12px;"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Password (খালি রাখলে remove হবে)</label>
+        <input id="editPassword" type="password" placeholder="Optional">
+      </div>
+      
+      <div class="modal-btns">
+        <button class="btn" onclick="closeEditPageModal()">Cancel</button>
+        <button class="btn blue" onclick="savePageEdit()">💾 Save</button>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    const API = '';
     let token = localStorage.getItem('adm_token');
     let allPages = [], allUsers = [], allProducts = [], allDeposits = [], allOrders = [], allRefs = [];
+    let editingProductId = null, editingPageId = null;
 
     if (token) showApp();
 
@@ -578,20 +784,15 @@
     }
 
     const pageTitles = {
-      overview: '📊 Overview',
-      pages: '📄 Pages',
-      users: '👥 Users',
-      referrals: '📢 Referrals',
-      products: '🛍 Products',
-      deposits: '💰 Deposits',
-      orders: '📦 Orders',
-      settings: '⚙️ Settings',
-      content: '🎨 Content Editor'
+      overview: '📊 Overview', pages: '📄 Pages', users: '👥 Users',
+      referrals: '📢 Referrals', products: '🛍 Products', deposits: '💰 Deposits',
+      orders: '📦 Orders', settings: '⚙️ Settings', content: '🎨 Content Editor'
     };
 
     function showPage(name) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById('page-' + name).classList.add('active');
+      const pageEl = document.getElementById('page-' + name);
+      if (pageEl) pageEl.classList.add('active');
       
       document.querySelectorAll('.nav-item').forEach(n => {
         n.classList.toggle('active', n.dataset.page === name);
@@ -599,15 +800,29 @@
       
       document.getElementById('pageTitle').textContent = pageTitles[name] || name;
       closeSidebar();
-      
-      // Lazy load
-      if (name === 'pages' && !allPages.length) loadPages();
-      if (name === 'users' && !allUsers.length) loadUsers();
-      if (name === 'referrals' && !allRefs.length) loadRefs();
-      if (name === 'products' && !allProducts.length) loadProducts();
+      loadPageData(name);
+    }
+
+    function loadPageData(name) {
+      if (name === 'overview') loadAll();
+      if (name === 'pages') loadPages();
+      if (name === 'users') loadUsers();
+      if (name === 'referrals') loadRefs();
+      if (name === 'products') loadProducts();
       if (name === 'deposits') loadDeposits('pending');
-      if (name === 'orders' && !allOrders.length) loadOrders();
+      if (name === 'orders') loadOrders();
       if (name === 'settings') loadSettings();
+    }
+
+    function refreshPage() {
+      loadAll();
+      loadPageData(currentPage());
+      showToast('✅ Refreshed');
+    }
+
+    function currentPage() {
+      const active = document.querySelector('.page.active');
+      return active ? active.id.replace('page-', '') : 'overview';
     }
 
     function showToast(msg, error) {
@@ -622,6 +837,7 @@
       return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
 
+    // ===== LOAD ALL =====
     async function loadAll() {
       const h = { 'x-admin-token': token };
       try {
@@ -634,7 +850,6 @@
         const stats = await statsRes.json();
         allPages = await pagesRes.json();
         
-        // Overview stats
         document.getElementById('ovPages').textContent = stats.totalPages || 0;
         document.getElementById('ovViews').textContent = stats.totalViews || 0;
         document.getElementById('ovUsers').textContent = stats.totalUsers || 0;
@@ -644,23 +859,24 @@
         document.getElementById('ovOrders').textContent = stats.totalPurchases || 0;
         document.getElementById('ovRevenue').textContent = '৳' + (stats.totalRevenue || 0);
         
-        // Pending badge in sidebar
+        const badge = document.getElementById('pendingBadge');
         if (stats.pendingDeposits > 0) {
-          const badge = document.getElementById('pendingBadge');
           badge.textContent = stats.pendingDeposits;
           badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
         }
-        
-        // Render pages if in pages page
-        if (document.getElementById('page-pages').classList.contains('active')) {
-          renderPages(allPages);
-        }
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) { console.error(e); }
     }
 
-    // PAGES
+    // ===== PAGES =====
+    async function loadPages() {
+      const res = await fetch('/api/admin/list-full', { headers: { 'x-admin-token': token } });
+      if (res.status === 401) return logout();
+      allPages = await res.json();
+      renderPages(allPages);
+    }
+
     function filterPages() {
       const q = document.getElementById('searchPages').value.toLowerCase();
       if (!q) return renderPages(allPages);
@@ -684,13 +900,14 @@
             '<div style="flex:1;min-width:0;">' +
               '<div class="item-title">' + esc(p.title) + '</div>' +
               '<div class="item-meta">👁 ' + (p.views||0) + ' · 📅 ' + new Date(p.createdAt).toLocaleDateString() + '</div>' +
-              badges.join(' ') +
             '</div>' +
           '</div>' +
+          '<div style="margin:8px 0;">' + badges.join(' ') + '</div>' +
           '<div style="margin:8px 0;"><a href="/p/' + p._id + '" target="_blank" style="color:#4ade80;font-size:12px;word-break:break-all;text-decoration:none;">/p/' + p._id + '</a></div>' +
           '<div class="item-actions">' +
+            '<button class="btn blue" onclick="openEditPage(\'' + p._id + '\')">📝 Edit</button>' +
             '<button class="btn green" onclick="toggleCode(\'' + p._id + '\')">📄 Code</button>' +
-            '<button class="btn blue" onclick="copyLink(\'' + p._id + '\')">🔗 Copy</button>' +
+            '<button class="btn" onclick="copyLink(\'' + p._id + '\')">🔗 Copy</button>' +
             '<button class="btn red" onclick="delPage(\'' + p._id + '\')">🗑 Delete</button>' +
           '</div>' +
           '<div class="code-box" id="code-' + p._id + '"><pre>' + esc(p.html || '') + '</pre></div>' +
@@ -698,23 +915,59 @@
       }).join('');
     }
 
-    function toggleCode(id) {
-      document.getElementById('code-' + id).classList.toggle('show');
-    }
-    function copyLink(id) {
+    function toggleCode(id) { document.getElementById('code-' + id).classList.toggle('show'); }
+    function copyLink(id) { 
       navigator.clipboard.writeText(location.origin + '/p/' + id);
       showToast('✅ Link copied!');
     }
     async function delPage(id) {
-      if (!confirm('Delete করবে?')) return;
+      if (!confirm('Page delete করবে?')) return;
       await fetch('/api/admin/delete/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
       showToast('🗑 Deleted');
+      loadPages();
       loadAll();
     }
 
-    // USERS
+    function openEditPage(id) {
+      const p = allPages.find(x => x._id === id);
+      if (!p) return;
+      editingPageId = id;
+      document.getElementById('editTitle').value = p.title || '';
+      document.getElementById('editHtml').value = p.html || '';
+      document.getElementById('editPassword').value = '';
+      document.getElementById('editPageModal').classList.add('show');
+    }
+    function closeEditPageModal() {
+      editingPageId = null;
+      document.getElementById('editPageModal').classList.remove('show');
+    }
+    async function savePageEdit() {
+      if (!editingPageId) return;
+      const body = {
+        title: document.getElementById('editTitle').value,
+        html: document.getElementById('editHtml').value
+      };
+      const pass = document.getElementById('editPassword').value;
+      if (pass) body.password = pass;
+      
+      const res = await fetch('/api/admin/page/' + editingPageId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        showToast('✅ Saved!');
+        closeEditPageModal();
+        loadPages();
+      } else {
+        showToast('❌ Failed', true);
+      }
+    }
+
+    // ===== USERS =====
     async function loadUsers() {
       const res = await fetch('/api/admin/list-users', { headers: { 'x-admin-token': token } });
+      if (res.status === 401) return logout();
       allUsers = await res.json();
       renderUsers(allUsers);
     }
@@ -734,12 +987,13 @@
           '<div class="item-title">' + esc(u.name || 'User') + '</div>' +
           '<div class="item-meta">📧 ' + esc(u.email) + '</div>' +
           '<div class="item-meta">💰 ৳' + (u.wallet || 0) + ' · 📢 ' + (u.referrals || 0) + ' referrals</div>' +
+          '<div class="item-meta">📅 ' + new Date(u.createdAt).toLocaleDateString() + '</div>' +
           (u.banned ? '<div style="margin-top:6px;"><span class="badge banned">⛔ BANNED</span></div>' : '') +
           '<div class="item-actions">' +
             (u.banned 
               ? '<button class="btn green" onclick="banUser(\'' + u._id + '\', false)">✅ Unban</button>'
               : '<button class="btn orange" onclick="banUser(\'' + u._id + '\', true)">🚫 Ban</button>') +
-            '<button class="btn red" onclick="delUser(\'' + u._id + '\')">🗑 Delete</button>' +
+            '<button class="btn red" onclick="delUser(\'' + u._id + '\', \'' + esc(u.email) + '\')">🗑 Delete</button>' +
           '</div>' +
         '</div>'
       ).join('');
@@ -754,14 +1008,15 @@
       showToast(ban ? '🚫 Banned' : '✅ Unbanned');
       loadUsers();
     }
-    async function delUser(id) {
-      if (!confirm('Delete করবে?')) return;
+    async function delUser(id, email) {
+      if (!confirm('"' + email + '" এর account delete করবে?')) return;
       await fetch('/api/admin/user/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
       showToast('🗑 Deleted');
       loadUsers();
+      loadAll();
     }
 
-    // REFERRALS
+    // ===== REFERRALS =====
     async function loadRefs() {
       const res = await fetch('/api/admin/referrals', { headers: { 'x-admin-token': token } });
       allRefs = await res.json();
@@ -772,41 +1027,148 @@
         '<div class="item-card">' +
           '<div class="item-title">👤 ' + esc(r.name || 'User') + '</div>' +
           '<div class="item-meta">📧 ' + esc(r.email) + '</div>' +
-          '<div class="item-meta" style="color:#c4b5fd;">invited by → ' + esc(r.referrerName || '') + ' (' + esc(r.referrerEmail || '') + ')</div>' +
+          '<div class="item-meta" style="color:#c4b5fd;">Invited by → ' + esc(r.referrerName || '') + ' (' + esc(r.referrerEmail || '') + ')</div>' +
           '<div class="item-meta">🕐 ' + new Date(r.createdAt).toLocaleString() + '</div>' +
         '</div>'
       ).join('');
     }
 
-    // PRODUCTS
+    // ===== PRODUCTS =====
     async function loadProducts() {
       const res = await fetch('/api/admin/products', { headers: { 'x-admin-token': token } });
+      if (res.status === 401) return logout();
       allProducts = await res.json();
+      renderProducts();
+    }
+    function renderProducts() {
       const list = document.getElementById('productsList');
       if (!allProducts.length) { list.innerHTML = '<div class="empty">কোনো product নেই</div>'; return; }
       
-      list.innerHTML = allProducts.map(p => 
-        '<div class="item-card">' +
-          '<div class="item-title">📦 ' + esc(p.title) + '</div>' +
-          '<div class="item-meta">💰 ৳' + (p.discountPrice || p.price) + ' · Sold: ' + (p.sold || 0) + '</div>' +
-          '<div class="item-meta">📁 ' + esc(p.category || 'Other') + '</div>' +
-          '<div class="item-actions">' +
-            '<button class="btn red" onclick="delProduct(\'' + p._id + '\')">🗑 Delete</button>' +
+      list.innerHTML = allProducts.map(p => {
+        const photo = p.photo 
+          ? '<img src="' + esc(p.photo) + '" class="product-img" onerror="this.outerHTML=\'<div class=\\\'product-img\\\'>📦</div>\'">'
+          : '<div class="product-img">📦</div>';
+        return '<div class="product-row">' +
+          photo +
+          '<div class="product-info">' +
+            '<h4>' + esc(p.title) + '</h4>' +
+            '<p>📁 ' + esc(p.category || 'Other') + ' · 📦 Stock: ' + (p.stock || 0) + '</p>' +
+            '<p>🛒 Sold: ' + (p.sold || 0) + (p.active ? ' · ● Active' : ' · ⛔ Inactive') + '</p>' +
+            '<div class="product-price">৳' + (p.discountPrice || p.price) + 
+              (p.discountPrice ? ' <span style="color:#888;font-size:11px;text-decoration:line-through;">৳' + p.price + '</span>' : '') + 
+            '</div>' +
           '</div>' +
-        '</div>'
-      ).join('');
+        '</div>' +
+        '<div style="display:flex; gap:6px; margin:-6px 0 12px 0;">' +
+          '<button class="btn blue" onclick="openProductModal(\'' + p._id + '\')">📝 Edit</button>' +
+          '<button class="btn red" onclick="delProduct(\'' + p._id + '\')">🗑 Delete</button>' +
+        '</div>';
+      }).join('');
+    }
+    function openProductModal(id) {
+      editingProductId = id || null;
+      document.getElementById('productModalTitle').textContent = id ? '📝 Edit Product' : '➕ Add Product';
+      
+      if (id) {
+        const p = allProducts.find(x => x._id === id);
+        if (p) {
+          document.getElementById('pTitle').value = p.title || '';
+          document.getElementById('pDesc').value = p.description || '';
+          document.getElementById('pCategory').value = p.category || '';
+          document.getElementById('pPrice').value = p.price || '';
+          document.getElementById('pDiscount').value = p.discountPrice || '';
+          document.getElementById('pPhoto').value = p.photo || '';
+          document.getElementById('pDeliveryType').value = p.deliveryType || 'link';
+          document.getElementById('pDeliveryData').value = p.deliveryData || '';
+          document.getElementById('pStock').value = p.stock || '';
+          previewPhoto();
+        }
+      } else {
+        ['pTitle','pDesc','pCategory','pPrice','pDiscount','pPhoto','pDeliveryData','pStock'].forEach(i => document.getElementById(i).value = '');
+        document.getElementById('pDeliveryType').value = 'link';
+        document.getElementById('photoPreview').classList.remove('show');
+      }
+      document.getElementById('productModal').classList.add('show');
+    }
+    function closeProductModal() {
+      editingProductId = null;
+      document.getElementById('productModal').classList.remove('show');
+    }
+    function previewPhoto() {
+      const url = document.getElementById('pPhoto').value.trim();
+      const img = document.getElementById('photoPreview');
+      if (url) {
+        img.src = url;
+        img.classList.add('show');
+      } else {
+        img.classList.remove('show');
+      }
+    }
+    async function saveProduct() {
+      const btn = document.getElementById('saveProductBtn');
+      const body = {
+        title: document.getElementById('pTitle').value.trim(),
+        description: document.getElementById('pDesc').value.trim(),
+        category: document.getElementById('pCategory').value.trim(),
+        price: document.getElementById('pPrice').value,
+        discountPrice: document.getElementById('pDiscount').value,
+        photo: document.getElementById('pPhoto').value.trim(),
+        deliveryType: document.getElementById('pDeliveryType').value,
+        deliveryData: document.getElementById('pDeliveryData').value.trim(),
+        stock: document.getElementById('pStock').value
+      };
+      
+      if (!body.title) return showToast('❌ Title দিন', true);
+      if (!body.price) return showToast('❌ Price দিন', true);
+      if (!body.deliveryData) return showToast('❌ Delivery Data দিন', true);
+      
+      btn.disabled = true;
+      btn.textContent = '💾 Saving...';
+      
+      const url = editingProductId ? '/api/admin/product/' + editingProductId : '/api/admin/product';
+      const method = editingProductId ? 'PUT' : 'POST';
+      
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(editingProductId ? '✅ Updated!' : '✅ Product added!');
+          closeProductModal();
+          loadProducts();
+          loadAll();
+        } else {
+          showToast('❌ ' + (data.error || 'Failed'), true);
+        }
+      } catch (e) {
+        showToast('❌ ' + e.message, true);
+      }
+      btn.disabled = false;
+      btn.textContent = '💾 Save Product';
     }
     async function delProduct(id) {
-      if (!confirm('Delete করবে?')) return;
+      if (!confirm('Product delete করবে?')) return;
       await fetch('/api/admin/product/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
       showToast('🗑 Deleted');
       loadProducts();
+      loadAll();
     }
 
-    // DEPOSITS
-    async function loadDeposits(status) {
+    // ===== DEPOSITS =====
+    async function loadDeposits(status, btn) {
+      if (btn) {
+        document.querySelectorAll('#page-deposits .filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
       const res = await fetch('/api/admin/deposits?status=' + (status || 'pending'), { headers: { 'x-admin-token': token } });
+      if (res.status === 401) return logout();
       allDeposits = await res.json();
+      renderDeposits();
+    }
+    function renderDeposits() {
       const list = document.getElementById('depositsList');
       if (!allDeposits.length) { list.innerHTML = '<div class="empty">কোনো deposit নেই</div>'; return; }
       
@@ -817,10 +1179,10 @@
             '<span class="badge ' + d.status + '">' + d.status + '</span>' +
           '</div>' +
           '<div class="item-meta">👤 ' + esc(d.userEmail || '') + '</div>' +
-          '<div class="item-meta">📱 ' + esc(d.senderNumber || '') + '</div>' +
-          (d.transactionId ? '<div class="item-meta">🆔 ' + esc(d.transactionId) + '</div>' : '') +
+          '<div class="item-meta">📱 From: ' + esc(d.senderNumber || 'N/A') + '</div>' +
+          (d.transactionId ? '<div class="item-meta">🆔 TRX: ' + esc(d.transactionId) + '</div>' : '') +
           '<div class="item-meta">🕐 ' + new Date(d.createdAt).toLocaleString() + '</div>' +
-          (d.screenshot ? '<div style="margin:6px 0;"><a href="' + esc(d.screenshot) + '" target="_blank" style="color:#4ade80;font-size:12px;">📷 View Screenshot</a></div>' : '') +
+          (d.screenshot ? '<div style="margin:8px 0;"><a href="' + esc(d.screenshot) + '" target="_blank" style="color:#4ade80;font-size:12px;">📷 View Screenshot</a></div>' : '') +
           (d.status === 'pending' 
             ? '<div class="item-actions">' +
                 '<button class="btn green" onclick="reviewDep(\'' + d._id + '\', \'approve\')">✅ Approve</button>' +
@@ -831,60 +1193,95 @@
       ).join('');
     }
     async function reviewDep(id, action) {
-      if (!confirm(action === 'approve' ? 'Approve করলে wallet এ টাকা যোগ হবে। ঠিক আছে?' : 'Reject করবে?')) return;
-      const res = await fetch('/api/admin/deposit/' + id, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-        body: JSON.stringify({ action })
-      });
-      if (res.ok) {
-        showToast(action === 'approve' ? '✅ Approved!' : '❌ Rejected');
-        loadDeposits('pending');
-        loadAll();
-      } else {
-        showToast('❌ Failed', true);
+      if (!confirm(action === 'approve' ? 'Approve করলে user এর wallet এ ৳ যোগ হবে। ঠিক আছে?' : 'Reject করবে?')) return;
+      try {
+        const res = await fetch('/api/admin/deposit/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+          body: JSON.stringify({ action })
+        });
+        if (res.ok) {
+          showToast(action === 'approve' ? '✅ Approved! Wallet updated.' : '❌ Rejected');
+          loadDeposits('pending');
+          loadAll();
+        } else {
+          showToast('❌ Failed', true);
+        }
+      } catch (e) {
+        showToast('❌ ' + e.message, true);
       }
     }
 
-    // ORDERS
+    // ===== ORDERS =====
     async function loadOrders() {
       const res = await fetch('/api/admin/purchases', { headers: { 'x-admin-token': token } });
+      if (res.status === 401) return logout();
       allOrders = await res.json();
+      renderOrders(allOrders);
+    }
+    function filterOrders() {
+      const q = document.getElementById('searchOrders').value.toLowerCase();
+      if (!q) return renderOrders(allOrders);
+      renderOrders(allOrders.filter(o => 
+        (o.productTitle || '').toLowerCase().includes(q) || 
+        (o.userEmail || '').toLowerCase().includes(q)
+      ));
+    }
+    function renderOrders(orders) {
       const list = document.getElementById('ordersList');
-      if (!allOrders.length) { list.innerHTML = '<div class="empty">কোনো order নেই</div>'; return; }
+      if (!orders.length) { list.innerHTML = '<div class="empty">কোনো order নেই</div>'; return; }
       
-      list.innerHTML = allOrders.map(o => 
+      list.innerHTML = orders.map(o => 
         '<div class="item-card">' +
           '<div class="item-title">📦 ' + esc(o.productTitle) + '</div>' +
           '<div class="item-meta">👤 ' + esc(o.userEmail) + '</div>' +
-          '<div class="item-meta">💰 ৳' + o.price + ' · 🕐 ' + new Date(o.purchasedAt).toLocaleString() + '</div>' +
+          '<div class="item-meta">💰 ৳' + o.price + '</div>' +
+          '<div class="item-meta">🕐 ' + new Date(o.purchasedAt).toLocaleString() + '</div>' +
         '</div>'
       ).join('');
     }
 
-    // SETTINGS
+    // ===== SETTINGS =====
     async function loadSettings() {
       const res = await fetch('/api/admin/settings', { headers: { 'x-admin-token': token } });
       const s = await res.json();
       document.getElementById('setBkash').value = s.bkashNumber || '';
       document.getElementById('setBkashType').value = s.bkashType || 'Personal';
+      document.getElementById('setNagad').value = s.nagadNumber || '';
+      document.getElementById('setNagadActive').value = s.nagadActive ? 'true' : 'false';
       document.getElementById('setWelcome').value = s.welcomeBonus || 20;
       document.getElementById('setReferral').value = s.referralBonus || 10;
+      document.getElementById('setMin').value = s.minDeposit || 50;
+      document.getElementById('setMax').value = s.maxDeposit || 10000;
+      document.getElementById('setEmail').value = s.supportEmail || '';
+      document.getElementById('setWhatsapp').value = s.supportWhatsapp || '';
+      document.getElementById('setTelegram').value = s.supportTelegram || '';
     }
     async function saveSettings() {
       const body = {
-        bkashNumber: document.getElementById('setBkash').value,
+        bkashNumber: document.getElementById('setBkash').value.trim(),
         bkashType: document.getElementById('setBkashType').value,
+        nagadNumber: document.getElementById('setNagad').value.trim(),
+        nagadActive: document.getElementById('setNagadActive').value === 'true',
         welcomeBonus: Number(document.getElementById('setWelcome').value) || 20,
-        referralBonus: Number(document.getElementById('setReferral').value) || 10
+        referralBonus: Number(document.getElementById('setReferral').value) || 10,
+        minDeposit: Number(document.getElementById('setMin').value) || 50,
+        maxDeposit: Number(document.getElementById('setMax').value) || 10000,
+        supportEmail: document.getElementById('setEmail').value.trim(),
+        supportWhatsapp: document.getElementById('setWhatsapp').value.trim(),
+        supportTelegram: document.getElementById('setTelegram').value.trim()
       };
-      const res = await fetch('/api/admin/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-        body: JSON.stringify(body)
-      });
-      if (res.ok) showToast('✅ Settings Saved!');
-      else showToast('❌ Failed', true);
+      try {
+        const res = await fetch('/api/admin/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+          body: JSON.stringify(body)
+        });
+        if (res.ok) showToast('✅ Settings Saved!');
+        else showToast('❌ Failed', true);
+      } catch (e) {
+        showToast('❌ ' + e.message, true);
+      }
     }
   </script>
 </body>
