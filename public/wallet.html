@@ -29,23 +29,28 @@
   .balance-sub { font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 10px; font-weight: 600; }
   
   .gift-section {
-    background: linear-gradient(135deg, rgba(251,146,60,0.1), rgba(239,68,68,0.05));
-    border: 1px solid rgba(251,146,60,0.3);
+    background: linear-gradient(135deg, rgba(236,72,153,0.12), rgba(139,92,246,0.08));
+    border: 1px solid rgba(236,72,153,0.3);
     border-radius: 16px; padding: 18px; margin-bottom: 20px;
   }
-  .gift-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; color: #fb923c; }
-  .gift-desc { font-size: 12px; color: #a1a1aa; margin-bottom: 12px; }
+  .gift-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; color: #ec4899; }
+  .gift-desc { font-size: 12px; color: #a1a1aa; margin-bottom: 12px; line-height: 1.5; }
   .gift-form { display: flex; gap: 8px; }
   .gift-form input {
     flex: 1; padding: 12px 14px; background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(251,146,60,0.3); border-radius: 10px;
+    border: 1.5px solid rgba(236,72,153,0.3); border-radius: 10px;
     color: #fff; font-size: 14px; outline: none; text-transform: uppercase;
+    font-family: 'Courier New', monospace; letter-spacing: 2px; font-weight: 700;
   }
+  .gift-form input:focus { border-color: #ec4899; background: rgba(236,72,153,0.05); }
+  .gift-form input::placeholder { color: #52525b; letter-spacing: normal; font-weight: 400; font-family: inherit; }
   .gift-form button {
-    padding: 12px 22px; background: linear-gradient(135deg, #fb923c, #ea580c);
+    padding: 12px 22px; background: linear-gradient(135deg, #ec4899, #8b5cf6);
     color: #fff; border: none; border-radius: 10px;
     font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap;
+    font-family: inherit;
   }
+  .gift-form button:disabled { opacity: 0.6; cursor: not-allowed; }
   
   .tabs {
     display: flex; gap: 8px; margin-bottom: 20px;
@@ -84,7 +89,7 @@
   .copy-bkash {
     padding: 8px 16px; background: rgba(255,255,255,0.2);
     color: #fff; border: none; border-radius: 8px;
-    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
   }
   
   .field { margin-bottom: 14px; }
@@ -98,7 +103,7 @@
     background: rgba(0,0,0,0.4);
     border: 1.5px solid rgba(255,255,255,0.08);
     border-radius: 10px; color: #fff;
-    font-size: 14px; outline: none;
+    font-size: 14px; outline: none; font-family: inherit;
   }
   .field input:focus {
     border-color: rgba(139,92,246,0.6);
@@ -110,16 +115,18 @@
     padding: 6px 12px; background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 20px; color: #d4d4d8;
-    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
   }
+  .quick-amt:hover { background: rgba(139,92,246,0.2); color: #c4b5fd; }
   
   .submit-btn {
     width: 100%; padding: 15px;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
     color: #fff; border: none; border-radius: 12px;
     font-size: 15px; font-weight: 800;
-    cursor: pointer; margin-top: 8px;
+    cursor: pointer; margin-top: 8px; font-family: inherit;
   }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
   
   .history-item {
     background: linear-gradient(180deg, #101018, #0d0d14);
@@ -132,8 +139,8 @@
   .badge-pending { background: #ea580c; color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
   .badge-approved { background: #16a34a; color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
   .badge-rejected { background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
+  .badge-gift { background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
   
-  /* REFERRAL */
   .referral-section {
     background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.04));
     border: 1px solid rgba(16,185,129,0.3);
@@ -159,6 +166,7 @@
     padding: 10px 16px; background: linear-gradient(135deg, #10b981, #059669);
     color: #fff; border: none; border-radius: 8px;
     font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
+    font-family: inherit;
   }
   
   .ref-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
@@ -174,6 +182,7 @@
     color: #d4d4d8; border-radius: 8px;
     font-size: 11px; font-weight: 700;
     cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;
+    font-family: inherit;
   }
   
   .referred-list { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(16,185,129,0.15); }
@@ -195,9 +204,12 @@
     padding: 12px 24px; border-radius: 10px;
     font-size: 14px; font-weight: 600;
     transition: transform 0.3s; z-index: 9999;
+    max-width: 90%; text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.error { background: #dc2626; }
+  .toast.gift { background: linear-gradient(135deg, #ec4899, #8b5cf6); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -215,11 +227,12 @@
       <div class="balance-sub" id="safeText">🔒 Safe & Secure</div>
     </div>
     
+    <!-- GIFT CODE -->
     <div class="gift-section">
       <div class="gift-title" id="giftTitle">🎁 Redeem Gift Code</div>
-      <div class="gift-desc" id="giftDesc">আপনার gift code লিখুন...</div>
+      <div class="gift-desc" id="giftDesc">আপনার gift code লিখুন এবং wallet এ টাকা পান!</div>
       <div class="gift-form">
-        <input id="giftCode" placeholder="GIFT CODE" onkeypress="if(event.key==='Enter') redeemGift()">
+        <input id="giftCode" placeholder="GIFT CODE" maxlength="20" onkeypress="if(event.key==='Enter') redeemGift()">
         <button onclick="redeemGift()" id="giftBtn">🎉 Claim</button>
       </div>
     </div>
@@ -233,7 +246,7 @@
     <div class="tab-content active" id="contentAdd">
       <div class="form-card">
         <div class="form-title" id="howToTitle">💰 How to Add Money</div>
-        <div class="info-box" id="howToInfo">⚠️ bKash এ Send Money করুন...</div>
+        <div class="info-box" id="howToInfo">⚠️ bKash এ Send Money করুন → Screenshot upload করুন → Admin approve করলে Wallet এ যোগ হবে (২-৪ ঘণ্টা)</div>
         
         <div class="bkash-box">
           <div class="bkash-label" id="sendLabel">Send Money to bKash</div>
@@ -285,7 +298,7 @@
         <div class="ref-head-icon">📢</div>
         <div>
           <h2 id="refTitle">Invite Friends & Earn ৳10</h2>
-          <p id="refSubtitle">প্রতিটা বন্ধু sign up করলে...</p>
+          <p id="refSubtitle">প্রতিটা বন্ধু sign up করলে ৳10 পাবেন + সে পাবে ৳20 bonus</p>
         </div>
       </div>
       
@@ -325,21 +338,18 @@
     let refLinkGlobal = '';
     let content = {};
     
-    function showToast(msg, isError) {
+    function showToast(msg, isError, isGift) {
       const t = document.getElementById('toast');
       t.textContent = msg;
-      t.className = 'toast' + (isError ? ' error' : '');
+      t.className = 'toast' + (isError ? ' error' : (isGift ? ' gift' : ''));
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2500);
+      setTimeout(() => t.classList.remove('show'), 3000);
     }
     
-    // Load content from server
     async function loadContent() {
       try {
         const res = await fetch('/api/content');
         content = await res.json();
-        
-        // Wallet section
         const w = content.wallet || {};
         if (w.title) document.getElementById('titleText').textContent = w.title;
         if (w.balanceLabel) document.getElementById('balanceLabel').textContent = w.balanceLabel;
@@ -364,7 +374,6 @@
         if (w.screenshotPlaceholder) document.getElementById('screenshot').placeholder = w.screenshotPlaceholder;
         if (w.submitBtn) document.getElementById('submitBtn').textContent = w.submitBtn;
         
-        // Referral section
         const r = content.referral || {};
         if (r.title) document.getElementById('refTitle').textContent = r.title;
         if (r.subtitle) document.getElementById('refSubtitle').textContent = r.subtitle;
@@ -375,9 +384,7 @@
         if (r.telegramBtn) document.getElementById('tgBtn').textContent = r.telegramBtn;
         if (r.facebookBtn) document.getElementById('fbBtn').textContent = r.facebookBtn;
         if (r.whoJoinedTitle) document.getElementById('whoJoinedTitle').textContent = r.whoJoinedTitle;
-      } catch (e) {
-        console.error('Failed to load content:', e);
-      }
+      } catch (e) {}
     }
     
     function switchTab(name) {
@@ -470,8 +477,9 @@
           const badge = d.status === 'pending' ? '<span class="badge-pending">⏳ PENDING</span>'
                       : d.status === 'approved' ? '<span class="badge-approved">✅ APPROVED</span>'
                       : '<span class="badge-rejected">❌ REJECTED</span>';
+          const isGift = d.method === 'gift';
           return '<div class="history-item">' +
-            '<div class="history-title">💰 ৳' + d.amount + ' ' + badge + '</div>' +
+            '<div class="history-title">' + (isGift ? '🎁' : '💰') + ' ৳' + d.amount + ' ' + (isGift ? '<span class="badge-gift">GIFT</span>' : badge) + '</div>' +
             '<div class="history-date">' + new Date(d.createdAt).toLocaleString() + '</div>' +
           '</div>';
         }).join('');
@@ -480,11 +488,47 @@
       }
     }
     
-    function redeemGift() {
-      const code = document.getElementById('giftCode').value.trim().toUpperCase();
+    // ===== REDEEM GIFT CODE — REAL API =====
+    async function redeemGift() {
+      const codeInput = document.getElementById('giftCode');
+      const claimBtn = document.getElementById('giftBtn');
+      const code = codeInput.value.trim().toUpperCase();
+      
       if (!code) return showToast('❌ Gift code লিখুন', true);
-      showToast('🎁 Gift system coming soon!');
-      document.getElementById('giftCode').value = '';
+      if (code.length < 4) return showToast('❌ Code কমপক্ষে ৪ অক্ষর', true);
+      
+      if (claimBtn) {
+        claimBtn.disabled = true;
+        claimBtn.textContent = '⏳ Claiming...';
+      }
+      
+      try {
+        const res = await fetch('/api/giftcode/redeem', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || 'Failed to redeem');
+        
+        showToast('🎉 ৳' + data.amount + ' added to your wallet!', false, true);
+        document.getElementById('balance').textContent = '৳' + data.newBalance;
+        codeInput.value = '';
+        
+        if (typeof loadHistory === 'function') loadHistory();
+        
+        if (data.amount >= 100) {
+          setTimeout(() => showToast('🎊 বড় Gift! ধন্যবাদ!', false, true), 1500);
+        }
+      } catch (e) {
+        showToast(e.message, true);
+      }
+      
+      if (claimBtn) {
+        claimBtn.disabled = false;
+        claimBtn.textContent = content.wallet?.giftButton || '🎉 Claim';
+      }
     }
     
     async function loadReferral() {
@@ -527,7 +571,6 @@
       return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
     
-    // Init
     async function init() {
       await loadContent();
       await loadUser();
