@@ -121,6 +121,7 @@
   }
   .stat-num.green { color: #34d399; }
   .stat-num.orange { color: #fb923c; }
+  .stat-num.pink { color: #ec4899; }
   .stat-label {
     font-size: 11px; color: #71717a;
     text-transform: uppercase; letter-spacing: 0.6px;
@@ -208,6 +209,9 @@
   .badge.link { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); text-transform: none; }
   .badge.file { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); text-transform: none; }
   .badge.code { background: rgba(139,92,246,0.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); text-transform: none; }
+  .badge.gift-active { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+  .badge.gift-inactive { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3); }
+  .badge.gift-expired { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
   
   .btn {
     padding: 7px 12px;
@@ -228,6 +232,8 @@
   .btn.orange { background: #ea580c; color: #fff; border-color: #ea580c; }
   .btn.purple { background: #8b5cf6; color: #fff; border-color: #8b5cf6; }
   .btn.purple:hover { background: #7c3aed; }
+  .btn.pink { background: #ec4899; color: #fff; border-color: #ec4899; }
+  .btn.pink:hover { background: #db2777; }
   .btn.full { width: 100%; padding: 12px; font-size: 13px; justify-content: center; }
   .btn.small { padding: 5px 10px; font-size: 11px; }
   
@@ -346,6 +352,72 @@
     display: none;
   }
   
+  /* GIFT CODE CARD */
+  .gift-card {
+    background: linear-gradient(135deg, rgba(236,72,153,0.08), rgba(139,92,246,0.05));
+    border: 1px solid rgba(236,72,153,0.25);
+    border-radius: 14px; padding: 16px;
+    margin-bottom: 12px;
+  }
+  .gift-code-big {
+    font-family: 'Courier New', monospace;
+    font-size: 20px; font-weight: 900;
+    color: #ec4899; letter-spacing: 2px;
+    margin-bottom: 10px;
+    word-break: break-all;
+  }
+  .gift-stats {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 10px;
+    font-size: 12px; color: #a1a1aa;
+  }
+  .gift-stats span { display: flex; align-items: center; gap: 4px; }
+  
+  /* CREATE GIFT FORM */
+  .create-gift-box {
+    background: linear-gradient(135deg, rgba(236,72,153,0.05), rgba(139,92,246,0.03));
+    border: 1px solid rgba(236,72,153,0.2);
+    border-radius: 14px; padding: 20px;
+    margin-bottom: 24px;
+  }
+  .create-gift-box h3 {
+    font-size: 16px; font-weight: 800;
+    margin-bottom: 16px; color: #ec4899;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .code-generate-row {
+    display: flex; gap: 6px; align-items: stretch;
+  }
+  .code-generate-row input { flex: 1; }
+  .code-generate-row button {
+    padding: 0 14px; background: #1a1a1a;
+    border: 1.5px solid #222; border-radius: 10px;
+    color: #c4b5fd; font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    white-space: nowrap;
+  }
+  .code-generate-row button:hover { background: #222; color: #fff; }
+  
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #16a34a; color: #fff;
+    padding: 12px 24px; border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    transition: transform 0.3s; z-index: 9999;
+    max-width: 90%; text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: #dc2626; }
+  
+  .overlay {
+    display: none; position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7); z-index: 90;
+  }
+  .overlay.show { display: block; }
+  
   /* CONTENT EDITOR */
   .content-tabs {
     display: flex; gap: 6px; margin-bottom: 20px;
@@ -364,7 +436,6 @@
   .content-tab.active {
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
     color: #fff; border-color: transparent;
-    box-shadow: 0 8px 20px -8px rgba(139,92,246,0.6);
   }
   
   .content-panel { display: none; }
@@ -406,7 +477,6 @@
   .content-field input:focus,
   .content-field textarea:focus {
     border-color: rgba(139,92,246,0.6);
-    box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
   }
   .content-field textarea { resize: vertical; min-height: 70px; }
   
@@ -417,26 +487,6 @@
   }
   .content-actions .btn { padding: 12px 24px; font-size: 14px; }
   .content-actions .btn.primary { flex: 1; min-width: 200px; }
-  
-  .toast {
-    position: fixed; bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: #16a34a; color: #fff;
-    padding: 12px 24px; border-radius: 10px;
-    font-size: 14px; font-weight: 600;
-    transition: transform 0.3s; z-index: 9999;
-    max-width: 90%; text-align: center;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.error { background: #dc2626; }
-  
-  .overlay {
-    display: none; position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.7); z-index: 90;
-  }
-  .overlay.show { display: block; }
   
   @media (max-width: 768px) {
     .sidebar { transform: translateX(-100%); }
@@ -494,6 +544,9 @@
         </div>
         <div class="nav-item" onclick="showPage('orders')" data-page="orders">
           <span class="icon">📦</span> <span>Orders</span>
+        </div>
+        <div class="nav-item" onclick="showPage('giftcodes')" data-page="giftcodes">
+          <span class="icon">🎁</span> <span>Gift Codes</span>
         </div>
         
         <div class="nav-group">System</div>
@@ -565,6 +618,11 @@
               <div class="stat-label">Orders</div>
             </div>
             <div class="stat-card">
+              <span class="stat-icon">🎁</span>
+              <div class="stat-num pink" id="ovGifts">0</div>
+              <div class="stat-label">Gift Codes</div>
+            </div>
+            <div class="stat-card">
               <span class="stat-icon">💵</span>
               <div class="stat-num green" id="ovRevenue">৳0</div>
               <div class="stat-label">Total Revenue</div>
@@ -578,7 +636,7 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
               <button class="btn purple full" onclick="showPage('products')">🛍 Manage Products</button>
               <button class="btn purple full" onclick="showPage('deposits')">💰 Pending Deposits</button>
-              <button class="btn purple full" onclick="showPage('users')">👥 View Users</button>
+              <button class="btn pink full" onclick="showPage('giftcodes')">🎁 Gift Codes</button>
               <button class="btn purple full" onclick="showPage('content')">🎨 Edit Content</button>
             </div>
           </div>
@@ -628,6 +686,49 @@
             <input id="searchOrders" placeholder="🔍 Search orders..." oninput="filterOrders()">
           </div>
           <div id="ordersList"><div class="empty">Loading...</div></div>
+        </div>
+
+        <!-- GIFT CODES -->
+        <div class="page" id="page-giftcodes">
+          <!-- CREATE FORM -->
+          <div class="create-gift-box">
+            <h3>🎁 Create New Gift Code</h3>
+            
+            <div class="form-group">
+              <label>Code <span class="required">*</span></label>
+              <div class="code-generate-row">
+                <input id="giftCode" placeholder="SUMMER2026" style="text-transform:uppercase;">
+                <button onclick="generateRandomCode()">🎲 Random</button>
+              </div>
+              <small>কমপক্ষে ৪ অক্ষর, ছোট হাতের হলে বড় হয়ে যাবে</small>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label>Amount (৳) <span class="required">*</span></label>
+                <input id="giftAmount" type="number" placeholder="100" min="1">
+              </div>
+              <div class="form-group">
+                <label>Max Uses</label>
+                <input id="giftMaxUses" type="number" placeholder="1" min="1" value="1">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Expires At (ঐচ্ছিক)</label>
+              <input id="giftExpires" type="date">
+              <small>খালি রাখলে কখনো expire হবে না</small>
+            </div>
+            
+            <button class="btn pink full" onclick="createGiftCode()" style="padding:14px; font-size:14px;">💾 Create Gift Code</button>
+          </div>
+          
+          <!-- LIST -->
+          <div class="section-head" style="margin-bottom:12px;">
+            <h2 style="font-size:16px; font-weight:800;">📋 All Gift Codes</h2>
+            <span id="giftCount" style="font-size:12px; color:#888;"></span>
+          </div>
+          <div id="giftcodesList"><div class="empty">Loading...</div></div>
         </div>
 
         <!-- SETTINGS -->
@@ -838,11 +939,22 @@
     </div>
   </div>
 
+  <!-- REDEEMS MODAL -->
+  <div class="modal-overlay" id="redeemsModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="redeemsModalTitle">🎁 Redemptions</h2>
+        <button class="modal-close" onclick="closeRedeemsModal()">✕</button>
+      </div>
+      <div id="redeemsList"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
     let token = localStorage.getItem('adm_token');
-    let allPages = [], allUsers = [], allProducts = [], allDeposits = [], allOrders = [], allRefs = [];
+    let allPages = [], allUsers = [], allProducts = [], allDeposits = [], allOrders = [], allRefs = [], allGifts = [];
     let editingProductId = null, editingPageId = null;
     let contentData = {};
     let activeContentSection = 'wallet';
@@ -893,7 +1005,8 @@
     const pageTitles = {
       overview: '📊 Overview', pages: '📄 Pages', users: '👥 Users',
       referrals: '📢 Referrals', products: '🛍 Products', deposits: '💰 Deposits',
-      orders: '📦 Orders', settings: '⚙️ Settings', content: '🎨 Content Editor'
+      orders: '📦 Orders', giftcodes: '🎁 Gift Codes',
+      settings: '⚙️ Settings', content: '🎨 Content Editor'
     };
 
     function showPage(name) {
@@ -918,6 +1031,7 @@
       if (name === 'products') loadProducts();
       if (name === 'deposits') loadDeposits('pending');
       if (name === 'orders') loadOrders();
+      if (name === 'giftcodes') loadGiftCodes();
       if (name === 'settings') loadSettings();
       if (name === 'content') loadContent();
     }
@@ -960,6 +1074,7 @@
         document.getElementById('ovProducts').textContent = stats.totalProducts || 0;
         document.getElementById('ovPending').textContent = stats.pendingDeposits || 0;
         document.getElementById('ovOrders').textContent = stats.totalPurchases || 0;
+        document.getElementById('ovGifts').textContent = stats.totalGiftCodes || 0;
         document.getElementById('ovRevenue').textContent = '৳' + (stats.totalRevenue || 0);
         
         const badge = document.getElementById('pendingBadge');
@@ -1355,6 +1470,179 @@
           '<div class="item-meta">🕐 ' + new Date(o.purchasedAt).toLocaleString() + '</div>' +
         '</div>'
       ).join('');
+    }
+
+    // ===== GIFT CODES =====
+    async function loadGiftCodes() {
+      const res = await fetch('/api/admin/giftcodes', { headers: { 'x-admin-token': token } });
+      if (res.status === 401) return logout();
+      allGifts = await res.json();
+      renderGiftCodes();
+    }
+    function renderGiftCodes() {
+      const list = document.getElementById('giftcodesList');
+      document.getElementById('giftCount').textContent = allGifts.length + ' total';
+      
+      if (!allGifts.length) {
+        list.innerHTML = '<div class="empty">কোনো Gift Code নেই</div>';
+        return;
+      }
+      
+      list.innerHTML = allGifts.map(g => {
+        const isExpired = g.expiresAt && new Date() > new Date(g.expiresAt);
+        const isUsedUp = g.usedCount >= g.maxUses;
+        
+        let statusBadge = '';
+        if (isExpired) statusBadge = '<span class="badge gift-expired">⏰ Expired</span>';
+        else if (!g.active) statusBadge = '<span class="badge gift-inactive">⏸ Inactive</span>';
+        else if (isUsedUp) statusBadge = '<span class="badge gift-expired">✅ Fully Used</span>';
+        else statusBadge = '<span class="badge gift-active">✅ Active</span>';
+        
+        const expiryText = g.expiresAt 
+          ? new Date(g.expiresAt).toLocaleDateString('bn-BD') 
+          : 'Never';
+        
+        const progress = Math.min(100, Math.round((g.usedCount / g.maxUses) * 100));
+        
+        return '<div class="gift-card">' +
+          '<div class="gift-code-big">🎁 ' + esc(g.code) + '</div>' +
+          '<div class="gift-stats">' +
+            '<span>💰 ৳' + g.amount + '</span>' +
+            '<span>📊 ' + g.usedCount + '/' + g.maxUses + ' used</span>' +
+            '<span>⏰ ' + expiryText + '</span>' +
+          '</div>' +
+          '<div style="background:#0a0a0a; height:4px; border-radius:4px; overflow:hidden; margin-bottom:10px;">' +
+            '<div style="width:' + progress + '%; height:100%; background:linear-gradient(90deg,#ec4899,#8b5cf6);"></div>' +
+          '</div>' +
+          '<div>' + statusBadge + '</div>' +
+          '<div class="item-actions">' +
+            '<button class="btn small" onclick="copyGiftCode(\'' + esc(g.code) + '\')">📋 Copy</button>' +
+            '<button class="btn small blue" onclick="viewRedeems(\'' + esc(g.code) + '\')">👁 Redeems</button>' +
+            '<button class="btn small orange" onclick="toggleGift(\'' + esc(g.code) + '\')">' + (g.active ? '⏸ Disable' : '▶ Enable') + '</button>' +
+            '<button class="btn small red" onclick="deleteGift(\'' + esc(g.code) + '\')">🗑 Delete</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+    
+    function generateRandomCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      document.getElementById('giftCode').value = code;
+    }
+    
+    async function createGiftCode() {
+      const code = document.getElementById('giftCode').value.trim().toUpperCase();
+      const amount = document.getElementById('giftAmount').value;
+      const maxUses = document.getElementById('giftMaxUses').value || 1;
+      const expiresAt = document.getElementById('giftExpires').value;
+      
+      if (!code) return showToast('❌ Code দিন', true);
+      if (code.length < 4) return showToast('❌ Code কমপক্ষে ৪ অক্ষর', true);
+      if (!amount) return showToast('❌ Amount দিন', true);
+      
+      try {
+        const res = await fetch('/api/admin/giftcode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+          body: JSON.stringify({ 
+            code, 
+            amount: Number(amount), 
+            maxUses: Number(maxUses),
+            expiresAt: expiresAt || null
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('✅ Gift Code তৈরি হয়েছে: ' + code);
+          document.getElementById('giftCode').value = '';
+          document.getElementById('giftAmount').value = '';
+          document.getElementById('giftMaxUses').value = '1';
+          document.getElementById('giftExpires').value = '';
+          loadGiftCodes();
+          loadAll();
+        } else {
+          showToast('❌ ' + (data.error || 'Failed'), true);
+        }
+      } catch (e) {
+        showToast('❌ ' + e.message, true);
+      }
+    }
+    
+    function copyGiftCode(code) {
+      navigator.clipboard.writeText(code);
+      showToast('✅ Copied: ' + code);
+    }
+    
+    async function toggleGift(code) {
+      try {
+        const res = await fetch('/api/admin/giftcode/' + code + '/toggle', {
+          method: 'PUT',
+          headers: { 'x-admin-token': token }
+        });
+        if (res.ok) {
+          showToast('✅ Updated');
+          loadGiftCodes();
+        } else {
+          showToast('❌ Failed', true);
+        }
+      } catch (e) {
+        showToast('❌ ' + e.message, true);
+      }
+    }
+    
+    async function deleteGift(code) {
+      if (!confirm('Gift Code "' + code + '" delete করবে?')) return;
+      try {
+        const res = await fetch('/api/admin/giftcode/' + code, {
+          method: 'DELETE',
+          headers: { 'x-admin-token': token }
+        });
+        if (res.ok) {
+          showToast('🗑 Deleted');
+          loadGiftCodes();
+          loadAll();
+        } else {
+          showToast('❌ Failed', true);
+        }
+      } catch (e) {
+        showToast('❌ ' + e.message, true);
+      }
+    }
+    
+    async function viewRedeems(code) {
+      document.getElementById('redeemsModalTitle').textContent = '🎁 ' + code + ' — Redemptions';
+      document.getElementById('redeemsList').innerHTML = '<div class="empty">Loading...</div>';
+      document.getElementById('redeemsModal').classList.add('show');
+      
+      try {
+        const res = await fetch('/api/admin/giftcode/' + code + '/redeems', {
+          headers: { 'x-admin-token': token }
+        });
+        const list = await res.json();
+        
+        if (!list.length) {
+          document.getElementById('redeemsList').innerHTML = '<div class="empty">এখনো কেউ ব্যবহার করেনি</div>';
+          return;
+        }
+        
+        document.getElementById('redeemsList').innerHTML = list.map(r => 
+          '<div class="item-card">' +
+            '<div class="item-title">👤 ' + esc(r.userName || 'User') + '</div>' +
+            '<div class="item-meta">📧 ' + esc(r.userEmail) + '</div>' +
+            '<div class="item-meta">💰 ৳' + r.amount + '</div>' +
+            '<div class="item-meta">🕐 ' + new Date(r.redeemedAt).toLocaleString() + '</div>' +
+          '</div>'
+        ).join('');
+      } catch (e) {
+        document.getElementById('redeemsList').innerHTML = '<div class="empty">Failed to load</div>';
+      }
+    }
+    function closeRedeemsModal() {
+      document.getElementById('redeemsModal').classList.remove('show');
     }
 
     // ===== SETTINGS =====
