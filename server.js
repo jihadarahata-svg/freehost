@@ -18,150 +18,82 @@ const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 const WELCOME_BONUS = 20;
 const REFERRAL_BONUS = 10;
 
-let pages, users, products, deposits, purchases, settings, db;
+let pages, users, products, deposits, purchases, settings, giftcodes, giftredeems, db;
 
-// ===== DEFAULT CONTENT (A-Z Editable) =====
 const DEFAULT_CONTENT = {
   wallet: {
-    title: "My Wallet",
-    balanceLabel: "Current Balance",
-    safeText: "🔒 Safe & Secure",
-    giftTitle: "🎁 Redeem Gift Code",
-    giftDesc: "আপনার gift code লিখুন এবং wallet এ টাকা পান!",
-    giftPlaceholder: "GIFT CODE",
-    giftButton: "🎉 Claim",
-    addMoneyTab: "➕ Add Money",
-    historyTab: "📋 History",
+    title: "My Wallet", balanceLabel: "Current Balance", safeText: "🔒 Safe & Secure",
+    giftTitle: "🎁 Redeem Gift Code", giftDesc: "আপনার gift code লিখুন এবং wallet এ টাকা পান!",
+    giftPlaceholder: "GIFT CODE", giftButton: "🎉 Claim",
+    addMoneyTab: "➕ Add Money", historyTab: "📋 History",
     howToTitle: "💰 How to Add Money",
     howToInfo: "⚠️ bKash এ Send Money করুন → Screenshot upload করুন → Admin approve করলে Wallet এ যোগ হবে (২-৪ ঘণ্টা)",
-    sendLabel: "Send Money to bKash",
-    copyBtn: "📋 Copy Number",
-    amountLabel: "Amount (৳)",
-    amountPlaceholder: "সর্বনিম্ন 50 টাকা",
-    bkashLabel: "Your bKash Number",
-    bkashPlaceholder: "01XXXXXXXXX",
-    trxLabel: "Transaction ID (ঐচ্ছিক)",
-    trxPlaceholder: "TRX...",
-    screenshotLabel: "Screenshot URL",
-    screenshotPlaceholder: "https://photo-url.jpg",
-    submitBtn: "🚀 Submit Request",
-    noHistory: "এখনো কোনো history নেই",
-    loadingText: "Loading..."
+    sendLabel: "Send Money to bKash", copyBtn: "📋 Copy Number",
+    amountLabel: "Amount (৳)", amountPlaceholder: "সর্বনিম্ন 50 টাকা",
+    bkashLabel: "Your bKash Number", bkashPlaceholder: "01XXXXXXXXX",
+    trxLabel: "Transaction ID (ঐচ্ছিক)", trxPlaceholder: "TRX...",
+    screenshotLabel: "Screenshot URL", screenshotPlaceholder: "https://photo-url.jpg",
+    submitBtn: "🚀 Submit Request", noHistory: "এখনো কোনো history নেই", loadingText: "Loading..."
   },
   referral: {
     title: "Invite Friends & Earn ৳10",
     subtitle: "প্রতিটা বন্ধু sign up করলে ৳10 পাবেন + সে পাবে ৳20 bonus",
-    copyBtn: "📋 Copy",
-    referralsLabel: "Referrals",
-    earnedLabel: "Earned",
-    whatsappBtn: "💬 WhatsApp",
-    telegramBtn: "📢 Telegram",
-    facebookBtn: "📘 Facebook",
-    whoJoinedTitle: "🎉 Who Joined",
-    shareMessage: "🎁 Join FreeHost and get ৳20 bonus!"
+    copyBtn: "📋 Copy", referralsLabel: "Referrals", earnedLabel: "Earned",
+    whatsappBtn: "💬 WhatsApp", telegramBtn: "📢 Telegram", facebookBtn: "📘 Facebook",
+    whoJoinedTitle: "🎉 Who Joined", shareMessage: "🎁 Join FreeHost and get ৳20 bonus!"
   },
   shop: {
-    logoText: "FreeHost Shop",
-    searchPlaceholder: "🔍 কী খুঁজছেন?",
-    walletBtn: "Wallet",
-    ordersBtn: "Orders",
-    cartBtn: "Cart",
-    meBtn: "Me",
-    heroBadge: "🔥 Limited Time",
-    heroHeading: "HTML Templates Mega Pack",
-    heroSubtitle: "৫০টা প্রিমিয়াম টেমপ্লেট — মাত্র ৳১০০",
-    heroButton: "এখনই কিনুন →",
-    featuredTitle: "⚡ Featured Products",
-    allProductsTitle: "📦 All Products",
-    seeAllText: "See all →",
-    buyNowText: "Buy Now",
-    addToCartText: "Add to Cart",
-    noProductsText: "কোনো product পাওয়া যায়নি",
-    tryDifferentText: "অন্য কিছু খুঁজুন",
-    footerCopyright: "© 2026 FreeHost Shop",
-    footerText: "All rights reserved",
-    filterBtn: "⚙ Filter",
-    sortNewest: "Newest",
-    sortPriceLow: "Price: Low to High",
-    sortPriceHigh: "Price: High to Low",
-    sortPopular: "Most Popular"
+    logoText: "FreeHost Shop", searchPlaceholder: "🔍 কী খুঁজছেন?",
+    walletBtn: "Wallet", ordersBtn: "Orders", cartBtn: "Cart", meBtn: "Me",
+    heroBadge: "🔥 Limited Time", heroHeading: "HTML Templates Mega Pack",
+    heroSubtitle: "৫০টা প্রিমিয়াম টেমপ্লেট — মাত্র ৳১০০", heroButton: "এখনই কিনুন →",
+    featuredTitle: "⚡ Featured Products", allProductsTitle: "📦 All Products",
+    seeAllText: "See all →", buyNowText: "Buy Now", addToCartText: "Add to Cart",
+    noProductsText: "কোনো product পাওয়া যায়নি", tryDifferentText: "অন্য কিছু খুঁজুন",
+    footerCopyright: "© 2026 FreeHost Shop", footerText: "All rights reserved",
+    filterBtn: "⚙ Filter", sortNewest: "Newest", sortPriceLow: "Price: Low to High",
+    sortPriceHigh: "Price: High to Low", sortPopular: "Most Popular"
   },
   product: {
-    backBtn: "← Back to Shop",
-    buyNowBtn: "🛒 Buy Now",
-    loginToBuyBtn: "🔒 Login to Buy",
-    confirmPurchaseTitle: "📦 Confirm Purchase",
-    currentBalanceLabel: "Your Balance",
-    afterPurchaseLabel: "After Purchase",
-    confirmBtn: "✅ Confirm & Buy",
-    cancelBtn: "❌ Cancel",
-    purchasedTitle: "✅ Purchase Successful!",
-    paidLabel: "Paid",
-    newBalanceLabel: "New Balance",
-    deliveryReadyText: "Your Product is Ready!",
-    downloadBtn: "📥 Download Now",
-    copyLinkBtn: "🔗 Copy Link",
-    copyCodeBtn: "📋 Copy Code",
-    openLinkBtn: "🔗 Open Link",
-    backToShopBtn: "🏠 Back to Shop",
-    contactSupportBtn: "💬 Contact Support",
-    descriptionLabel: "📝 Description",
-    categoryLabel: "📦 Category",
-    tagsLabel: "🏷 Tags",
-    linkSectionTitle: "🔗 Download Link",
-    codeSectionTitle: "💻 Source Code",
+    backBtn: "← Back to Shop", buyNowBtn: "🛒 Buy Now", loginToBuyBtn: "🔒 Login to Buy",
+    confirmPurchaseTitle: "📦 Confirm Purchase", currentBalanceLabel: "Your Balance",
+    afterPurchaseLabel: "After Purchase", confirmBtn: "✅ Confirm & Buy", cancelBtn: "❌ Cancel",
+    purchasedTitle: "✅ Purchase Successful!", paidLabel: "Paid", newBalanceLabel: "New Balance",
+    deliveryReadyText: "Your Product is Ready!", downloadBtn: "📥 Download Now",
+    copyLinkBtn: "🔗 Copy Link", copyCodeBtn: "📋 Copy Code", openLinkBtn: "🔗 Open Link",
+    backToShopBtn: "🏠 Back to Shop", contactSupportBtn: "💬 Contact Support",
+    descriptionLabel: "📝 Description", categoryLabel: "📦 Category", tagsLabel: "🏷 Tags",
+    linkSectionTitle: "🔗 Download Link", codeSectionTitle: "💻 Source Code",
     fileSectionTitle: "📁 File Download",
-    insufficientBalanceMsg: "❌ Insufficient balance",
-    loginRequiredMsg: "❌ Login required"
+    insufficientBalanceMsg: "❌ Insufficient balance", loginRequiredMsg: "❌ Login required"
   },
   login: {
-    title: "Welcome to FreeHost",
-    subtitle: "Sign in or create account to continue",
-    signinTab: "Sign In",
-    signupTab: "Sign Up",
-    emailLabel: "Email",
-    emailPlaceholder: "your@email.com",
-    passwordLabel: "Password",
-    passwordPlaceholder: "Your password",
-    nameLabel: "Full Name",
-    namePlaceholder: "Your name",
-    signinButton: "Sign In",
-    signupButton: "Create Account",
-    backBtn: "← Back to home",
-    termsText: "By signing in, you agree to our Terms of Service"
+    title: "Welcome to FreeHost", subtitle: "Sign in or create account to continue",
+    signinTab: "Sign In", signupTab: "Sign Up",
+    emailLabel: "Email", emailPlaceholder: "your@email.com",
+    passwordLabel: "Password", passwordPlaceholder: "Your password",
+    nameLabel: "Full Name", namePlaceholder: "Your name",
+    signinButton: "Sign In", signupButton: "Create Account",
+    backBtn: "← Back to home", termsText: "By signing in, you agree to our Terms of Service"
   },
   dashboard: {
-    title: "My Dashboard",
-    subtitle: "Manage all your hosted pages",
-    pagesLabel: "Total Pages",
-    viewsLabel: "Total Views",
-    walletLabel: "Wallet Balance",
-    hostPageBtn: "+ Host New Page",
-    shopBtn: "🛍 Visit Shop",
-    walletBtn: "💰 My Wallet",
-    myPagesTitle: "My Pages",
-    noPagesText: "No pages yet",
-    hostFirstText: "Host your first HTML page"
+    title: "My Dashboard", subtitle: "Manage all your hosted pages",
+    pagesLabel: "Total Pages", viewsLabel: "Total Views", walletLabel: "Wallet Balance",
+    hostPageBtn: "+ Host New Page", shopBtn: "🛍 Visit Shop", walletBtn: "💰 My Wallet",
+    myPagesTitle: "My Pages", noPagesText: "No pages yet", hostFirstText: "Host your first HTML page"
   },
   home: {
-    title: "FreeHost",
-    heroBadge: "✨ New products available",
+    title: "FreeHost", heroBadge: "✨ New products available",
     heroHeading: "Premium Digital Products",
     heroSubtitle: "Host HTML instantly and shop premium digital products",
-    hostBtn: "🚀 Host Now",
-    shopBtn: "🛍 Shop",
-    loginBtn: "Sign In",
+    hostBtn: "🚀 Host Now", shopBtn: "🛍 Shop", loginBtn: "Sign In",
     htmlPlaceholder: "<h1>Hello World</h1>",
-    titleLabel: "Title",
-    titlePlaceholder: "My Page",
-    slugLabel: "Custom URL",
-    slugPlaceholder: "my-page"
+    titleLabel: "Title", titlePlaceholder: "My Page",
+    slugLabel: "Custom URL", slugPlaceholder: "my-page"
   },
   colors: {
-    primary: "#8b5cf6",
-    accent: "#10b981",
-    buttonText: "#ffffff",
-    heroGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+    primary: "#8b5cf6", accent: "#10b981",
+    buttonText: "#ffffff", heroGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
   }
 };
 
@@ -189,7 +121,13 @@ async function connectDB() {
   deposits = db.collection('deposits');
   purchases = db.collection('purchases');
   settings = db.collection('settings');
+  giftcodes = db.collection('giftcodes');
+  giftredeems = db.collection('giftredeems');
   await users.createIndex({ email: 1 }, { unique: true });
+  
+  try {
+    await giftcodes.createIndex({ code: 1 }, { unique: true });
+  } catch (e) { console.log('giftcodes index:', e.message); }
   
   const existing = await settings.findOne({ _id: 'config' });
   if (!existing) {
@@ -450,7 +388,6 @@ app.get('/embed/:id', async (req, res) => {
   } catch (err) { res.status(500).send('Error'); }
 });
 
-// ============ USER PAGES ============
 app.get('/api/my-pages', requireAuth, async (req, res) => {
   const user = await getUser(req);
   if (!user) return res.status(401).json({ error: 'Not logged in' });
@@ -460,7 +397,7 @@ app.get('/api/my-pages', requireAuth, async (req, res) => {
   res.json(list);
 });
 
-// ============ CONTENT (PUBLIC) ============
+// ============ CONTENT ============
 app.get('/api/content', async (req, res) => {
   try {
     const s = await settings.findOne({ _id: 'config' });
@@ -470,7 +407,7 @@ app.get('/api/content', async (req, res) => {
   }
 });
 
-// ============ SHOP (PUBLIC) ============
+// ============ SHOP ============
 app.get('/api/shop/products', async (req, res) => {
   try {
     const { category, search, sort } = req.query;
@@ -486,7 +423,6 @@ app.get('/api/shop/products', async (req, res) => {
     if (sort === 'price-low') sortObj = { price: 1 };
     if (sort === 'price-high') sortObj = { price: -1 };
     if (sort === 'popular') sortObj = { sold: -1 };
-    // Hide delivery data
     const list = await products.find(query, { 
       projection: { linkData: 0, codeData: 0, fileData: 0, deliveryData: 0 } 
     }).sort(sortObj).toArray();
@@ -552,9 +488,7 @@ app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
         success: true, alreadyOwned: true,
         linkData: product.linkData || '',
         codeData: product.codeData || '',
-        fileData: product.fileData || '',
-        deliveryType: product.deliveryType,
-        deliveryData: product.deliveryData
+        fileData: product.fileData || ''
       });
     }
 
@@ -590,8 +524,6 @@ app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
       linkData: product.linkData || '',
       codeData: product.codeData || '',
       fileData: product.fileData || '',
-      deliveryType: product.deliveryType,
-      deliveryData: product.deliveryData,
       newBalance: userWallet - price
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -611,9 +543,7 @@ app.get('/api/shop/access/:id', requireAuth, async (req, res) => {
     res.json({
       linkData: product.linkData || '',
       codeData: product.codeData || '',
-      fileData: product.fileData || '',
-      deliveryType: product.deliveryType,
-      deliveryData: product.deliveryData
+      fileData: product.fileData || ''
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -663,6 +593,57 @@ app.get('/api/deposit/my-list', requireAuth, async (req, res) => {
     const list = await deposits.find({ userId: user._id.toString() })
       .sort({ createdAt: -1 }).toArray();
     res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ============ GIFT CODE (User) ============
+app.post('/api/giftcode/redeem', requireAuth, async (req, res) => {
+  try {
+    const user = await getUser(req);
+    if (!user) return res.status(401).json({ error: 'Login required' });
+    
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ error: 'Code required' });
+    
+    const cleanCode = code.toUpperCase().trim();
+    const gift = await giftcodes.findOne({ code: cleanCode });
+    
+    if (!gift) return res.status(404).json({ error: '❌ ভুল Gift Code' });
+    if (!gift.active) return res.status(400).json({ error: '❌ এই Code নিষ্ক্রিয়' });
+    if (gift.expiresAt && new Date() > new Date(gift.expiresAt)) {
+      return res.status(400).json({ error: '❌ এই Code এর মেয়াদ শেষ' });
+    }
+    if (gift.usedCount >= gift.maxUses) {
+      return res.status(400).json({ error: '❌ এই Code এর ব্যবহার শেষ' });
+    }
+    
+    const already = await giftredeems.findOne({
+      code: cleanCode,
+      userId: user._id.toString()
+    });
+    if (already) return res.status(400).json({ error: '❌ আপনি ইতিমধ্যেই এই Code ব্যবহার করেছেন' });
+    
+    await users.updateOne(
+      { _id: user._id },
+      { $inc: { wallet: gift.amount } }
+    );
+    
+    await giftredeems.insertOne({
+      code: cleanCode,
+      userId: user._id.toString(),
+      userEmail: user.email,
+      userName: user.name,
+      amount: gift.amount,
+      redeemedAt: new Date()
+    });
+    
+    await giftcodes.updateOne({ code: cleanCode }, { $inc: { usedCount: 1 } });
+    
+    res.json({ 
+      success: true, 
+      amount: gift.amount,
+      newBalance: (user.wallet || 0) + gift.amount
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -729,7 +710,7 @@ app.delete('/api/admin/user/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ===== ADMIN PRODUCTS (Multi-Delivery) =====
+// ===== ADMIN PRODUCTS =====
 app.get('/api/admin/products', adminAuth, async (req, res) => {
   const list = await products.find({}).sort({ createdAt: -1 }).toArray();
   res.json(list);
@@ -825,6 +806,68 @@ app.put('/api/admin/deposit/:id', adminAuth, async (req, res) => {
       await deposits.updateOne(q, { $set: { status: 'rejected', reviewedAt: new Date() } });
     }
     res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ===== ADMIN GIFT CODES =====
+app.post('/api/admin/giftcode', adminAuth, async (req, res) => {
+  try {
+    const { code, amount, maxUses, expiresAt } = req.body;
+    if (!code || !amount) return res.status(400).json({ error: 'Code and amount required' });
+    
+    const cleanCode = String(code).toUpperCase().trim();
+    if (cleanCode.length < 4) return res.status(400).json({ error: 'Code must be 4+ characters' });
+    if (Number(amount) < 1) return res.status(400).json({ error: 'Amount must be 1+' });
+    
+    const existing = await giftcodes.findOne({ code: cleanCode });
+    if (existing) return res.status(400).json({ error: 'এই Code আগেই আছে' });
+    
+    await giftcodes.insertOne({
+      code: cleanCode,
+      amount: Number(amount),
+      maxUses: maxUses ? Number(maxUses) : 1,
+      usedCount: 0,
+      expiresAt: expiresAt ? new Date(expiresAt) : null,
+      active: true,
+      createdAt: new Date()
+    });
+    
+    res.json({ success: true, code: cleanCode });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/admin/giftcodes', adminAuth, async (req, res) => {
+  try {
+    const list = await giftcodes.find({}).sort({ createdAt: -1 }).toArray();
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/admin/giftcode/:code/toggle', adminAuth, async (req, res) => {
+  try {
+    const code = req.params.code.toUpperCase();
+    const gift = await giftcodes.findOne({ code });
+    if (!gift) return res.status(404).json({ error: 'Not found' });
+    
+    await giftcodes.updateOne({ code }, { $set: { active: !gift.active } });
+    res.json({ success: true, active: !gift.active });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/admin/giftcode/:code', adminAuth, async (req, res) => {
+  try {
+    const code = req.params.code.toUpperCase();
+    await giftcodes.deleteOne({ code });
+    await giftredeems.deleteMany({ code });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/admin/giftcode/:code/redeems', adminAuth, async (req, res) => {
+  try {
+    const code = req.params.code.toUpperCase();
+    const list = await giftredeems.find({ code }).sort({ redeemedAt: -1 }).toArray();
+    res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -929,11 +972,12 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const pendingDeposits = await deposits.countDocuments({ status: 'pending' });
   const totalPurchases = await purchases.countDocuments();
   const totalReferrals = await users.countDocuments({ referredBy: { $ne: null } });
+  const totalGiftCodes = await giftcodes.countDocuments({ active: true });
   const revenueAgg = await purchases.aggregate([{ $group: { _id: null, t: { $sum: '$price' } } }]).toArray();
   const v = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
   res.json({
     totalPages, totalUsers, totalProducts,
-    pendingDeposits, totalPurchases, totalReferrals,
+    pendingDeposits, totalPurchases, totalReferrals, totalGiftCodes,
     totalRevenue: revenueAgg[0]?.t || 0,
     totalViews: v[0]?.v || 0
   });
