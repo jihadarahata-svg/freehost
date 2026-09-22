@@ -111,6 +111,15 @@
   }
   .success.show { display: block; }
   
+  .warning {
+    background: rgba(251,146,60,0.1);
+    border: 1px solid rgba(251,146,60,0.3);
+    border-radius: 10px; padding: 10px 14px;
+    font-size: 13px; color: #fb923c;
+    margin-bottom: 16px; display: none;
+  }
+  .warning.show { display: block; }
+  
   .back {
     display: block; text-align: center;
     margin-top: 20px; color: #a1a1aa;
@@ -156,6 +165,7 @@
     
     <div class="error" id="error"></div>
     <div class="success" id="success"></div>
+    <div class="warning" id="warning"></div>
     
     <!-- LOGIN FORM -->
     <div id="loginForm">
@@ -236,7 +246,6 @@
         if (l.backBtn) document.getElementById('backBtn').textContent = l.backBtn;
         if (l.termsText) document.getElementById('termsText').textContent = l.termsText;
         
-        // Update page title
         if (l.title) document.title = l.title + ' — FreeHost';
       } catch (e) {
         console.error('Content load failed:', e);
@@ -251,7 +260,6 @@
     }
     
     function switchTab(tab) {
-      const l = content.login || {};
       if (tab === 'login') {
         document.getElementById('tabLogin').classList.add('active');
         document.getElementById('tabSignup').classList.remove('active');
@@ -266,30 +274,37 @@
       hideMessages();
     }
     
-    function showError(msg) {
-      const el = document.getElementById('error');
-      el.textContent = msg;
-      el.classList.add('show');
-      document.getElementById('success').classList.remove('show');
-    }
-    
-    function showSuccess(msg) {
-      const el = document.getElementById('success');
-      el.textContent = msg;
-      el.classList.add('show');
-      document.getElementById('error').classList.remove('show');
-    }
-    
     function hideMessages() {
       document.getElementById('error').classList.remove('show');
       document.getElementById('success').classList.remove('show');
+      document.getElementById('warning').classList.remove('show');
+    }
+    
+    function showError(msg) {
+      hideMessages();
+      const el = document.getElementById('error');
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+    
+    function showSuccess(msg) {
+      hideMessages();
+      const el = document.getElementById('success');
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+    
+    function showWarning(msg) {
+      hideMessages();
+      const el = document.getElementById('warning');
+      el.textContent = msg;
+      el.classList.add('show');
     }
     
     async function doLogin() {
       const btn = document.getElementById('loginBtn');
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
-      const l = content.login || {};
       
       if (!email || !password) return showError('Email and password required');
       
@@ -343,12 +358,23 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Signup failed');
         
+        // Bonus blocked case
+        if (data.bonusBlocked) {
+          showWarning('⚠️ Account created, but Referral bonus blocked (same network as referrer). Redirecting...');
+          sessionStorage.removeItem('refCode');
+          setTimeout(() => window.location.href = '/dashboard', 2000);
+          return;
+        }
+        
+        // Success with bonus
         let msg = '✅ Account created!';
-        if (data.welcomeBonus) msg += ` 🎁 ৳${data.welcomeBonus} welcome bonus added!`;
+        if (data.welcomeBonus) {
+          msg += ` 🎁 ৳${data.welcomeBonus} welcome bonus added!`;
+        }
         showSuccess(msg + ' Redirecting...');
         
         sessionStorage.removeItem('refCode');
-        setTimeout(() => window.location.href = '/dashboard', 1200);
+        setTimeout(() => window.location.href = '/dashboard', 1500);
       } catch (e) {
         showError('❌ ' + e.message);
         btn.disabled = false;
@@ -356,7 +382,7 @@
       }
     }
     
-    // Init
+    // Load content
     loadContent();
   </script>
 </body>
