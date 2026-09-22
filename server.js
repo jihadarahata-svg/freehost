@@ -34,7 +34,9 @@ const DEFAULT_CONTENT = {
     bkashLabel: "Your bKash Number", bkashPlaceholder: "01XXXXXXXXX",
     trxLabel: "Transaction ID (ঐচ্ছিক)", trxPlaceholder: "TRX...",
     screenshotLabel: "Screenshot URL", screenshotPlaceholder: "https://photo-url.jpg",
-    submitBtn: "🚀 Submit Request", noHistory: "এখনো কোনো history নেই", loadingText: "Loading..."
+    submitBtn: "🚀 Submit Request", noHistory: "এখনো কোনো history নেই", loadingText: "Loading...",
+    bonusTitle: "🎁 Deposit Bonus",
+    bonusDesc: "প্রতিটা deposit এ bonus পান!"
   },
   referral: {
     title: "Invite Friends & Earn ৳10",
@@ -98,6 +100,24 @@ const DEFAULT_CONTENT = {
   }
 };
 
+const DEFAULT_DEPOSIT_BONUSES = {
+  deposit1: [
+    { minAmount: 50, bonus: 10 },
+    { minAmount: 100, bonus: 15 },
+    { minAmount: 300, bonus: 30 },
+    { minAmount: 500, bonus: 100 },
+    { minAmount: 1000, bonus: 200 }
+  ],
+  deposit2: [
+    { minAmount: 50, bonus: 5 },
+    { minAmount: 100, bonus: 10 },
+    { minAmount: 300, bonus: 20 },
+    { minAmount: 500, bonus: 50 },
+    { minAmount: 1000, bonus: 100 }
+  ],
+  deposit3: []
+};
+
 function mergeContent(saved) {
   const result = {};
   for (const section in DEFAULT_CONTENT) {
@@ -110,6 +130,39 @@ function makeIdQuery(id) {
   const queries = [{ _id: id }];
   try { queries.push({ _id: new ObjectId(id) }); } catch (e) {}
   return { $or: queries };
+}
+
+// 🎁 Calculate deposit bonus
+function calculateDepositBonus(user, depositAmount, config) {
+  try {
+    if (!config || config.depositBonusEnabled === false) return 0;
+    
+    const totalDeposits = user.totalDeposits || 0;
+    const nextDepositNumber = totalDeposits + 1;
+    
+    let bonusTiers = null;
+    if (nextDepositNumber === 1) {
+      bonusTiers = config.depositBonuses?.deposit1 || DEFAULT_DEPOSIT_BONUSES.deposit1;
+    } else if (nextDepositNumber === 2) {
+      bonusTiers = config.depositBonuses?.deposit2 || DEFAULT_DEPOSIT_BONUSES.deposit2;
+    } else {
+      bonusTiers = config.depositBonuses?.deposit3 || DEFAULT_DEPOSIT_BONUSES.deposit3;
+    }
+    
+    if (!bonusTiers || !bonusTiers.length) return 0;
+    
+    const sorted = [...bonusTiers].sort((a, b) => b.minAmount - a.minAmount);
+    for (const tier of sorted) {
+      if (depositAmount >= tier.minAmount) {
+        return Number(tier.bonus) || 0;
+      }
+    }
+    
+    return 0;
+  } catch (e) {
+    console.error('calculateDepositBonus error:', e);
+    return 0;
+  }
 }
 
 async function connectDB() {
@@ -147,6 +200,8 @@ async function connectDB() {
       referralBonus: 10,
       minRefDeposit: 50,
       blockSameIp: true,
+      depositBonusEnabled: true,
+      depositBonuses: DEFAULT_DEPOSIT_BONUSES,
       supportEmail: 'support@freehost.com',
       supportWhatsapp: '',
       supportTelegram: '',
@@ -221,7 +276,6 @@ app.post('/api/auth/signup', async (req, res) => {
     let referrerId = null;
     let sameIpBlock = false;
     
-    // Check referral
     if (referralCode) {
       try {
         const referrer = await users.findOne({ _id: new ObjectId(referralCode) });
@@ -235,7 +289,6 @@ app.post('/api/auth/signup', async (req, res) => {
       } catch (e) {}
     }
     
-    // Welcome Bonus — সবসময় দেয়া হবে (same IP হলে না)
     const welcomeBonus = sameIpBlock ? 0 : welcomeBonusAmt;
     
     const hash = await bcrypt.hash(password, 10);
@@ -244,7 +297,7 @@ app.post('/api/auth/signup', async (req, res) => {
       email: cleanEmail,
       password: hash,
       banned: false,
-      wallet: welcomeBonus, // ✅ Instant Welcome Bonus
+      wallet: welcomeBonus,
       totalSpent: 0,
       photo: null,
       referredBy: referrerId,
@@ -253,11 +306,11 @@ app.post('/api/auth/signup', async (req, res) => {
       sameIpBlock: sameIpBlock,
       hasDeposited: false,
       totalDeposited: 0,
+      totalDeposits: 0,
       createdAt: new Date(),
       lastLogin: new Date()
     });
     
-    // Create pending referral (if referrer exists and not same IP)
     if (referrerId && !sameIpBlock) {
       const referrer = await users.findOne({ _id: new ObjectId(referrerId) });
       await pendingrefs.insertOne({
@@ -337,6 +390,8 @@ app.get('/api/me', async (req, res) => {
     wallet: user.wallet || 0,
     totalSpent: user.totalSpent || 0,
     referrals: user.referrals || 0,
+    totalDeposits: user.totalDeposits || 0,
+    totalDeposited: user.totalDeposited || 0,
     referredBy: user.referredBy || null
   });
 });
@@ -517,6 +572,7 @@ app.get('/api/shop/settings', async (req, res) => {
       welcomeBonus: s?.welcomeBonus || 20,
       referralBonus: s?.referralBonus || 10,
       minRefDeposit: s?.minRefDeposit || 50,
+      depositBonusEnabled: s?.depositBonusEnabled !== false,
       supportEmail: s?.supportEmail || '',
       supportWhatsapp: s?.supportWhatsapp || '',
       supportTelegram: s?.supportTelegram || ''
@@ -626,11 +682,17 @@ app.post('/api/deposit/request', requireAuth, async (req, res) => {
     if (amount > maxDep) return res.status(400).json({ error: 'Maximum ৳' + maxDep });
     if (!senderNumber) return res.status(400).json({ error: 'Sender number required' });
 
+    // 🎁 Calculate bonus
+    const bonusAmount = calculateDepositBonus(user, Number(amount), config);
+    const nextDepositNum = (user.totalDeposits || 0) + 1;
+
     const result = await deposits.insertOne({
       userId: user._id.toString(),
       userEmail: user.email,
       userName: user.name,
       amount: Number(amount),
+      bonusAmount: bonusAmount,
+      depositNumber: nextDepositNum,
       method: 'bKash',
       senderNumber,
       transactionId: transactionId || '',
@@ -639,7 +701,12 @@ app.post('/api/deposit/request', requireAuth, async (req, res) => {
       createdAt: new Date(),
       reviewedAt: null
     });
-    res.json({ success: true, id: result.insertedId.toString() });
+    res.json({ 
+      success: true, 
+      id: result.insertedId.toString(),
+      bonusAmount: bonusAmount,
+      depositNumber: nextDepositNum
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -649,6 +716,38 @@ app.get('/api/deposit/my-list', requireAuth, async (req, res) => {
     const list = await deposits.find({ userId: user._id.toString() })
       .sort({ createdAt: -1 }).toArray();
     res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 🎁 Bonus preview
+app.get('/api/deposit/bonus-preview', requireAuth, async (req, res) => {
+  try {
+    const user = await getUser(req);
+    if (!user) return res.status(401).json({ error: 'Not logged in' });
+    
+    const config = await settings.findOne({ _id: 'config' });
+    if (!config || config.depositBonusEnabled === false) {
+      return res.json({ enabled: false, tiers: [], depositNumber: 0 });
+    }
+    
+    const nextDepositNumber = (user.totalDeposits || 0) + 1;
+    
+    let tiers = [];
+    if (nextDepositNumber === 1) {
+      tiers = config.depositBonuses?.deposit1 || DEFAULT_DEPOSIT_BONUSES.deposit1;
+    } else if (nextDepositNumber === 2) {
+      tiers = config.depositBonuses?.deposit2 || DEFAULT_DEPOSIT_BONUSES.deposit2;
+    } else {
+      tiers = config.depositBonuses?.deposit3 || DEFAULT_DEPOSIT_BONUSES.deposit3;
+    }
+    
+    res.json({
+      enabled: true,
+      depositNumber: nextDepositNumber,
+      tiers: [...tiers].sort((a, b) => a.minAmount - b.minAmount),
+      hasDepositedBefore: (user.totalDeposits || 0) > 0,
+      totalDeposits: user.totalDeposits || 0
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -858,16 +957,26 @@ app.put('/api/admin/deposit/:id', adminAuth, async (req, res) => {
       const userQ = makeIdQuery(deposit.userId);
       const userDoc = await users.findOne(userQ);
       
+      const bonusAmount = deposit.bonusAmount || 0;
+      const totalToAdd = deposit.amount + bonusAmount;
+      
       await users.updateOne(userQ, { 
         $inc: { 
-          wallet: deposit.amount,
-          totalDeposited: deposit.amount
+          wallet: totalToAdd,
+          totalDeposited: deposit.amount,
+          totalDeposits: 1
         },
         $set: { hasDeposited: true }
       });
-      await deposits.updateOne(q, { $set: { status: 'approved', reviewedAt: new Date() } });
       
-      // 🎁 Process pending referral — credit referrer now
+      await deposits.updateOne(q, { 
+        $set: { 
+          status: 'approved', 
+          reviewedAt: new Date(),
+          bonusCredited: bonusAmount
+        } 
+      });
+      
       await processPendingReferral(deposit.userId, deposit.amount);
     } else if (action === 'reject') {
       await deposits.updateOne(q, { $set: { status: 'rejected', reviewedAt: new Date() } });
@@ -876,13 +985,11 @@ app.put('/api/admin/deposit/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 🎁 Credit referral bonus on deposit
 async function processPendingReferral(userId, depositAmount) {
   try {
     const config = await settings.findOne({ _id: 'config' });
     const minRefDeposit = config?.minRefDeposit || 50;
     
-    // Get user's total deposited
     const user = await users.findOne(makeIdQuery(userId));
     if (!user) return;
     
@@ -896,7 +1003,6 @@ async function processPendingReferral(userId, depositAmount) {
     
     if (!pending) return;
     
-    // ✅ Credit referrer
     await users.updateOne(
       { _id: new ObjectId(pending.referrerId) },
       { $inc: { wallet: pending.referrerBonus, referrals: 1 } }
@@ -1004,6 +1110,54 @@ app.put('/api/admin/settings', adminAuth, async (req, res) => {
     const update = { ...req.body, updatedAt: new Date() };
     delete update._id;
     await settings.updateOne({ _id: 'config' }, { $set: update }, { upsert: true });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ===== ADMIN DEPOSIT BONUSES =====
+app.get('/api/admin/deposit-bonuses', adminAuth, async (req, res) => {
+  try {
+    const s = await settings.findOne({ _id: 'config' });
+    res.json({
+      enabled: s?.depositBonusEnabled !== false,
+      depositBonuses: s?.depositBonuses || DEFAULT_DEPOSIT_BONUSES
+    });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/admin/deposit-bonuses', adminAuth, async (req, res) => {
+  try {
+    const { enabled, depositBonuses } = req.body;
+    const update = { updatedAt: new Date() };
+    
+    if (typeof enabled === 'boolean') {
+      update.depositBonusEnabled = enabled;
+    }
+    
+    if (depositBonuses) {
+      // Validate & sort
+      const cleaned = {};
+      for (const key of ['deposit1', 'deposit2', 'deposit3']) {
+        const tiers = depositBonuses[key] || [];
+        cleaned[key] = tiers
+          .filter(t => t && t.minAmount > 0 && t.bonus >= 0)
+          .map(t => ({ minAmount: Number(t.minAmount), bonus: Number(t.bonus) }))
+          .sort((a, b) => a.minAmount - b.minAmount);
+      }
+      update.depositBonuses = cleaned;
+    }
+    
+    await settings.updateOne({ _id: 'config' }, { $set: update }, { upsert: true });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/admin/deposit-bonuses/reset', adminAuth, async (req, res) => {
+  try {
+    await settings.updateOne(
+      { _id: 'config' },
+      { $set: { depositBonuses: DEFAULT_DEPOSIT_BONUSES, depositBonusEnabled: true, updatedAt: new Date() } }
+    );
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
