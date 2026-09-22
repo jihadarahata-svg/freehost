@@ -92,6 +92,61 @@
     font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
   }
   
+  /* 🎁 BONUS SECTION */
+  .bonus-section {
+    background: linear-gradient(135deg, rgba(236,72,153,0.1), rgba(139,92,246,0.05));
+    border: 1px solid rgba(236,72,153,0.3);
+    border-radius: 14px; padding: 16px; margin-bottom: 16px;
+    display: none;
+  }
+  .bonus-section.show { display: block; }
+  .bonus-section-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 800;
+    color: #ec4899; margin-bottom: 12px;
+  }
+  .bonus-section-head .num-badge {
+    width: 24px; height: 24px; border-radius: 7px;
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 900; color: #fff;
+  }
+  .bonus-tier-list { display: flex; flex-direction: column; gap: 6px; }
+  .bonus-tier {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 8px;
+    font-size: 13px;
+    transition: 0.2s;
+  }
+  .bonus-tier.highlight {
+    background: linear-gradient(135deg, rgba(236,72,153,0.2), rgba(139,92,246,0.15));
+    border: 1px solid rgba(236,72,153,0.5);
+    transform: scale(1.02);
+  }
+  .bonus-tier .amount { color: #e4e4e7; font-weight: 700; }
+  .bonus-tier .arrow { color: #71717a; margin: 0 8px; }
+  .bonus-tier .bonus-amt { color: #34d399; font-weight: 800; }
+  .bonus-tier .check { color: #ec4899; font-weight: 900; margin-left: 6px; }
+  
+  .bonus-preview {
+    background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(99,102,241,0.1));
+    border: 1.5px solid rgba(139,92,246,0.4);
+    border-radius: 12px; padding: 14px; margin-bottom: 16px;
+    display: none;
+  }
+  .bonus-preview.show { display: block; }
+  .bonus-preview-row {
+    display: flex; justify-content: space-between;
+    font-size: 13px; margin-bottom: 6px;
+  }
+  .bonus-preview-row:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-weight: 800; }
+  .bonus-preview-row .lbl { color: #a1a1aa; }
+  .bonus-preview-row .val { color: #fff; font-weight: 700; }
+  .bonus-preview-row .val.bonus { color: #ec4899; }
+  .bonus-preview-row.total .val { color: #34d399; font-size: 15px; }
+  
   .field { margin-bottom: 14px; }
   .field label {
     display: block; font-size: 11px; color: #71717a;
@@ -139,7 +194,7 @@
   .badge-pending { background: #ea580c; color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
   .badge-approved { background: #16a34a; color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
   .badge-rejected { background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
-  .badge-gift { background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
+  .badge-bonus { background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
   
   .referral-section {
     background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.04));
@@ -169,10 +224,10 @@
     font-family: inherit;
   }
   
-  .ref-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .ref-stat { background: rgba(0,0,0,0.25); border-radius: 10px; padding: 14px; text-align: center; }
-  .ref-stat-num { font-size: 22px; font-weight: 900; color: #34d399; }
-  .ref-stat-lbl { font-size: 10px; color: #71717a; text-transform: uppercase; font-weight: 700; margin-top: 4px; }
+  .ref-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .ref-stat { background: rgba(0,0,0,0.25); border-radius: 10px; padding: 12px 6px; text-align: center; }
+  .ref-stat-num { font-size: 20px; font-weight: 900; color: #34d399; }
+  .ref-stat-lbl { font-size: 9px; color: #71717a; text-transform: uppercase; font-weight: 700; margin-top: 4px; letter-spacing: 0.5px; }
   
   .ref-share { display: flex; gap: 6px; flex-wrap: wrap; }
   .share-btn {
@@ -196,6 +251,9 @@
   }
   .referred-name { flex: 1; color: #e4e4e7; }
   .referred-date { color: #71717a; font-size: 11px; }
+  .referred-status { font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 700; }
+  .referred-status.pending { background: rgba(251,146,60,0.15); color: #fb923c; }
+  .referred-status.completed { background: rgba(16,185,129,0.15); color: #34d399; }
   
   .toast {
     position: fixed; bottom: 24px; left: 50%;
@@ -248,6 +306,15 @@
         <div class="form-title" id="howToTitle">💰 How to Add Money</div>
         <div class="info-box" id="howToInfo">⚠️ bKash এ Send Money করুন → Screenshot upload করুন → Admin approve করলে Wallet এ যোগ হবে (২-৪ ঘণ্টা)</div>
         
+        <!-- 🎁 BONUS TIER LIST -->
+        <div class="bonus-section" id="bonusSection">
+          <div class="bonus-section-head">
+            <span class="num-badge" id="bonusNumBadge">1</span>
+            <span id="bonusSectionTitle">১ম Deposit Bonus</span>
+          </div>
+          <div class="bonus-tier-list" id="bonusTierList"></div>
+        </div>
+        
         <div class="bkash-box">
           <div class="bkash-label" id="sendLabel">Send Money to bKash</div>
           <div class="bkash-number" id="bkashNumber">01631628306</div>
@@ -257,15 +324,32 @@
         
         <div class="field">
           <label id="amountLabel">Amount (৳)</label>
-          <input id="depAmount" type="number" placeholder="সর্বনিম্ন 50 টাকা" min="50">
+          <input id="depAmount" type="number" placeholder="সর্বনিম্ন 50 টাকা" min="50" oninput="updateBonusPreview()">
         </div>
         
         <div class="quick-amounts">
           <button class="quick-amt" onclick="setAmt(50)">৳50</button>
           <button class="quick-amt" onclick="setAmt(100)">৳100</button>
           <button class="quick-amt" onclick="setAmt(200)">৳200</button>
+          <button class="quick-amt" onclick="setAmt(300)">৳300</button>
           <button class="quick-amt" onclick="setAmt(500)">৳500</button>
           <button class="quick-amt" onclick="setAmt(1000)">৳1000</button>
+        </div>
+        
+        <!-- 🎁 BONUS PREVIEW -->
+        <div class="bonus-preview" id="bonusPreview">
+          <div class="bonus-preview-row">
+            <span class="lbl">💰 Deposit</span>
+            <span class="val" id="previewDeposit">৳0</span>
+          </div>
+          <div class="bonus-preview-row">
+            <span class="lbl">🎁 Bonus</span>
+            <span class="val bonus" id="previewBonus">৳0</span>
+          </div>
+          <div class="bonus-preview-row total">
+            <span class="lbl">✨ Total</span>
+            <span class="val" id="previewTotal">৳0</span>
+          </div>
         </div>
         
         <div class="field">
@@ -298,7 +382,7 @@
         <div class="ref-head-icon">📢</div>
         <div>
           <h2 id="refTitle">Invite Friends & Earn ৳10</h2>
-          <p id="refSubtitle">প্রতিটা বন্ধু sign up করলে ৳10 পাবেন + সে পাবে ৳20 bonus</p>
+          <p id="refSubtitle">প্রতিটা বন্ধু ৳50 deposit করলে আপনি ৳10 পাবেন + সে ৳20 পাবে</p>
         </div>
       </div>
       
@@ -311,6 +395,10 @@
         <div class="ref-stat">
           <div class="ref-stat-num" id="refCount">0</div>
           <div class="ref-stat-lbl" id="refsLabel">Referrals</div>
+        </div>
+        <div class="ref-stat">
+          <div class="ref-stat-num" id="refPending">0</div>
+          <div class="ref-stat-lbl">Pending</div>
         </div>
         <div class="ref-stat">
           <div class="ref-stat-num">৳<span id="refEarned">0</span></div>
@@ -337,6 +425,7 @@
   <script>
     let refLinkGlobal = '';
     let content = {};
+    let bonusData = { enabled: false, tiers: [], depositNumber: 1 };
     
     function showToast(msg, isError, isGift) {
       const t = document.getElementById('toast');
@@ -387,6 +476,111 @@
       } catch (e) {}
     }
     
+    // ===== BONUS =====
+    async function loadBonus() {
+      try {
+        const res = await fetch('/api/deposit/bonus-preview');
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        bonusData = {
+          enabled: data.enabled,
+          tiers: data.tiers || [],
+          depositNumber: data.depositNumber || 1
+        };
+        
+        renderBonusSection();
+        updateBonusPreview();
+      } catch (e) {
+        console.error('Bonus load failed:', e);
+      }
+    }
+    
+    function renderBonusSection() {
+      const section = document.getElementById('bonusSection');
+      const badge = document.getElementById('bonusNumBadge');
+      const title = document.getElementById('bonusSectionTitle');
+      const list = document.getElementById('bonusTierList');
+      
+      if (!bonusData.enabled || !bonusData.tiers.length) {
+        section.classList.remove('show');
+        return;
+      }
+      
+      section.classList.add('show');
+      
+      // Title
+      const num = bonusData.depositNumber;
+      if (num === 1) title.textContent = '১ম Deposit Bonus';
+      else if (num === 2) title.textContent = '২য় Deposit Bonus';
+      else title.textContent = num + 'তম Deposit Bonus';
+      
+      // Number badge
+      if (num === 1) badge.textContent = '1';
+      else if (num === 2) badge.textContent = '2';
+      else badge.textContent = num;
+      
+      // Tiers
+      list.innerHTML = bonusData.tiers.map(t => 
+        '<div class="bonus-tier" data-amount="' + t.minAmount + '">' +
+          '<span class="amount">৳' + t.minAmount + '</span>' +
+          '<span class="arrow">→</span>' +
+          '<span class="bonus-amt">৳' + t.bonus + ' bonus</span>' +
+        '</div>'
+      ).join('');
+    }
+    
+    function updateBonusPreview() {
+      const preview = document.getElementById('bonusPreview');
+      
+      if (!bonusData.enabled || !bonusData.tiers.length) {
+        preview.classList.remove('show');
+        highlightTier(null);
+        return;
+      }
+      
+      const amount = Number(document.getElementById('depAmount').value) || 0;
+      
+      if (!amount || amount < 1) {
+        preview.classList.remove('show');
+        highlightTier(null);
+        return;
+      }
+      
+      // Find matching tier (highest <= amount)
+      const sorted = [...bonusData.tiers].sort((a, b) => b.minAmount - a.minAmount);
+      let matchedTier = null;
+      for (const tier of sorted) {
+        if (amount >= tier.minAmount) {
+          matchedTier = tier;
+          break;
+        }
+      }
+      
+      highlightTier(matchedTier ? matchedTier.minAmount : null);
+      
+      if (!matchedTier) {
+        preview.classList.remove('show');
+        return;
+      }
+      
+      const bonus = matchedTier.bonus;
+      const total = amount + bonus;
+      
+      document.getElementById('previewDeposit').textContent = '৳' + amount;
+      document.getElementById('previewBonus').textContent = '+৳' + bonus;
+      document.getElementById('previewTotal').textContent = '৳' + total;
+      preview.classList.add('show');
+    }
+    
+    function highlightTier(amount) {
+      document.querySelectorAll('.bonus-tier').forEach(el => {
+        const elAmt = Number(el.dataset.amount);
+        el.classList.toggle('highlight', elAmt === amount);
+      });
+    }
+    
+    // ===== UI =====
     function switchTab(name) {
       document.getElementById('tabAdd').classList.toggle('active', name === 'add');
       document.getElementById('tabHistory').classList.toggle('active', name === 'history');
@@ -395,7 +589,10 @@
       if (name === 'history') loadHistory();
     }
     
-    function setAmt(n) { document.getElementById('depAmount').value = n; }
+    function setAmt(n) {
+      document.getElementById('depAmount').value = n;
+      updateBonusPreview();
+    }
     
     function copyBkash() {
       const num = document.getElementById('bkashNumber').textContent;
@@ -448,11 +645,17 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed');
         
-        showToast('✅ Request submitted!');
+        let msg = '✅ Request submitted!';
+        if (data.bonusAmount > 0) {
+          msg += ' 🎁 ৳' + data.bonusAmount + ' bonus পাবেন!';
+        }
+        showToast(msg);
+        
         document.getElementById('depAmount').value = '';
         document.getElementById('senderNumber').value = '';
         document.getElementById('trxId').value = '';
         document.getElementById('screenshot').value = '';
+        updateBonusPreview();
       } catch (e) {
         showToast('❌ ' + e.message, true);
       }
@@ -477,10 +680,11 @@
           const badge = d.status === 'pending' ? '<span class="badge-pending">⏳ PENDING</span>'
                       : d.status === 'approved' ? '<span class="badge-approved">✅ APPROVED</span>'
                       : '<span class="badge-rejected">❌ REJECTED</span>';
-          const isGift = d.method === 'gift';
+          const bonusBadge = d.bonusAmount > 0 ? '<span class="badge-bonus">🎁 +৳' + d.bonusAmount + '</span>' : '';
           return '<div class="history-item">' +
-            '<div class="history-title">' + (isGift ? '🎁' : '💰') + ' ৳' + d.amount + ' ' + (isGift ? '<span class="badge-gift">GIFT</span>' : badge) + '</div>' +
-            '<div class="history-date">' + new Date(d.createdAt).toLocaleString() + '</div>' +
+            '<div class="history-title">💰 ৳' + d.amount + ' ' + badge + ' ' + bonusBadge + '</div>' +
+            (d.depositNumber ? '<div class="history-date">📊 Deposit #' + d.depositNumber + '</div>' : '') +
+            '<div class="history-date">🕐 ' + new Date(d.createdAt).toLocaleString() + '</div>' +
           '</div>';
         }).join('');
       } catch (e) {
@@ -488,7 +692,6 @@
       }
     }
     
-    // ===== REDEEM GIFT CODE — REAL API =====
     async function redeemGift() {
       const codeInput = document.getElementById('giftCode');
       const claimBtn = document.getElementById('giftBtn');
@@ -540,6 +743,7 @@
         refLinkGlobal = data.link;
         document.getElementById('refLink').value = data.link;
         document.getElementById('refCount').textContent = data.referrals || 0;
+        document.getElementById('refPending').textContent = data.pendingCount || 0;
         document.getElementById('refEarned').textContent = data.totalEarned || 0;
         
         if (data.referredUsers && data.referredUsers.length > 0) {
@@ -548,7 +752,7 @@
             '<div class="referred-user">' +
               '<div class="referred-avatar">' + (u.name || 'U').charAt(0).toUpperCase() + '</div>' +
               '<div class="referred-name">' + esc(u.name) + '</div>' +
-              '<div class="referred-date">' + new Date(u.createdAt).toLocaleDateString() + '</div>' +
+              '<span class="referred-status ' + (u.hasDeposited ? 'completed' : 'pending') + '">' + (u.hasDeposited ? '✅ Paid' : '⏳ Pending') + '</span>' +
             '</div>'
           ).join('');
         }
@@ -575,6 +779,7 @@
       await loadContent();
       await loadUser();
       await loadSettings();
+      await loadBonus();
       await loadReferral();
     }
     init();
