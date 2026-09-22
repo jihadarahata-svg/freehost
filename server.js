@@ -19,7 +19,7 @@ const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 const WELCOME_BONUS = 20;
 const REFERRAL_BONUS = 10;
 
-let pages, users, products, deposits, purchases, settings, giftcodes, giftredeems, db;
+let pages, users, products, deposits, purchases, settings, giftcodes, giftredeems, pendingrefs, db;
 
 const DEFAULT_CONTENT = {
   wallet: {
@@ -38,7 +38,7 @@ const DEFAULT_CONTENT = {
   },
   referral: {
     title: "Invite Friends & Earn ৳10",
-    subtitle: "প্রতিটা বন্ধু sign up করলে ৳10 পাবেন + সে পাবে ৳20 bonus",
+    subtitle: "প্রতিটা বন্ধু ৳50 deposit করলে আপনি ৳10 পাবেন + সে ৳20 পাবে",
     copyBtn: "📋 Copy", referralsLabel: "Referrals", earnedLabel: "Earned",
     whatsappBtn: "💬 WhatsApp", telegramBtn: "📢 Telegram", facebookBtn: "📘 Facebook",
     whoJoinedTitle: "🎉 Who Joined", shareMessage: "🎁 Join FreeHost and get ৳20 bonus!"
@@ -124,9 +124,13 @@ async function connectDB() {
   settings = db.collection('settings');
   giftcodes = db.collection('giftcodes');
   giftredeems = db.collection('giftredeems');
+  pendingrefs = db.collection('pendingrefs');
   await users.createIndex({ email: 1 }, { unique: true });
   try {
     await giftcodes.createIndex({ code: 1 }, { unique: true });
+  } catch (e) {}
+  try {
+    await pendingrefs.createIndex({ referredUserId: 1 }, { unique: true });
   } catch (e) {}
   
   const existing = await settings.findOne({ _id: 'config' });
@@ -141,6 +145,8 @@ async function connectDB() {
       maxDeposit: 10000,
       welcomeBonus: 20,
       referralBonus: 10,
+      minRefDeposit: 50,
+      blockSameIp: true,
       supportEmail: 'support@freehost.com',
       supportWhatsapp: '',
       supportTelegram: '',
@@ -184,9 +190,7 @@ async function getUser(req) {
 
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
-  if (forwarded) {
-    return String(forwarded).split(',')[0].trim();
-  }
+  if (forwarded) return String(forwarded).split(',')[0].trim();
   return req.headers['cf-connecting-ip'] || req.ip || req.connection?.remoteAddress || 'unknown';
 }
 
@@ -206,22 +210,24 @@ app.post('/api/auth/signup', async (req, res) => {
     const existing = await users.findOne({ email: cleanEmail });
     if (existing) return res.status(400).json({ error: 'Email already registered' });
     
-    // 🌐 Get client IP
     const clientIp = getClientIp(req);
     
-    let referrerId = null;
-    let bonusBlocked = false;
-    let blockReason = '';
+    const config = await settings.findOne({ _id: 'config' });
+    const minRefDeposit = config?.minRefDeposit || 50;
+    const welcomeBonusAmt = config?.welcomeBonus || WELCOME_BONUS;
+    const referralBonusAmt = config?.referralBonus || REFERRAL_BONUS;
+    const blockSameIp = config?.blockSameIp !== false;
     
+    let referrerId = null;
+    let sameIpBlock = false;
+    
+    // Check referral
     if (referralCode) {
       try {
         const referrer = await users.findOne({ _id: new ObjectId(referralCode) });
         if (referrer && !referrer.banned) {
-          // 🚫 Same IP check — if referrer signed up from same IP
-          if (referrer.signupIp && referrer.signupIp === clientIp) {
-            bonusBlocked = true;
-            blockReason = 'Same IP as referrer';
-            console.log('🚫 Same IP blocked:', clientIp, '— referrer:', referrer.email);
+          if (blockSameIp && referrer.signupIp && referrer.signupIp === clientIp) {
+            sameIpBlock = true;
           } else {
             referrerId = referrer._id.toString();
           }
@@ -229,9 +235,8 @@ app.post('/api/auth/signup', async (req, res) => {
       } catch (e) {}
     }
     
-    const config = await settings.findOne({ _id: 'config' });
-    const welcomeBonus = (referrerId && !bonusBlocked) ? (config?.welcomeBonus || WELCOME_BONUS) : 0;
-    const referralBonus = config?.referralBonus || REFERRAL_BONUS;
+    // Welcome Bonus — সবসময় দেয়া হবে (same IP হলে না)
+    const welcomeBonus = sameIpBlock ? 0 : welcomeBonusAmt;
     
     const hash = await bcrypt.hash(password, 10);
     const result = await users.insertOne({
@@ -239,24 +244,34 @@ app.post('/api/auth/signup', async (req, res) => {
       email: cleanEmail,
       password: hash,
       banned: false,
-      wallet: welcomeBonus,
+      wallet: welcomeBonus, // ✅ Instant Welcome Bonus
       totalSpent: 0,
       photo: null,
       referredBy: referrerId,
       referrals: 0,
       signupIp: clientIp,
-      bonusBlocked: bonusBlocked,
-      blockReason: blockReason,
+      sameIpBlock: sameIpBlock,
+      hasDeposited: false,
+      totalDeposited: 0,
       createdAt: new Date(),
       lastLogin: new Date()
     });
     
-    // Credit referral bonus to referrer (only if not blocked)
-    if (referrerId && !bonusBlocked) {
-      await users.updateOne(
-        { _id: new ObjectId(referrerId) },
-        { $inc: { wallet: referralBonus, referrals: 1 } }
-      );
+    // Create pending referral (if referrer exists and not same IP)
+    if (referrerId && !sameIpBlock) {
+      const referrer = await users.findOne({ _id: new ObjectId(referrerId) });
+      await pendingrefs.insertOne({
+        referrerId: referrerId,
+        referrerName: referrer.name,
+        referrerEmail: referrer.email,
+        referredUserId: result.insertedId.toString(),
+        referredName: name.trim(),
+        referredEmail: cleanEmail,
+        referrerBonus: referralBonusAmt,
+        minDeposit: minRefDeposit,
+        status: 'pending',
+        createdAt: new Date()
+      });
     }
     
     req.session.userId = result.insertedId.toString();
@@ -265,8 +280,10 @@ app.post('/api/auth/signup', async (req, res) => {
       userId: result.insertedId.toString(),
       welcomeBonus: welcomeBonus,
       referred: !!referrerId,
-      bonusBlocked: bonusBlocked,
-      blockReason: blockReason
+      sameIpBlock: sameIpBlock,
+      pendingReferral: (referrerId && !sameIpBlock) ? {
+        minDeposit: minRefDeposit
+      } : null
     });
   } catch (err) {
     console.error('Signup error:', err);
@@ -333,11 +350,17 @@ app.get('/api/referral/info', requireAuth, async (req, res) => {
     const config = await settings.findOne({ _id: 'config' });
     const referralBonus = config?.referralBonus || REFERRAL_BONUS;
     const welcomeBonus = config?.welcomeBonus || WELCOME_BONUS;
+    const minRefDeposit = config?.minRefDeposit || 50;
     
     const referred = await users.find(
       { referredBy: user._id.toString() },
-      { projection: { email: 1, name: 1, createdAt: 1 } }
+      { projection: { email: 1, name: 1, createdAt: 1, hasDeposited: 1 } }
     ).sort({ createdAt: -1 }).limit(20).toArray();
+    
+    const pendingCount = await pendingrefs.countDocuments({
+      referrerId: user._id.toString(),
+      status: 'pending'
+    });
     
     res.json({
       link: BASE_URL + '/login?ref=' + user._id.toString(),
@@ -346,6 +369,8 @@ app.get('/api/referral/info', requireAuth, async (req, res) => {
       totalEarned: (user.referrals || 0) * referralBonus,
       referralBonus,
       welcomeBonus,
+      minRefDeposit,
+      pendingCount,
       referredUsers: referred
     });
   } catch (err) {
@@ -491,6 +516,7 @@ app.get('/api/shop/settings', async (req, res) => {
       maxDeposit: s?.maxDeposit || 10000,
       welcomeBonus: s?.welcomeBonus || 20,
       referralBonus: s?.referralBonus || 10,
+      minRefDeposit: s?.minRefDeposit || 50,
       supportEmail: s?.supportEmail || '',
       supportWhatsapp: s?.supportWhatsapp || '',
       supportTelegram: s?.supportTelegram || ''
@@ -830,11 +856,77 @@ app.put('/api/admin/deposit/:id', adminAuth, async (req, res) => {
 
     if (action === 'approve') {
       const userQ = makeIdQuery(deposit.userId);
-      await users.updateOne(userQ, { $inc: { wallet: deposit.amount } });
+      const userDoc = await users.findOne(userQ);
+      
+      await users.updateOne(userQ, { 
+        $inc: { 
+          wallet: deposit.amount,
+          totalDeposited: deposit.amount
+        },
+        $set: { hasDeposited: true }
+      });
       await deposits.updateOne(q, { $set: { status: 'approved', reviewedAt: new Date() } });
+      
+      // 🎁 Process pending referral — credit referrer now
+      await processPendingReferral(deposit.userId, deposit.amount);
     } else if (action === 'reject') {
       await deposits.updateOne(q, { $set: { status: 'rejected', reviewedAt: new Date() } });
     }
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 🎁 Credit referral bonus on deposit
+async function processPendingReferral(userId, depositAmount) {
+  try {
+    const config = await settings.findOne({ _id: 'config' });
+    const minRefDeposit = config?.minRefDeposit || 50;
+    
+    // Get user's total deposited
+    const user = await users.findOne(makeIdQuery(userId));
+    if (!user) return;
+    
+    const totalDep = user.totalDeposited || 0;
+    if (totalDep < minRefDeposit) return;
+    
+    const pending = await pendingrefs.findOne({
+      referredUserId: userId,
+      status: 'pending'
+    });
+    
+    if (!pending) return;
+    
+    // ✅ Credit referrer
+    await users.updateOne(
+      { _id: new ObjectId(pending.referrerId) },
+      { $inc: { wallet: pending.referrerBonus, referrals: 1 } }
+    );
+    
+    await pendingrefs.updateOne(
+      { _id: pending._id },
+      { $set: { status: 'completed', completedAt: new Date() } }
+    );
+    
+    console.log('✅ Referral bonus credited:', pending.referrerBonus, 'to', pending.referrerEmail);
+  } catch (err) {
+    console.error('processPendingReferral error:', err);
+  }
+}
+
+// ===== ADMIN PENDING REFERRALS =====
+app.get('/api/admin/pending-refs', adminAuth, async (req, res) => {
+  try {
+    const { status } = req.query;
+    const query = status && status !== 'all' ? { status } : {};
+    const list = await pendingrefs.find(query).sort({ createdAt: -1 }).limit(200).toArray();
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/admin/pending-ref/:id', adminAuth, async (req, res) => {
+  try {
+    const q = makeIdQuery(req.params.id);
+    await pendingrefs.deleteOne(q);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -974,7 +1066,7 @@ app.get('/api/admin/referrals', adminAuth, async (req, res) => {
   try {
     const list = await users.find(
       { referredBy: { $ne: null } },
-      { projection: { email: 1, name: 1, referredBy: 1, createdAt: 1, wallet: 1, bonusBlocked: 1, signupIp: 1 } }
+      { projection: { email: 1, name: 1, referredBy: 1, createdAt: 1, wallet: 1, signupIp: 1, hasDeposited: 1 } }
     ).sort({ createdAt: -1 }).limit(200).toArray();
     
     for (let i = 0; i < list.length; i++) {
@@ -1002,14 +1094,14 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const pendingDeposits = await deposits.countDocuments({ status: 'pending' });
   const totalPurchases = await purchases.countDocuments();
   const totalReferrals = await users.countDocuments({ referredBy: { $ne: null } });
-  const blockedReferrals = await users.countDocuments({ bonusBlocked: true });
+  const pendingRefs = await pendingrefs.countDocuments({ status: 'pending' });
   const totalGiftCodes = await giftcodes.countDocuments({ active: true });
   const revenueAgg = await purchases.aggregate([{ $group: { _id: null, t: { $sum: '$price' } } }]).toArray();
   const v = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
   res.json({
     totalPages, totalUsers, totalProducts,
     pendingDeposits, totalPurchases, totalReferrals, totalGiftCodes,
-    blockedReferrals,
+    pendingRefs,
     totalRevenue: revenueAgg[0]?.t || 0,
     totalViews: v[0]?.v || 0
   });
