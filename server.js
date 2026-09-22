@@ -9,6 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('public'));
+app.set('trust proxy', true);
 
 const MONGO_URI = process.env.MONGO_URI;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'farhad23';
@@ -124,10 +125,9 @@ async function connectDB() {
   giftcodes = db.collection('giftcodes');
   giftredeems = db.collection('giftredeems');
   await users.createIndex({ email: 1 }, { unique: true });
-  
   try {
     await giftcodes.createIndex({ code: 1 }, { unique: true });
-  } catch (e) { console.log('giftcodes index:', e.message); }
+  } catch (e) {}
   
   const existing = await settings.findOne({ _id: 'config' });
   if (!existing) {
@@ -182,6 +182,14 @@ async function getUser(req) {
   } catch (e) { return null; }
 }
 
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    return String(forwarded).split(',')[0].trim();
+  }
+  return req.headers['cf-connecting-ip'] || req.ip || req.connection?.remoteAddress || 'unknown';
+}
+
 // ============ AUTH ============
 
 app.post('/api/auth/signup', async (req, res) => {
@@ -198,16 +206,31 @@ app.post('/api/auth/signup', async (req, res) => {
     const existing = await users.findOne({ email: cleanEmail });
     if (existing) return res.status(400).json({ error: 'Email already registered' });
     
+    // 🌐 Get client IP
+    const clientIp = getClientIp(req);
+    
     let referrerId = null;
+    let bonusBlocked = false;
+    let blockReason = '';
+    
     if (referralCode) {
       try {
         const referrer = await users.findOne({ _id: new ObjectId(referralCode) });
-        if (referrer && !referrer.banned) referrerId = referrer._id.toString();
+        if (referrer && !referrer.banned) {
+          // 🚫 Same IP check — if referrer signed up from same IP
+          if (referrer.signupIp && referrer.signupIp === clientIp) {
+            bonusBlocked = true;
+            blockReason = 'Same IP as referrer';
+            console.log('🚫 Same IP blocked:', clientIp, '— referrer:', referrer.email);
+          } else {
+            referrerId = referrer._id.toString();
+          }
+        }
       } catch (e) {}
     }
     
     const config = await settings.findOne({ _id: 'config' });
-    const welcomeBonus = referrerId ? (config?.welcomeBonus || WELCOME_BONUS) : 0;
+    const welcomeBonus = (referrerId && !bonusBlocked) ? (config?.welcomeBonus || WELCOME_BONUS) : 0;
     const referralBonus = config?.referralBonus || REFERRAL_BONUS;
     
     const hash = await bcrypt.hash(password, 10);
@@ -221,11 +244,15 @@ app.post('/api/auth/signup', async (req, res) => {
       photo: null,
       referredBy: referrerId,
       referrals: 0,
+      signupIp: clientIp,
+      bonusBlocked: bonusBlocked,
+      blockReason: blockReason,
       createdAt: new Date(),
       lastLogin: new Date()
     });
     
-    if (referrerId) {
+    // Credit referral bonus to referrer (only if not blocked)
+    if (referrerId && !bonusBlocked) {
       await users.updateOne(
         { _id: new ObjectId(referrerId) },
         { $inc: { wallet: referralBonus, referrals: 1 } }
@@ -237,9 +264,12 @@ app.post('/api/auth/signup', async (req, res) => {
       success: true, 
       userId: result.insertedId.toString(),
       welcomeBonus: welcomeBonus,
-      referred: !!referrerId
+      referred: !!referrerId,
+      bonusBlocked: bonusBlocked,
+      blockReason: blockReason
     });
   } catch (err) {
+    console.error('Signup error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -944,7 +974,7 @@ app.get('/api/admin/referrals', adminAuth, async (req, res) => {
   try {
     const list = await users.find(
       { referredBy: { $ne: null } },
-      { projection: { email: 1, name: 1, referredBy: 1, createdAt: 1, wallet: 1 } }
+      { projection: { email: 1, name: 1, referredBy: 1, createdAt: 1, wallet: 1, bonusBlocked: 1, signupIp: 1 } }
     ).sort({ createdAt: -1 }).limit(200).toArray();
     
     for (let i = 0; i < list.length; i++) {
@@ -972,12 +1002,14 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const pendingDeposits = await deposits.countDocuments({ status: 'pending' });
   const totalPurchases = await purchases.countDocuments();
   const totalReferrals = await users.countDocuments({ referredBy: { $ne: null } });
+  const blockedReferrals = await users.countDocuments({ bonusBlocked: true });
   const totalGiftCodes = await giftcodes.countDocuments({ active: true });
   const revenueAgg = await purchases.aggregate([{ $group: { _id: null, t: { $sum: '$price' } } }]).toArray();
   const v = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
   res.json({
     totalPages, totalUsers, totalProducts,
     pendingDeposits, totalPurchases, totalReferrals, totalGiftCodes,
+    blockedReferrals,
     totalRevenue: revenueAgg[0]?.t || 0,
     totalViews: v[0]?.v || 0
   });
