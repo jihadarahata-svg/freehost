@@ -19,7 +19,7 @@ const BASE_URL = process.env.BASE_URL || 'https://freehost-f010.onrender.com';
 const WELCOME_BONUS = 20;
 const REFERRAL_BONUS = 10;
 
-let pages, users, products, deposits, purchases, settings, giftcodes, giftredeems, pendingrefs, db;
+let pages, users, products, deposits, purchases, settings, giftcodes, giftredeems, pendingrefs, wishlists, db;
 
 const DEFAULT_CONTENT = {
   wallet: {
@@ -35,8 +35,7 @@ const DEFAULT_CONTENT = {
     trxLabel: "Transaction ID (ঐচ্ছিক)", trxPlaceholder: "TRX...",
     screenshotLabel: "Screenshot URL", screenshotPlaceholder: "https://photo-url.jpg",
     submitBtn: "🚀 Submit Request", noHistory: "এখনো কোনো history নেই", loadingText: "Loading...",
-    bonusTitle: "🎁 Deposit Bonus",
-    bonusDesc: "প্রতিটা deposit এ bonus পান!"
+    bonusTitle: "🎁 Deposit Bonus", bonusDesc: "প্রতিটা deposit এ bonus পান!"
   },
   referral: {
     title: "Invite Friends & Earn ৳10",
@@ -46,29 +45,39 @@ const DEFAULT_CONTENT = {
     whoJoinedTitle: "🎉 Who Joined", shareMessage: "🎁 Join FreeHost and get ৳20 bonus!"
   },
   shop: {
-    logoText: "FreeHost Shop", searchPlaceholder: "🔍 কী খুঁজছেন?",
-    walletBtn: "Wallet", ordersBtn: "Orders", cartBtn: "Cart", meBtn: "Me",
-    heroBadge: "🔥 Limited Time", heroHeading: "HTML Templates Mega Pack",
-    heroSubtitle: "৫০টা প্রিমিয়াম টেমপ্লেট — মাত্র ৳১০০", heroButton: "এখনই কিনুন →",
-    featuredTitle: "⚡ Featured Products", allProductsTitle: "📦 All Products",
-    seeAllText: "See all →", buyNowText: "Buy Now", addToCartText: "Add to Cart",
-    noProductsText: "কোনো product পাওয়া যায়নি", tryDifferentText: "অন্য কিছু খুঁজুন",
-    footerCopyright: "© 2026 FreeHost Shop", footerText: "All rights reserved",
-    filterBtn: "⚙ Filter", sortNewest: "Newest", sortPriceLow: "Price: Low to High",
-    sortPriceHigh: "Price: High to Low", sortPopular: "Most Popular"
+    heroPhoto: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+    heroBadge: "প্রিমিয়াম কালেকশন",
+    heroHeading: "ডিজিটাল শপিং এক্সপেরিয়েন্স",
+    heroSubtitle: "সেরা কোয়ালিটি এবং দ্রুততম ডেলিভারি।",
+    announcementText: "🎉 প্রমোশনাল অফার! প্রথম অর্ডারে পাবেন ১০% ক্যাশব্যাক",
+    announcementVisible: true,
+    logoText: "FreeHost",
+    logoSecondText: "Shop",
+    logoIcon: "F",
+    featuredTitle: "জনপ্রিয় প্রোডাক্টস",
+    allProductsTitle: "📦 All Products",
+    buyNowText: "Buy Now",
+    seeAllText: "See all →",
+    noProductsText: "কোনো product পাওয়া যায়নি",
+    footerCopyright: "© 2026 FreeHost Shop · Made with ❤️ in Bangladesh",
+    footerLinks: "About Us,Terms of Service,Privacy Policy,Contact,Help Center"
   },
   product: {
     backBtn: "← Back to Shop", buyNowBtn: "🛒 Buy Now", loginToBuyBtn: "🔒 Login to Buy",
-    confirmPurchaseTitle: "📦 Confirm Purchase", currentBalanceLabel: "Your Balance",
-    afterPurchaseLabel: "After Purchase", confirmBtn: "✅ Confirm & Buy", cancelBtn: "❌ Cancel",
+    confirmPurchaseTitle: "📦 Confirm Purchase",
+    currentBalanceLabel: "Your Balance", afterPurchaseLabel: "After Purchase",
+    confirmBtn: "✅ Confirm & Buy", cancelBtn: "❌ Cancel",
     purchasedTitle: "✅ Purchase Successful!", paidLabel: "Paid", newBalanceLabel: "New Balance",
-    deliveryReadyText: "Your Product is Ready!", downloadBtn: "📥 Download Now",
-    copyLinkBtn: "🔗 Copy Link", copyCodeBtn: "📋 Copy Code", openLinkBtn: "🔗 Open Link",
-    backToShopBtn: "🏠 Back to Shop", contactSupportBtn: "💬 Contact Support",
-    descriptionLabel: "📝 Description", categoryLabel: "📦 Category", tagsLabel: "🏷 Tags",
-    linkSectionTitle: "🔗 Download Link", codeSectionTitle: "💻 Source Code",
-    fileSectionTitle: "📁 File Download",
-    insufficientBalanceMsg: "❌ Insufficient balance", loginRequiredMsg: "❌ Login required"
+    deliveryReadyText: "Your Product is Ready!",
+    downloadBtn: "📥 Download Now", copyLinkBtn: "🔗 Copy Link", copyCodeBtn: "📋 Copy Code",
+    openLinkBtn: "🔗 Open Link", backToShopBtn: "🏠 Back to Shop",
+    descriptionLabel: "📝 Description", categoryLabel: "📦 Category",
+    reviewsLabel: "reviews", soldLabel: "sold",
+    linkSectionTitle: "🔗 Download Link", codeSectionTitle: "💻 Source Code", fileSectionTitle: "📁 File Download"
+  },
+  wishlist: {
+    title: "❤️ My Wishlist",
+    emptyText: "Wishlist খালি — ❤️ চেপে product যোগ করুন"
   },
   login: {
     title: "Welcome to FreeHost", subtitle: "Sign in or create account to continue",
@@ -132,14 +141,11 @@ function makeIdQuery(id) {
   return { $or: queries };
 }
 
-// 🎁 Calculate deposit bonus
 function calculateDepositBonus(user, depositAmount, config) {
   try {
     if (!config || config.depositBonusEnabled === false) return 0;
-    
     const totalDeposits = user.totalDeposits || 0;
     const nextDepositNumber = totalDeposits + 1;
-    
     let bonusTiers = null;
     if (nextDepositNumber === 1) {
       bonusTiers = config.depositBonuses?.deposit1 || DEFAULT_DEPOSIT_BONUSES.deposit1;
@@ -148,21 +154,13 @@ function calculateDepositBonus(user, depositAmount, config) {
     } else {
       bonusTiers = config.depositBonuses?.deposit3 || DEFAULT_DEPOSIT_BONUSES.deposit3;
     }
-    
     if (!bonusTiers || !bonusTiers.length) return 0;
-    
     const sorted = [...bonusTiers].sort((a, b) => b.minAmount - a.minAmount);
     for (const tier of sorted) {
-      if (depositAmount >= tier.minAmount) {
-        return Number(tier.bonus) || 0;
-      }
+      if (depositAmount >= tier.minAmount) return Number(tier.bonus) || 0;
     }
-    
     return 0;
-  } catch (e) {
-    console.error('calculateDepositBonus error:', e);
-    return 0;
-  }
+  } catch (e) { return 0; }
 }
 
 async function connectDB() {
@@ -178,13 +176,11 @@ async function connectDB() {
   giftcodes = db.collection('giftcodes');
   giftredeems = db.collection('giftredeems');
   pendingrefs = db.collection('pendingrefs');
+  wishlists = db.collection('wishlists');
   await users.createIndex({ email: 1 }, { unique: true });
-  try {
-    await giftcodes.createIndex({ code: 1 }, { unique: true });
-  } catch (e) {}
-  try {
-    await pendingrefs.createIndex({ referredUserId: 1 }, { unique: true });
-  } catch (e) {}
+  try { await giftcodes.createIndex({ code: 1 }, { unique: true }); } catch (e) {}
+  try { await pendingrefs.createIndex({ referredUserId: 1 }, { unique: true }); } catch (e) {}
+  try { await wishlists.createIndex({ userId: 1, productId: 1 }, { unique: true }); } catch (e) {}
   
   const existing = await settings.findOne({ _id: 'config' });
   if (!existing) {
@@ -246,27 +242,20 @@ async function getUser(req) {
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) return String(forwarded).split(',')[0].trim();
-  return req.headers['cf-connecting-ip'] || req.ip || req.connection?.remoteAddress || 'unknown';
+  return req.headers['cf-connecting-ip'] || req.ip || 'unknown';
 }
 
-// ============ AUTH ============
-
+// ===== AUTH =====
 app.post('/api/auth/signup', async (req, res) => {
   try {
     const { name, email, password, referralCode } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email, password required' });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be 6+ characters' });
-    }
+    if (!name || !email || !password) return res.status(400).json({ error: 'Name, email, password required' });
+    if (password.length < 6) return res.status(400).json({ error: 'Password must be 6+ characters' });
     const cleanEmail = email.toLowerCase().trim();
-    
     const existing = await users.findOne({ email: cleanEmail });
     if (existing) return res.status(400).json({ error: 'Email already registered' });
     
     const clientIp = getClientIp(req);
-    
     const config = await settings.findOne({ _id: 'config' });
     const minRefDeposit = config?.minRefDeposit || 50;
     const welcomeBonusAmt = config?.welcomeBonus || WELCOME_BONUS;
@@ -290,88 +279,47 @@ app.post('/api/auth/signup', async (req, res) => {
     }
     
     const welcomeBonus = sameIpBlock ? 0 : welcomeBonusAmt;
-    
     const hash = await bcrypt.hash(password, 10);
     const result = await users.insertOne({
-      name: name.trim(),
-      email: cleanEmail,
-      password: hash,
-      banned: false,
-      wallet: welcomeBonus,
-      totalSpent: 0,
-      photo: null,
-      referredBy: referrerId,
-      referrals: 0,
-      signupIp: clientIp,
-      sameIpBlock: sameIpBlock,
-      hasDeposited: false,
-      totalDeposited: 0,
-      totalDeposits: 0,
-      createdAt: new Date(),
-      lastLogin: new Date()
+      name: name.trim(), email: cleanEmail, password: hash, banned: false,
+      wallet: welcomeBonus, totalSpent: 0, photo: null,
+      referredBy: referrerId, referrals: 0, signupIp: clientIp,
+      sameIpBlock: sameIpBlock, hasDeposited: false,
+      totalDeposited: 0, totalDeposits: 0,
+      createdAt: new Date(), lastLogin: new Date()
     });
     
     if (referrerId && !sameIpBlock) {
       const referrer = await users.findOne({ _id: new ObjectId(referrerId) });
       await pendingrefs.insertOne({
-        referrerId: referrerId,
-        referrerName: referrer.name,
-        referrerEmail: referrer.email,
+        referrerId, referrerName: referrer.name, referrerEmail: referrer.email,
         referredUserId: result.insertedId.toString(),
-        referredName: name.trim(),
-        referredEmail: cleanEmail,
-        referrerBonus: referralBonusAmt,
-        minDeposit: minRefDeposit,
-        status: 'pending',
-        createdAt: new Date()
+        referredName: name.trim(), referredEmail: cleanEmail,
+        referrerBonus: referralBonusAmt, minDeposit: minRefDeposit,
+        status: 'pending', createdAt: new Date()
       });
     }
     
     req.session.userId = result.insertedId.toString();
-    res.json({ 
-      success: true, 
-      userId: result.insertedId.toString(),
-      welcomeBonus: welcomeBonus,
-      referred: !!referrerId,
-      sameIpBlock: sameIpBlock,
-      pendingReferral: (referrerId && !sameIpBlock) ? {
-        minDeposit: minRefDeposit
-      } : null
-    });
-  } catch (err) {
-    console.error('Signup error:', err);
-    res.status(500).json({ error: err.message });
-  }
+    res.json({ success: true, userId: result.insertedId.toString(), welcomeBonus, referred: !!referrerId, sameIpBlock, pendingReferral: (referrerId && !sameIpBlock) ? { minDeposit: minRefDeposit } : null });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-    
     const cleanEmail = email.toLowerCase().trim();
     const user = await users.findOne({ email: cleanEmail });
-    
     if (!user) return res.status(401).json({ error: 'Email or password wrong' });
     if (user.banned) return res.status(403).json({ error: 'Account banned' });
     if (!user.password) return res.status(401).json({ error: 'Please sign up again' });
-    
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(401).json({ error: 'Email or password wrong' });
-    
     await users.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
     req.session.userId = user._id.toString();
-    
-    res.json({ success: true, user: {
-      id: user._id.toString(),
-      email: user.email,
-      name: user.name,
-      wallet: user.wallet || 0,
-      totalSpent: user.totalSpent || 0
-    }});
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    res.json({ success: true, user: { id: user._id.toString(), email: user.email, name: user.name, wallet: user.wallet || 0, totalSpent: user.totalSpent || 0 }});
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post('/api/auth/logout', (req, res) => {
@@ -382,80 +330,35 @@ app.get('/api/me', async (req, res) => {
   const user = await getUser(req);
   if (!user) return res.status(401).json({ error: 'Not logged in' });
   if (user.banned) return res.status(403).json({ error: 'Banned' });
-  res.json({
-    id: user._id.toString(),
-    email: user.email,
-    name: user.name,
-    photo: user.photo,
-    wallet: user.wallet || 0,
-    totalSpent: user.totalSpent || 0,
-    referrals: user.referrals || 0,
-    totalDeposits: user.totalDeposits || 0,
-    totalDeposited: user.totalDeposited || 0,
-    referredBy: user.referredBy || null
-  });
+  res.json({ id: user._id.toString(), email: user.email, name: user.name, photo: user.photo, wallet: user.wallet || 0, totalSpent: user.totalSpent || 0, referrals: user.referrals || 0, totalDeposits: user.totalDeposits || 0, totalDeposited: user.totalDeposited || 0, referredBy: user.referredBy || null });
 });
 
-// ============ REFERRAL ============
+// ===== REFERRAL =====
 app.get('/api/referral/info', requireAuth, async (req, res) => {
   try {
     const user = await getUser(req);
     if (!user) return res.status(401).json({ error: 'Not logged in' });
-    
     const config = await settings.findOne({ _id: 'config' });
     const referralBonus = config?.referralBonus || REFERRAL_BONUS;
     const welcomeBonus = config?.welcomeBonus || WELCOME_BONUS;
     const minRefDeposit = config?.minRefDeposit || 50;
-    
-    const referred = await users.find(
-      { referredBy: user._id.toString() },
-      { projection: { email: 1, name: 1, createdAt: 1, hasDeposited: 1 } }
-    ).sort({ createdAt: -1 }).limit(20).toArray();
-    
-    const pendingCount = await pendingrefs.countDocuments({
-      referrerId: user._id.toString(),
-      status: 'pending'
-    });
-    
-    res.json({
-      link: BASE_URL + '/login?ref=' + user._id.toString(),
-      code: user._id.toString(),
-      referrals: user.referrals || 0,
-      totalEarned: (user.referrals || 0) * referralBonus,
-      referralBonus,
-      welcomeBonus,
-      minRefDeposit,
-      pendingCount,
-      referredUsers: referred
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    const referred = await users.find({ referredBy: user._id.toString() }, { projection: { email: 1, name: 1, createdAt: 1, hasDeposited: 1 } }).sort({ createdAt: -1 }).limit(20).toArray();
+    const pendingCount = await pendingrefs.countDocuments({ referrerId: user._id.toString(), status: 'pending' });
+    res.json({ link: BASE_URL + '/login?ref=' + user._id.toString(), code: user._id.toString(), referrals: user.referrals || 0, totalEarned: (user.referrals || 0) * referralBonus, referralBonus, welcomeBonus, minRefDeposit, pendingCount, referredUsers: referred });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ============ PAGES ============
+// ===== PAGES =====
 app.post('/api/create', async (req, res) => {
   try {
     const { html, slug, password, title } = req.body;
     if (!html) return res.status(400).json({ error: 'HTML required' });
-    
     const user = await getUser(req);
     let userId = null;
-    if (user) {
-      if (user.banned) return res.status(403).json({ error: 'Banned' });
-      userId = user._id.toString();
-    }
-    
+    if (user) { if (user.banned) return res.status(403).json({ error: 'Banned' }); userId = user._id.toString(); }
     const id = slug ? slug.trim() : Math.random().toString(36).slice(2, 10);
     const hash = password ? await bcrypt.hash(password, 10) : null;
-    
-    await pages.insertOne({
-      _id: id,
-      title: title || 'Untitled',
-      html, password: hash,
-      views: 0, userId, banned: false,
-      createdAt: new Date()
-    });
+    await pages.insertOne({ _id: id, title: title || 'Untitled', html, password: hash, views: 0, userId, banned: false, createdAt: new Date() });
     res.json({ url: BASE_URL + '/p/' + id, id });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -468,10 +371,7 @@ async function checkPassword(page, req) {
 }
 
 function passwordForm(id) {
-  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Protected</title></head>' +
-    '<body style="font-family:sans-serif;text-align:center;padding:50px;background:#0a0a0a;color:#fff"><h2>🔒 Password Protected</h2>' +
-    '<form method="GET" action="/p/' + id + '"><input type="password" name="pass" placeholder="Password" style="padding:12px;font-size:16px;border-radius:8px;border:1px solid #333;background:#151515;color:#fff;margin-top:20px"/>' +
-    '<br><button style="padding:12px 24px;font-size:16px;margin-top:12px;border-radius:8px;border:none;background:#fff;color:#000;font-weight:700">Enter</button></form></body></html>';
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Protected</title></head><body style="font-family:sans-serif;text-align:center;padding:50px;background:#0a0a0a;color:#fff"><h2>🔒 Password Protected</h2><form method="GET" action="/p/' + id + '"><input type="password" name="pass" placeholder="Password" style="padding:12px;font-size:16px;border-radius:8px;border:1px solid #333;background:#151515;color:#fff;margin-top:20px"/><br><button style="padding:12px 24px;font-size:16px;margin-top:12px;border-radius:8px;border:none;background:#fff;color:#000;font-weight:700">Enter</button></form></body></html>';
 }
 
 app.get('/p/:id', async (req, res) => {
@@ -482,9 +382,7 @@ app.get('/p/:id', async (req, res) => {
     if (!(await checkPassword(page, req))) return res.send(passwordForm(req.params.id));
     await pages.updateOne({ _id: req.params.id }, { $inc: { views: 1 } });
     const embedUrl = '/embed/' + req.params.id + (req.query.pass ? '?pass=' + encodeURIComponent(req.query.pass) : '');
-    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + (page.title || 'Page') + '</title>' +
-      '<style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:#fff}iframe{width:100%;height:100vh;border:none;display:block}</style></head>' +
-      '<body><iframe src="' + embedUrl + '" sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"></iframe></body></html>');
+    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + (page.title || 'Page') + '</title><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:#fff}iframe{width:100%;height:100vh;border:none;display:block}</style></head><body><iframe src="' + embedUrl + '" sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"></iframe></body></html>');
   } catch (err) { res.status(500).send('Server error'); }
 });
 
@@ -501,41 +399,30 @@ app.get('/embed/:id', async (req, res) => {
 app.get('/api/my-pages', requireAuth, async (req, res) => {
   const user = await getUser(req);
   if (!user) return res.status(401).json({ error: 'Not logged in' });
-  const userId = user._id.toString();
-  const list = await pages.find({ userId }, { projection: { html: 0, password: 0 } })
-    .sort({ createdAt: -1 }).toArray();
+  const list = await pages.find({ userId: user._id.toString() }, { projection: { html: 0, password: 0 } }).sort({ createdAt: -1 }).toArray();
   res.json(list);
 });
 
-// ============ CONTENT ============
+// ===== CONTENT =====
 app.get('/api/content', async (req, res) => {
   try {
     const s = await settings.findOne({ _id: 'config' });
     res.json(mergeContent(s?.content));
-  } catch (err) {
-    res.json(mergeContent({}));
-  }
+  } catch (err) { res.json(mergeContent({})); }
 });
 
-// ============ SHOP ============
+// ===== SHOP =====
 app.get('/api/shop/products', async (req, res) => {
   try {
     const { category, search, sort } = req.query;
     const query = { active: true };
     if (category && category !== 'all') query.category = category;
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
-    }
+    if (search) { query.$or = [{ title: { $regex: search, $options: 'i' } }, { description: { $regex: search, $options: 'i' } }]; }
     let sortObj = { createdAt: -1 };
     if (sort === 'price-low') sortObj = { price: 1 };
     if (sort === 'price-high') sortObj = { price: -1 };
     if (sort === 'popular') sortObj = { sold: -1 };
-    const list = await products.find(query, { 
-      projection: { linkData: 0, codeData: 0, fileData: 0, deliveryData: 0 } 
-    }).sort(sortObj).toArray();
+    const list = await products.find(query, { projection: { linkData: 0, codeData: 0, fileData: 0, deliveryData: 0 } }).sort(sortObj).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -544,18 +431,9 @@ app.get('/api/shop/product/:id', async (req, res) => {
   try {
     const q = makeIdQuery(req.params.id);
     q.active = true;
-    const product = await products.findOne(q, { 
-      projection: { linkData: 0, codeData: 0, fileData: 0, deliveryData: 0 } 
-    });
+    const product = await products.findOne(q, { projection: { linkData: 0, codeData: 0, fileData: 0, deliveryData: 0 } });
     if (!product) return res.status(404).json({ error: 'Not found' });
     res.json(product);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/api/shop/categories', async (req, res) => {
-  try {
-    const cats = await products.distinct('category', { active: true });
-    res.json(cats);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -563,79 +441,93 @@ app.get('/api/shop/settings', async (req, res) => {
   try {
     const s = await settings.findOne({ _id: 'config' });
     res.json({
-      bkashNumber: s?.bkashNumber || '',
-      bkashType: s?.bkashType || 'Personal',
-      nagadNumber: s?.nagadNumber || '',
-      nagadActive: s?.nagadActive || false,
-      minDeposit: s?.minDeposit || 50,
-      maxDeposit: s?.maxDeposit || 10000,
-      welcomeBonus: s?.welcomeBonus || 20,
-      referralBonus: s?.referralBonus || 10,
+      bkashNumber: s?.bkashNumber || '', bkashType: s?.bkashType || 'Personal',
+      nagadNumber: s?.nagadNumber || '', nagadActive: s?.nagadActive || false,
+      minDeposit: s?.minDeposit || 50, maxDeposit: s?.maxDeposit || 10000,
+      welcomeBonus: s?.welcomeBonus || 20, referralBonus: s?.referralBonus || 10,
       minRefDeposit: s?.minRefDeposit || 50,
       depositBonusEnabled: s?.depositBonusEnabled !== false,
-      supportEmail: s?.supportEmail || '',
-      supportWhatsapp: s?.supportWhatsapp || '',
-      supportTelegram: s?.supportTelegram || ''
+      supportEmail: s?.supportEmail || '', supportWhatsapp: s?.supportWhatsapp || '', supportTelegram: s?.supportTelegram || ''
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ============ PURCHASE ============
+// ===== WISHLIST =====
+app.get('/api/wishlist', requireAuth, async (req, res) => {
+  try {
+    const user = await getUser(req);
+    const list = await wishlists.find({ userId: user._id.toString() }).sort({ addedAt: -1 }).toArray();
+    res.json(list);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/wishlist/ids', requireAuth, async (req, res) => {
+  try {
+    const user = await getUser(req);
+    const list = await wishlists.find({ userId: user._id.toString() }, { projection: { productId: 1 } }).toArray();
+    res.json(list.map(w => w.productId));
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/wishlist/toggle', requireAuth, async (req, res) => {
+  try {
+    const user = await getUser(req);
+    const { productId } = req.body;
+    if (!productId) return res.status(400).json({ error: 'productId required' });
+    const existing = await wishlists.findOne({ userId: user._id.toString(), productId });
+    if (existing) {
+      await wishlists.deleteOne({ _id: existing._id });
+      return res.json({ success: true, added: false });
+    }
+    const product = await products.findOne(makeIdQuery(productId));
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    await wishlists.insertOne({
+      userId: user._id.toString(), productId,
+      title: product.title, price: product.price,
+      discountPrice: product.discountPrice || null,
+      photo: product.photo || '', rating: product.rating || 0,
+      reviews: product.reviews || 0, sold: product.sold || 0,
+      category: product.category || 'Other', addedAt: new Date()
+    });
+    res.json({ success: true, added: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ===== PURCHASE =====
 app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
   try {
     const user = await getUser(req);
     if (!user) return res.status(401).json({ error: 'Login required' });
-    
     const q = makeIdQuery(req.params.id);
     q.active = true;
     const product = await products.findOne(q);
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
-    const alreadyBought = await purchases.findOne({
-      userId: user._id.toString(),
-      productId: req.params.id
-    });
+    const alreadyBought = await purchases.findOne({ userId: user._id.toString(), productId: req.params.id });
     if (alreadyBought) {
       return res.json({
         success: true, alreadyOwned: true,
-        linkData: product.linkData || '',
-        codeData: product.codeData || '',
-        fileData: product.fileData || ''
+        linkData: product.linkData || '', codeData: product.codeData || '', fileData: product.fileData || ''
       });
     }
 
     const price = product.discountPrice || product.price;
     const userWallet = user.wallet || 0;
-
     if (userWallet < price) {
-      return res.status(400).json({
-        error: 'Insufficient balance',
-        needed: price - userWallet,
-        current: userWallet
-      });
+      return res.status(400).json({ error: 'Insufficient balance', needed: price - userWallet, current: userWallet });
     }
 
-    await users.updateOne(
-      { _id: user._id },
-      { $inc: { wallet: -price, totalSpent: price } }
-    );
-
+    await users.updateOne({ _id: user._id }, { $inc: { wallet: -price, totalSpent: price } });
     await purchases.insertOne({
-      userId: user._id.toString(),
-      userEmail: user.email,
-      productId: req.params.id,
-      productTitle: product.title,
-      price: price,
-      purchasedAt: new Date()
+      userId: user._id.toString(), userEmail: user.email,
+      productId: req.params.id, productTitle: product.title,
+      price, purchasedAt: new Date()
     });
-
     await products.updateOne({ _id: product._id }, { $inc: { sold: 1 } });
 
     res.json({
       success: true,
-      linkData: product.linkData || '',
-      codeData: product.codeData || '',
-      fileData: product.fileData || '',
+      linkData: product.linkData || '', codeData: product.codeData || '', fileData: product.fileData || '',
       newBalance: userWallet - price
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -644,32 +536,23 @@ app.post('/api/shop/buy/:id', requireAuth, async (req, res) => {
 app.get('/api/shop/access/:id', requireAuth, async (req, res) => {
   try {
     const user = await getUser(req);
-    const purchase = await purchases.findOne({
-      userId: user._id.toString(),
-      productId: req.params.id
-    });
+    const purchase = await purchases.findOne({ userId: user._id.toString(), productId: req.params.id });
     if (!purchase) return res.status(403).json({ error: 'Not purchased' });
-    const q = makeIdQuery(req.params.id);
-    const product = await products.findOne(q);
+    const product = await products.findOne(makeIdQuery(req.params.id));
     if (!product) return res.status(404).json({ error: 'Product gone' });
-    res.json({
-      linkData: product.linkData || '',
-      codeData: product.codeData || '',
-      fileData: product.fileData || ''
-    });
+    res.json({ linkData: product.linkData || '', codeData: product.codeData || '', fileData: product.fileData || '' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.get('/api/shop/my-purchases', requireAuth, async (req, res) => {
   try {
     const user = await getUser(req);
-    const list = await purchases.find({ userId: user._id.toString() })
-      .sort({ purchasedAt: -1 }).toArray();
+    const list = await purchases.find({ userId: user._id.toString() }).sort({ purchasedAt: -1 }).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ============ DEPOSIT ============
+// ===== DEPOSIT =====
 app.post('/api/deposit/request', requireAuth, async (req, res) => {
   try {
     const user = await getUser(req);
@@ -677,61 +560,41 @@ app.post('/api/deposit/request', requireAuth, async (req, res) => {
     const config = await settings.findOne({ _id: 'config' });
     const minDep = config?.minDeposit || 50;
     const maxDep = config?.maxDeposit || 10000;
-
     if (!amount || amount < minDep) return res.status(400).json({ error: 'Minimum ৳' + minDep });
     if (amount > maxDep) return res.status(400).json({ error: 'Maximum ৳' + maxDep });
     if (!senderNumber) return res.status(400).json({ error: 'Sender number required' });
 
-    // 🎁 Calculate bonus
     const bonusAmount = calculateDepositBonus(user, Number(amount), config);
     const nextDepositNum = (user.totalDeposits || 0) + 1;
 
     const result = await deposits.insertOne({
-      userId: user._id.toString(),
-      userEmail: user.email,
-      userName: user.name,
-      amount: Number(amount),
-      bonusAmount: bonusAmount,
-      depositNumber: nextDepositNum,
-      method: 'bKash',
-      senderNumber,
-      transactionId: transactionId || '',
-      screenshot: screenshot || '',
-      status: 'pending',
-      createdAt: new Date(),
-      reviewedAt: null
+      userId: user._id.toString(), userEmail: user.email, userName: user.name,
+      amount: Number(amount), bonusAmount, depositNumber: nextDepositNum,
+      method: 'bKash', senderNumber,
+      transactionId: transactionId || '', screenshot: screenshot || '',
+      status: 'pending', createdAt: new Date(), reviewedAt: null
     });
-    res.json({ 
-      success: true, 
-      id: result.insertedId.toString(),
-      bonusAmount: bonusAmount,
-      depositNumber: nextDepositNum
-    });
+    res.json({ success: true, id: result.insertedId.toString(), bonusAmount, depositNumber: nextDepositNum });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.get('/api/deposit/my-list', requireAuth, async (req, res) => {
   try {
     const user = await getUser(req);
-    const list = await deposits.find({ userId: user._id.toString() })
-      .sort({ createdAt: -1 }).toArray();
+    const list = await deposits.find({ userId: user._id.toString() }).sort({ createdAt: -1 }).toArray();
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 🎁 Bonus preview
 app.get('/api/deposit/bonus-preview', requireAuth, async (req, res) => {
   try {
     const user = await getUser(req);
     if (!user) return res.status(401).json({ error: 'Not logged in' });
-    
     const config = await settings.findOne({ _id: 'config' });
     if (!config || config.depositBonusEnabled === false) {
       return res.json({ enabled: false, tiers: [], depositNumber: 0 });
     }
-    
     const nextDepositNumber = (user.totalDeposits || 0) + 1;
-    
     let tiers = [];
     if (nextDepositNumber === 1) {
       tiers = config.depositBonuses?.deposit1 || DEFAULT_DEPOSIT_BONUSES.deposit1;
@@ -740,10 +603,8 @@ app.get('/api/deposit/bonus-preview', requireAuth, async (req, res) => {
     } else {
       tiers = config.depositBonuses?.deposit3 || DEFAULT_DEPOSIT_BONUSES.deposit3;
     }
-    
     res.json({
-      enabled: true,
-      depositNumber: nextDepositNumber,
+      enabled: true, depositNumber: nextDepositNumber,
       tiers: [...tiers].sort((a, b) => a.minAmount - b.minAmount),
       hasDepositedBefore: (user.totalDeposits || 0) > 0,
       totalDeposits: user.totalDeposits || 0
@@ -751,18 +612,15 @@ app.get('/api/deposit/bonus-preview', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ============ GIFT CODE (User) ============
+// ===== GIFT CODE (User) =====
 app.post('/api/giftcode/redeem', requireAuth, async (req, res) => {
   try {
     const user = await getUser(req);
     if (!user) return res.status(401).json({ error: 'Login required' });
-    
     const { code } = req.body;
     if (!code) return res.status(400).json({ error: 'Code required' });
-    
     const cleanCode = code.toUpperCase().trim();
     const gift = await giftcodes.findOne({ code: cleanCode });
-    
     if (!gift) return res.status(404).json({ error: '❌ ভুল Gift Code' });
     if (!gift.active) return res.status(400).json({ error: '❌ এই Code নিষ্ক্রিয়' });
     if (gift.expiresAt && new Date() > new Date(gift.expiresAt)) {
@@ -771,38 +629,20 @@ app.post('/api/giftcode/redeem', requireAuth, async (req, res) => {
     if (gift.usedCount >= gift.maxUses) {
       return res.status(400).json({ error: '❌ এই Code এর ব্যবহার শেষ' });
     }
-    
-    const already = await giftredeems.findOne({
-      code: cleanCode,
-      userId: user._id.toString()
-    });
+    const already = await giftredeems.findOne({ code: cleanCode, userId: user._id.toString() });
     if (already) return res.status(400).json({ error: '❌ আপনি ইতিমধ্যেই এই Code ব্যবহার করেছেন' });
-    
-    await users.updateOne(
-      { _id: user._id },
-      { $inc: { wallet: gift.amount } }
-    );
-    
+    await users.updateOne({ _id: user._id }, { $inc: { wallet: gift.amount } });
     await giftredeems.insertOne({
-      code: cleanCode,
-      userId: user._id.toString(),
-      userEmail: user.email,
-      userName: user.name,
-      amount: gift.amount,
-      redeemedAt: new Date()
+      code: cleanCode, userId: user._id.toString(),
+      userEmail: user.email, userName: user.name,
+      amount: gift.amount, redeemedAt: new Date()
     });
-    
     await giftcodes.updateOne({ code: cleanCode }, { $inc: { usedCount: 1 } });
-    
-    res.json({ 
-      success: true, 
-      amount: gift.amount,
-      newBalance: (user.wallet || 0) + gift.amount
-    });
+    res.json({ success: true, amount: gift.amount, newBalance: (user.wallet || 0) + gift.amount });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ============ ADMIN ============
+// ===== ADMIN =====
 app.post('/api/admin/login', (req, res) => {
   if (req.body.password === ADMIN_PASSWORD) {
     res.json({ success: true, token: ADMIN_PASSWORD });
@@ -812,14 +652,12 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 app.get('/api/admin/list-full', adminAuth, async (req, res) => {
-  const list = await pages.find({}, { projection: { password: 0 } })
-    .sort({ createdAt: -1 }).toArray();
+  const list = await pages.find({}, { projection: { password: 0 } }).sort({ createdAt: -1 }).toArray();
   res.json(list);
 });
 
 app.get('/api/admin/list-users', adminAuth, async (req, res) => {
-  const list = await users.find({}, { projection: { password: 0 } })
-    .sort({ createdAt: -1 }).toArray();
+  const list = await users.find({}, { projection: { password: 0 } }).sort({ createdAt: -1 }).toArray();
   res.json(list);
 });
 
@@ -873,28 +711,23 @@ app.get('/api/admin/products', adminAuth, async (req, res) => {
 
 app.post('/api/admin/product', adminAuth, async (req, res) => {
   try {
-    const { title, description, category, price, discountPrice, photo, linkData, codeData, fileData, stock } = req.body;
-    if (!title || !price) {
-      return res.status(400).json({ error: 'Title এবং Price দিতে হবে' });
-    }
-    if (!linkData && !codeData && !fileData) {
-      return res.status(400).json({ error: 'কমপক্ষে একটা Delivery (Link/Code/File) দিতে হবে' });
-    }
+    const { title, description, category, price, discountPrice, photo, linkData, codeData, fileData, stock, rating, reviews, sold } = req.body;
+    if (!title || !price) return res.status(400).json({ error: 'Title এবং Price দিতে হবে' });
+    if (!linkData && !codeData && !fileData) return res.status(400).json({ error: 'কমপক্ষে একটা Delivery (Link/Code/File) দিতে হবে' });
     const result = await products.insertOne({
-      title: String(title),
-      description: String(description || ''),
+      title: String(title), description: String(description || ''),
       category: String(category || 'Other'),
       price: Number(price),
       discountPrice: discountPrice ? Number(discountPrice) : null,
       photo: String(photo || ''),
-      linkData: String(linkData || ''),
-      codeData: String(codeData || ''),
-      fileData: String(fileData || ''),
+      linkData: String(linkData || ''), codeData: String(codeData || ''), fileData: String(fileData || ''),
       deliveryType: linkData ? 'link' : (fileData ? 'file' : 'code'),
       deliveryData: linkData || fileData || codeData || '',
       stock: stock ? Number(stock) : 999,
-      sold: 0, active: true,
-      createdAt: new Date()
+      rating: rating ? Number(rating) : 0,
+      reviews: reviews ? Number(reviews) : 0,
+      sold: sold ? Number(sold) : 0,
+      active: true, createdAt: new Date()
     });
     res.json({ success: true, id: result.insertedId.toString() });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -902,7 +735,7 @@ app.post('/api/admin/product', adminAuth, async (req, res) => {
 
 app.put('/api/admin/product/:id', adminAuth, async (req, res) => {
   try {
-    const { title, description, category, price, discountPrice, photo, linkData, codeData, fileData, stock, active } = req.body;
+    const { title, description, category, price, discountPrice, photo, linkData, codeData, fileData, stock, active, rating, reviews, sold } = req.body;
     const update = { updatedAt: new Date() };
     if (title !== undefined) update.title = String(title);
     if (description !== undefined) update.description = String(description);
@@ -915,12 +748,13 @@ app.put('/api/admin/product/:id', adminAuth, async (req, res) => {
     if (fileData !== undefined) update.fileData = String(fileData);
     if (stock !== undefined) update.stock = Number(stock);
     if (active !== undefined) update.active = !!active;
-    
+    if (rating !== undefined) update.rating = Number(rating);
+    if (reviews !== undefined) update.reviews = Number(reviews);
+    if (sold !== undefined) update.sold = Number(sold);
     if (linkData || fileData || codeData) {
       update.deliveryType = linkData ? 'link' : (fileData ? 'file' : 'code');
       update.deliveryData = linkData || fileData || codeData || '';
     }
-
     const q = makeIdQuery(req.params.id);
     const result = await products.updateOne(q, { $set: update });
     if (result.matchedCount === 0) return res.status(404).json({ error: 'Not found' });
@@ -955,28 +789,13 @@ app.put('/api/admin/deposit/:id', adminAuth, async (req, res) => {
 
     if (action === 'approve') {
       const userQ = makeIdQuery(deposit.userId);
-      const userDoc = await users.findOne(userQ);
-      
       const bonusAmount = deposit.bonusAmount || 0;
       const totalToAdd = deposit.amount + bonusAmount;
-      
-      await users.updateOne(userQ, { 
-        $inc: { 
-          wallet: totalToAdd,
-          totalDeposited: deposit.amount,
-          totalDeposits: 1
-        },
+      await users.updateOne(userQ, {
+        $inc: { wallet: totalToAdd, totalDeposited: deposit.amount, totalDeposits: 1 },
         $set: { hasDeposited: true }
       });
-      
-      await deposits.updateOne(q, { 
-        $set: { 
-          status: 'approved', 
-          reviewedAt: new Date(),
-          bonusCredited: bonusAmount
-        } 
-      });
-      
+      await deposits.updateOne(q, { $set: { status: 'approved', reviewedAt: new Date(), bonusCredited: bonusAmount } });
       await processPendingReferral(deposit.userId, deposit.amount);
     } else if (action === 'reject') {
       await deposits.updateOne(q, { $set: { status: 'rejected', reviewedAt: new Date() } });
@@ -989,34 +808,16 @@ async function processPendingReferral(userId, depositAmount) {
   try {
     const config = await settings.findOne({ _id: 'config' });
     const minRefDeposit = config?.minRefDeposit || 50;
-    
     const user = await users.findOne(makeIdQuery(userId));
     if (!user) return;
-    
     const totalDep = user.totalDeposited || 0;
     if (totalDep < minRefDeposit) return;
-    
-    const pending = await pendingrefs.findOne({
-      referredUserId: userId,
-      status: 'pending'
-    });
-    
+    const pending = await pendingrefs.findOne({ referredUserId: userId, status: 'pending' });
     if (!pending) return;
-    
-    await users.updateOne(
-      { _id: new ObjectId(pending.referrerId) },
-      { $inc: { wallet: pending.referrerBonus, referrals: 1 } }
-    );
-    
-    await pendingrefs.updateOne(
-      { _id: pending._id },
-      { $set: { status: 'completed', completedAt: new Date() } }
-    );
-    
+    await users.updateOne({ _id: new ObjectId(pending.referrerId) }, { $inc: { wallet: pending.referrerBonus, referrals: 1 } });
+    await pendingrefs.updateOne({ _id: pending._id }, { $set: { status: 'completed', completedAt: new Date() } });
     console.log('✅ Referral bonus credited:', pending.referrerBonus, 'to', pending.referrerEmail);
-  } catch (err) {
-    console.error('processPendingReferral error:', err);
-  }
+  } catch (err) { console.error('processPendingReferral error:', err); }
 }
 
 // ===== ADMIN PENDING REFERRALS =====
@@ -1042,24 +843,18 @@ app.post('/api/admin/giftcode', adminAuth, async (req, res) => {
   try {
     const { code, amount, maxUses, expiresAt } = req.body;
     if (!code || !amount) return res.status(400).json({ error: 'Code and amount required' });
-    
     const cleanCode = String(code).toUpperCase().trim();
     if (cleanCode.length < 4) return res.status(400).json({ error: 'Code must be 4+ characters' });
     if (Number(amount) < 1) return res.status(400).json({ error: 'Amount must be 1+' });
-    
     const existing = await giftcodes.findOne({ code: cleanCode });
     if (existing) return res.status(400).json({ error: 'এই Code আগেই আছে' });
-    
     await giftcodes.insertOne({
-      code: cleanCode,
-      amount: Number(amount),
+      code: cleanCode, amount: Number(amount),
       maxUses: maxUses ? Number(maxUses) : 1,
       usedCount: 0,
       expiresAt: expiresAt ? new Date(expiresAt) : null,
-      active: true,
-      createdAt: new Date()
+      active: true, createdAt: new Date()
     });
-    
     res.json({ success: true, code: cleanCode });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1076,7 +871,6 @@ app.put('/api/admin/giftcode/:code/toggle', adminAuth, async (req, res) => {
     const code = req.params.code.toUpperCase();
     const gift = await giftcodes.findOne({ code });
     if (!gift) return res.status(404).json({ error: 'Not found' });
-    
     await giftcodes.updateOne({ code }, { $set: { active: !gift.active } });
     res.json({ success: true, active: !gift.active });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -1129,13 +923,8 @@ app.put('/api/admin/deposit-bonuses', adminAuth, async (req, res) => {
   try {
     const { enabled, depositBonuses } = req.body;
     const update = { updatedAt: new Date() };
-    
-    if (typeof enabled === 'boolean') {
-      update.depositBonusEnabled = enabled;
-    }
-    
+    if (typeof enabled === 'boolean') update.depositBonusEnabled = enabled;
     if (depositBonuses) {
-      // Validate & sort
       const cleaned = {};
       for (const key of ['deposit1', 'deposit2', 'deposit3']) {
         const tiers = depositBonuses[key] || [];
@@ -1146,7 +935,6 @@ app.put('/api/admin/deposit-bonuses', adminAuth, async (req, res) => {
       }
       update.depositBonuses = cleaned;
     }
-    
     await settings.updateOne({ _id: 'config' }, { $set: update }, { upsert: true });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -1167,9 +955,7 @@ app.get('/api/admin/content', adminAuth, async (req, res) => {
   try {
     const s = await settings.findOne({ _id: 'config' });
     res.json(mergeContent(s?.content));
-  } catch (err) {
-    res.json(mergeContent({}));
-  }
+  } catch (err) { res.json(mergeContent({})); }
 });
 
 app.put('/api/admin/content', adminAuth, async (req, res) => {
@@ -1177,18 +963,14 @@ app.put('/api/admin/content', adminAuth, async (req, res) => {
     const { section, data } = req.body;
     if (!section || !data) return res.status(400).json({ error: 'Section and data required' });
     if (!DEFAULT_CONTENT[section]) return res.status(400).json({ error: 'Invalid section' });
-    
     const s = await settings.findOne({ _id: 'config' });
     const currentContent = (s && s.content) || {};
-    
     currentContent[section] = { ...(currentContent[section] || {}), ...data };
-    
     await settings.updateOne(
       { _id: 'config' },
       { $set: { content: currentContent, updatedAt: new Date() } },
       { upsert: true }
     );
-    
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1199,12 +981,10 @@ app.put('/api/admin/content/reset/:section', adminAuth, async (req, res) => {
     const s = await settings.findOne({ _id: 'config' });
     const currentContent = (s && s.content) || {};
     delete currentContent[section];
-    
     await settings.updateOne(
       { _id: 'config' },
       { $set: { content: currentContent, updatedAt: new Date() } }
     );
-    
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1222,20 +1002,15 @@ app.get('/api/admin/referrals', adminAuth, async (req, res) => {
       { referredBy: { $ne: null } },
       { projection: { email: 1, name: 1, referredBy: 1, createdAt: 1, wallet: 1, signupIp: 1, hasDeposited: 1 } }
     ).sort({ createdAt: -1 }).limit(200).toArray();
-    
     for (let i = 0; i < list.length; i++) {
       try {
-        const ref = await users.findOne(
-          { _id: new ObjectId(list[i].referredBy) },
-          { projection: { email: 1, name: 1 } }
-        );
+        const ref = await users.findOne({ _id: new ObjectId(list[i].referredBy) }, { projection: { email: 1, name: 1 } });
         if (ref) {
           list[i].referrerEmail = ref.email;
           list[i].referrerName = ref.name;
         }
       } catch (e) {}
     }
-    
     res.json(list);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1254,8 +1029,7 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const v = await pages.aggregate([{ $group: { _id: null, v: { $sum: '$views' } } }]).toArray();
   res.json({
     totalPages, totalUsers, totalProducts,
-    pendingDeposits, totalPurchases, totalReferrals, totalGiftCodes,
-    pendingRefs,
+    pendingDeposits, totalPurchases, totalReferrals, totalGiftCodes, pendingRefs,
     totalRevenue: revenueAgg[0]?.t || 0,
     totalViews: v[0]?.v || 0
   });
@@ -1265,6 +1039,7 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
 app.get('/login', (req, res) => res.sendFile(__dirname + '/public/login.html'));
 app.get('/dashboard', requireAuth, (req, res) => res.sendFile(__dirname + '/public/dashboard.html'));
 app.get('/shop', (req, res) => res.sendFile(__dirname + '/public/shop.html'));
+app.get('/wishlist', requireAuth, (req, res) => res.sendFile(__dirname + '/public/wishlist.html'));
 app.get('/wallet', requireAuth, (req, res) => res.sendFile(__dirname + '/public/wallet.html'));
 app.get('/product/:id', (req, res) => res.sendFile(__dirname + '/public/product.html'));
 
