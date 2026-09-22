@@ -23,23 +23,18 @@
     position: fixed; top: 0; left: 0; bottom: 0;
     transition: transform 0.3s; z-index: 100;
   }
-  .sidebar-head {
-    padding: 20px; border-bottom: 1px solid #1a1a1a;
-    display: flex; align-items: center; gap: 10px;
-  }
+  .sidebar-head { padding: 20px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; gap: 10px; }
   .sidebar-head-icon {
     width: 32px; height: 32px; border-radius: 9px;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
   }
   .sidebar-head-text { font-weight: 800; font-size: 15px; }
   
   .sidebar-nav { flex: 1; overflow-y: auto; padding: 16px 12px; }
   .nav-group {
-    font-size: 10px; color: #52525b;
-    text-transform: uppercase; letter-spacing: 1.2px;
-    font-weight: 700; padding: 0 8px; margin: 16px 0 8px;
+    font-size: 10px; color: #52525b; text-transform: uppercase;
+    letter-spacing: 1.2px; font-weight: 700; padding: 0 8px; margin: 16px 0 8px;
   }
   .nav-group:first-child { margin-top: 0; }
   .nav-item {
@@ -51,15 +46,13 @@
   }
   .nav-item:hover { background: #151520; color: #fff; }
   .nav-item.active {
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    color: #fff;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff;
     box-shadow: 0 8px 20px -8px rgba(139,92,246,0.6);
   }
   .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
   .nav-item .badge {
     margin-left: auto; background: #dc2626; color: #fff;
-    font-size: 10px; padding: 2px 7px; border-radius: 10px;
-    font-weight: 700;
+    font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700;
   }
   
   .sidebar-foot { padding: 16px 12px; border-top: 1px solid #1a1a1a; }
@@ -68,8 +61,7 @@
     background: rgba(239,68,68,0.1);
     border: 1px solid rgba(239,68,68,0.3);
     color: #f87171; border-radius: 8px;
-    font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: inherit;
+    font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
   }
   
   .main { flex: 1; margin-left: 240px; display: flex; flex-direction: column; min-width: 0; }
@@ -81,11 +73,7 @@
     position: sticky; top: 0; z-index: 50;
   }
   .topbar-left { display: flex; align-items: center; gap: 12px; }
-  .menu-btn {
-    display: none; background: transparent; border: none;
-    color: #fff; font-size: 22px; cursor: pointer;
-    padding: 4px 8px; border-radius: 6px;
-  }
+  .menu-btn { display: none; background: transparent; border: none; color: #fff; font-size: 22px; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
   .topbar h1 { font-size: 18px; font-weight: 800; }
   .topbar-right { display: flex; gap: 8px; }
   .topbar-btn {
@@ -108,45 +96,28 @@
   }
   .stat-card {
     background: linear-gradient(180deg, #101018, #0d0d14);
-    border: 1px solid #1a1a1a;
-    border-radius: 14px; padding: 18px;
-    transition: 0.2s;
+    border: 1px solid #1a1a1a; border-radius: 14px; padding: 18px; transition: 0.2s;
   }
   .stat-card:hover { border-color: #2a2a2a; transform: translateY(-2px); }
   .stat-icon { font-size: 22px; margin-bottom: 10px; display: block; }
-  .stat-num {
-    font-size: 28px; font-weight: 800;
-    letter-spacing: -1px; margin-bottom: 4px;
-    color: #c4b5fd;
-  }
+  .stat-num { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; color: #c4b5fd; }
   .stat-num.green { color: #34d399; }
   .stat-num.orange { color: #fb923c; }
   .stat-num.pink { color: #ec4899; }
-  .stat-label {
-    font-size: 11px; color: #71717a;
-    text-transform: uppercase; letter-spacing: 0.6px;
-    font-weight: 600;
-  }
+  .stat-label { font-size: 11px; color: #71717a; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
   
   .section {
     background: linear-gradient(180deg, #101018, #0d0d14);
-    border: 1px solid #1a1a1a;
-    border-radius: 14px; padding: 20px;
-    margin-bottom: 20px;
+    border: 1px solid #1a1a1a; border-radius: 14px; padding: 20px; margin-bottom: 20px;
   }
-  .section-head {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
-  }
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
   .section-head h2 { font-size: 16px; font-weight: 800; }
   
   .search-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
   .search-bar input {
-    flex: 1; min-width: 200px;
-    padding: 12px 14px;
+    flex: 1; min-width: 200px; padding: 12px 14px;
     background: #0a0a0a; border: 1px solid #222;
-    border-radius: 10px; color: #fff;
-    font-size: 14px; font-family: inherit; outline: none;
+    border-radius: 10px; color: #fff; font-size: 14px; font-family: inherit; outline: none;
   }
   .search-bar input:focus { border-color: rgba(139,92,246,0.6); }
   
@@ -158,17 +129,11 @@
     cursor: pointer; font-family: inherit;
   }
   .filter-tab:hover { background: #222; color: #fff; }
-  .filter-tab.active {
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    color: #fff; border-color: transparent;
-  }
+  .filter-tab.active { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; border-color: transparent; }
   
   .item-card {
-    background: #0d0d14;
-    border: 1px solid #1a1a1a;
-    border-radius: 12px;
-    padding: 14px; margin-bottom: 10px;
-    transition: 0.15s;
+    background: #0d0d14; border: 1px solid #1a1a1a;
+    border-radius: 12px; padding: 14px; margin-bottom: 10px; transition: 0.15s;
   }
   .item-card:hover { border-color: #2a2a2a; }
   .item-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
@@ -179,15 +144,12 @@
   .product-row {
     display: flex; gap: 12px; align-items: flex-start;
     padding: 14px; background: #0d0d14;
-    border: 1px solid #1a1a1a; border-radius: 12px;
-    margin-bottom: 10px;
+    border: 1px solid #1a1a1a; border-radius: 12px; margin-bottom: 10px;
   }
   .product-img {
-    width: 70px; height: 70px;
-    border-radius: 10px; background: #1a1a1a;
+    width: 70px; height: 70px; border-radius: 10px; background: #1a1a1a;
     object-fit: cover; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px;
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
   }
   .product-info { flex: 1; min-width: 0; }
   .product-info h4 { font-size: 14px; margin-bottom: 4px; }
@@ -212,15 +174,14 @@
   .badge.gift-active { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
   .badge.gift-inactive { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3); }
   .badge.gift-expired { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .badge.bonus { background: rgba(236,72,153,0.15); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); text-transform: none; }
   
   .btn {
-    padding: 7px 12px;
-    background: #1a1a1a; color: #d4d4d8;
+    padding: 7px 12px; background: #1a1a1a; color: #d4d4d8;
     border: 1px solid #222; border-radius: 7px;
     font-size: 12px; font-weight: 600;
     cursor: pointer; font-family: inherit;
-    display: inline-flex; align-items: center; gap: 4px;
-    transition: 0.15s;
+    display: inline-flex; align-items: center; gap: 4px; transition: 0.15s;
   }
   .btn:hover { background: #222; color: #fff; }
   .btn.blue { background: #2563eb; color: #fff; border-color: #2563eb; }
@@ -246,15 +207,10 @@
     max-height: 300px; overflow: auto;
   }
   .code-box.show { display: block; }
-  .code-box pre {
-    font-family: monospace; font-size: 11px;
-    color: #4ade80; white-space: pre-wrap;
-    word-break: break-all; margin: 0;
-  }
+  .code-box pre { font-family: monospace; font-size: 11px; color: #4ade80; white-space: pre-wrap; word-break: break-all; margin: 0; }
   
   .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.85);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
     display: none; align-items: center; justify-content: center;
     z-index: 1000; padding: 16px; overflow-y: auto;
   }
@@ -265,37 +221,21 @@
     width: 100%; max-width: 650px;
     max-height: 90vh; overflow-y: auto; margin: auto;
   }
-  .modal-head {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid #222;
-  }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid #222; }
   .modal-head h2 { font-size: 18px; }
-  .modal-close {
-    background: transparent; color: #888; border: none;
-    font-size: 24px; cursor: pointer; padding: 4px 12px;
-    margin: 0; line-height: 1;
-  }
+  .modal-close { background: transparent; color: #888; border: none; font-size: 24px; cursor: pointer; padding: 4px 12px; margin: 0; line-height: 1; }
   .modal-close:hover { color: #fff; }
   
   .form-group { margin-bottom: 14px; }
-  .form-group label {
-    display: block; font-size: 11px; color: #888;
-    margin-bottom: 6px; text-transform: uppercase;
-    font-weight: 700; letter-spacing: 0.5px;
-  }
+  .form-group label { display: block; font-size: 11px; color: #888; margin-bottom: 6px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
   .form-group label .required { color: #f87171; }
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
+  .form-group input, .form-group textarea, .form-group select {
     width: 100%; padding: 12px 14px;
     background: #0a0a0a; border: 1.5px solid #222;
     border-radius: 10px; color: #fff;
-    font-size: 14px; font-family: inherit;
-    outline: none; transition: 0.15s;
+    font-size: 14px; font-family: inherit; outline: none; transition: 0.15s;
   }
-  .form-group input:focus,
-  .form-group textarea:focus,
-  .form-group select:focus {
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
     border-color: rgba(139,92,246,0.6);
     box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
   }
@@ -305,98 +245,169 @@
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
   
-  .photo-preview {
-    margin-top: 8px; width: 100px; height: 100px;
-    border-radius: 10px; border: 1px solid #222;
-    object-fit: cover; display: none;
-  }
+  .photo-preview { margin-top: 8px; width: 100px; height: 100px; border-radius: 10px; border: 1px solid #222; object-fit: cover; display: none; }
   .photo-preview.show { display: block; }
   
-  .modal-btns {
-    display: flex; gap: 8px; margin-top: 20px;
-    padding-top: 16px; border-top: 1px solid #222;
-  }
+  .modal-btns { display: flex; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #222; }
   .modal-btns .btn { flex: 1; padding: 12px; justify-content: center; font-size: 14px; }
   
-  /* DELIVERY BOX */
-  .delivery-box {
-    border: 1px solid #222;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 14px;
-    background: rgba(139,92,246,0.03);
-  }
-  .delivery-box-title {
-    font-size: 12px; color: #c4b5fd;
-    font-weight: 700; margin-bottom: 14px;
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .delivery-hint {
-    font-size: 11px; color: #71717a;
-    text-transform: none; font-weight: 400;
-  }
-  .delivery-warning {
-    margin-top: 10px; padding: 8px 12px;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.3);
-    border-radius: 8px;
-    font-size: 11px; color: #f87171;
-    display: none;
-  }
-  .delivery-success {
-    margin-top: 10px; padding: 8px 12px;
-    background: rgba(16,185,129,0.1);
-    border: 1px solid rgba(16,185,129,0.3);
-    border-radius: 8px;
-    font-size: 11px; color: #34d399;
-    display: none;
-  }
+  .delivery-box { border: 1px solid #222; border-radius: 12px; padding: 16px; margin-bottom: 14px; background: rgba(139,92,246,0.03); }
+  .delivery-box-title { font-size: 12px; color: #c4b5fd; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .delivery-hint { font-size: 11px; color: #71717a; text-transform: none; font-weight: 400; }
+  .delivery-warning { margin-top: 10px; padding: 8px 12px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; font-size: 11px; color: #f87171; display: none; }
+  .delivery-success { margin-top: 10px; padding: 8px 12px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 8px; font-size: 11px; color: #34d399; display: none; }
   
-  /* GIFT CODE CARD */
   .gift-card {
     background: linear-gradient(135deg, rgba(236,72,153,0.08), rgba(139,92,246,0.05));
     border: 1px solid rgba(236,72,153,0.25);
-    border-radius: 14px; padding: 16px;
-    margin-bottom: 12px;
+    border-radius: 14px; padding: 16px; margin-bottom: 12px;
   }
-  .gift-code-big {
-    font-family: 'Courier New', monospace;
-    font-size: 20px; font-weight: 900;
-    color: #ec4899; letter-spacing: 2px;
-    margin-bottom: 10px;
-    word-break: break-all;
-  }
-  .gift-stats {
-    display: flex; gap: 16px; flex-wrap: wrap;
-    margin-bottom: 10px;
-    font-size: 12px; color: #a1a1aa;
-  }
+  .gift-code-big { font-family: 'Courier New', monospace; font-size: 20px; font-weight: 900; color: #ec4899; letter-spacing: 2px; margin-bottom: 10px; word-break: break-all; }
+  .gift-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; font-size: 12px; color: #a1a1aa; }
   .gift-stats span { display: flex; align-items: center; gap: 4px; }
   
-  /* CREATE GIFT FORM */
-  .create-gift-box {
-    background: linear-gradient(135deg, rgba(236,72,153,0.05), rgba(139,92,246,0.03));
-    border: 1px solid rgba(236,72,153,0.2);
-    border-radius: 14px; padding: 20px;
-    margin-bottom: 24px;
+  .create-gift-box { background: linear-gradient(135deg, rgba(236,72,153,0.05), rgba(139,92,246,0.03)); border: 1px solid rgba(236,72,153,0.2); border-radius: 14px; padding: 20px; margin-bottom: 24px; }
+  .create-gift-box h3 { font-size: 16px; font-weight: 800; margin-bottom: 16px; color: #ec4899; display: flex; align-items: center; gap: 8px; }
+  .code-generate-row { display: flex; gap: 6px; align-items: stretch; }
+  .code-generate-row input { flex: 1; }
+  .code-generate-row button { padding: 0 14px; background: #1a1a1a; border: 1.5px solid #222; border-radius: 10px; color: #c4b5fd; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .code-generate-row button:hover { background: #222; color: #fff; }
+  
+  /* ===== DEPOSIT BONUS ===== */
+  .bonus-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+    background: linear-gradient(135deg, rgba(236,72,153,0.08), rgba(139,92,246,0.05));
+    border: 1px solid rgba(236,72,153,0.25);
+    border-radius: 14px; padding: 20px; margin-bottom: 24px;
   }
-  .create-gift-box h3 {
-    font-size: 16px; font-weight: 800;
-    margin-bottom: 16px; color: #ec4899;
+  .bonus-header-info h2 { font-size: 18px; font-weight: 800; color: #f472b6; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .bonus-header-info p { font-size: 12px; color: #a1a1aa; }
+  .bonus-header-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  
+  .toggle-switch {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px; background: #1a1a1a;
+    border: 1px solid #222; border-radius: 10px;
+    cursor: pointer; font-size: 13px; font-weight: 700;
+    font-family: inherit; color: #d4d4d8;
+  }
+  .toggle-switch.on { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); color: #34d399; }
+  .toggle-switch.off { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.4); color: #f87171; }
+  
+  .bonus-section {
+    background: linear-gradient(180deg, #101018, #0d0d14);
+    border: 1px solid #1a1a1a;
+    border-radius: 14px; padding: 20px; margin-bottom: 20px;
+  }
+  .bonus-section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; padding-bottom: 12px;
+    border-bottom: 1px solid #1a1a1a;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .bonus-section-head h3 {
+    font-size: 15px; font-weight: 800;
     display: flex; align-items: center; gap: 8px;
   }
-  .code-generate-row {
-    display: flex; gap: 6px; align-items: stretch;
+  .bonus-section-head .num-badge {
+    width: 26px; height: 26px; border-radius: 8px;
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 900;
   }
-  .code-generate-row input { flex: 1; }
-  .code-generate-row button {
-    padding: 0 14px; background: #1a1a1a;
-    border: 1.5px solid #222; border-radius: 10px;
-    color: #c4b5fd; font-size: 12px; font-weight: 700;
+  
+  .tier-row {
+    display: flex; gap: 8px; align-items: center;
+    padding: 10px 12px; background: #0a0a0f;
+    border: 1px solid #1a1a1a; border-radius: 10px;
+    margin-bottom: 8px; transition: 0.15s;
+  }
+  .tier-row:hover { border-color: #2a2a2a; }
+  .tier-row .tier-num {
+    font-size: 11px; font-weight: 700;
+    color: #52525b; width: 22px; text-align: center;
+    flex-shrink: 0;
+  }
+  .tier-row .tier-input {
+    flex: 1; min-width: 0;
+    padding: 8px 10px;
+    background: #151515; border: 1px solid #222;
+    border-radius: 7px; color: #fff;
+    font-size: 13px; font-family: inherit;
+    outline: none;
+  }
+  .tier-row .tier-input:focus { border-color: rgba(236,72,153,0.6); }
+  .tier-row .tier-arrow {
+    font-size: 14px; color: #71717a;
+    flex-shrink: 0;
+  }
+  .tier-row .tier-del {
+    padding: 6px 10px; background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #f87171; border-radius: 7px;
+    font-size: 12px; font-weight: 700;
     cursor: pointer; font-family: inherit;
-    white-space: nowrap;
+    flex-shrink: 0;
   }
-  .code-generate-row button:hover { background: #222; color: #fff; }
+  .tier-row .tier-del:hover { background: rgba(239,68,68,0.25); }
+  
+  .empty-tiers {
+    text-align: center; padding: 24px;
+    background: rgba(107,114,128,0.05);
+    border: 1px dashed #222;
+    border-radius: 10px;
+    color: #666; font-size: 13px;
+    margin-bottom: 12px;
+  }
+  
+  .bonus-save-bar {
+    position: sticky; bottom: 20px;
+    background: linear-gradient(135deg, #151515, #0d0d14);
+    border: 1px solid rgba(236,72,153,0.3);
+    border-radius: 14px; padding: 16px;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+    margin-top: 24px;
+    display: flex; gap: 12px; flex-wrap: wrap;
+    z-index: 40;
+  }
+  .bonus-save-bar .btn { padding: 12px 24px; font-size: 14px; font-weight: 800; }
+  .bonus-save-bar .btn.primary { flex: 1; min-width: 180px; justify-content: center; }
+  
+  .content-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; padding-bottom: 16px; border-bottom: 1px solid #1a1a1a; }
+  .content-tab {
+    padding: 10px 16px; background: #1a1a1a;
+    border: 1px solid #222; color: #a1a1aa;
+    border-radius: 10px; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px; transition: 0.15s;
+  }
+  .content-tab:hover { background: #222; color: #fff; }
+  .content-tab.active { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; border-color: transparent; }
+  
+  .content-panel { display: none; }
+  .content-panel.active { display: block; }
+  
+  .content-panel-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #1a1a1a; }
+  .content-panel-head-icon { font-size: 32px; }
+  .content-panel-head h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .content-panel-head p { font-size: 13px; color: #888; }
+  
+  .content-field { margin-bottom: 18px; padding: 14px; background: #0d0d14; border: 1px solid #1a1a1a; border-radius: 12px; }
+  .content-field label { display: block; font-size: 12px; color: #a1a1aa; margin-bottom: 8px; font-weight: 700; }
+  .content-field label code { background: #1a1a1a; color: #c4b5fd; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 6px; font-family: monospace; }
+  .content-field input, .content-field textarea {
+    width: 100%; padding: 12px 14px;
+    background: #0a0a0a; border: 1.5px solid #222;
+    border-radius: 10px; color: #fff;
+    font-size: 14px; font-family: inherit; outline: none; transition: 0.15s;
+  }
+  .content-field input:focus, .content-field textarea:focus { border-color: rgba(139,92,246,0.6); }
+  .content-field textarea { resize: vertical; min-height: 70px; }
+  
+  .content-actions { display: flex; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #1a1a1a; flex-wrap: wrap; }
+  .content-actions .btn { padding: 12px 24px; font-size: 14px; }
+  .content-actions .btn.primary { flex: 1; min-width: 200px; }
   
   .toast {
     position: fixed; bottom: 24px; left: 50%;
@@ -411,82 +422,8 @@
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.error { background: #dc2626; }
   
-  .overlay {
-    display: none; position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.7); z-index: 90;
-  }
+  .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 90; }
   .overlay.show { display: block; }
-  
-  /* CONTENT EDITOR */
-  .content-tabs {
-    display: flex; gap: 6px; margin-bottom: 20px;
-    flex-wrap: wrap; padding-bottom: 16px;
-    border-bottom: 1px solid #1a1a1a;
-  }
-  .content-tab {
-    padding: 10px 16px; background: #1a1a1a;
-    border: 1px solid #222; color: #a1a1aa;
-    border-radius: 10px; font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: inherit;
-    display: inline-flex; align-items: center; gap: 6px;
-    transition: 0.15s;
-  }
-  .content-tab:hover { background: #222; color: #fff; }
-  .content-tab.active {
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    color: #fff; border-color: transparent;
-  }
-  
-  .content-panel { display: none; }
-  .content-panel.active { display: block; }
-  
-  .content-panel-head {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 20px; padding-bottom: 16px;
-    border-bottom: 1px solid #1a1a1a;
-  }
-  .content-panel-head-icon { font-size: 32px; }
-  .content-panel-head h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
-  .content-panel-head p { font-size: 13px; color: #888; }
-  
-  .content-field {
-    margin-bottom: 18px; padding: 14px;
-    background: #0d0d14; border: 1px solid #1a1a1a;
-    border-radius: 12px;
-  }
-  .content-field label {
-    display: block; font-size: 12px;
-    color: #a1a1aa; margin-bottom: 8px;
-    font-weight: 700;
-  }
-  .content-field label code {
-    background: #1a1a1a; color: #c4b5fd;
-    padding: 2px 6px; border-radius: 4px;
-    font-size: 10px; margin-left: 6px;
-    font-family: monospace;
-  }
-  .content-field input,
-  .content-field textarea {
-    width: 100%; padding: 12px 14px;
-    background: #0a0a0a; border: 1.5px solid #222;
-    border-radius: 10px; color: #fff;
-    font-size: 14px; font-family: inherit;
-    outline: none; transition: 0.15s;
-  }
-  .content-field input:focus,
-  .content-field textarea:focus {
-    border-color: rgba(139,92,246,0.6);
-  }
-  .content-field textarea { resize: vertical; min-height: 70px; }
-  
-  .content-actions {
-    display: flex; gap: 10px; margin-top: 20px;
-    padding-top: 20px; border-top: 1px solid #1a1a1a;
-    flex-wrap: wrap;
-  }
-  .content-actions .btn { padding: 12px 24px; font-size: 14px; }
-  .content-actions .btn.primary { flex: 1; min-width: 200px; }
   
   @media (max-width: 768px) {
     .sidebar { transform: translateX(-100%); }
@@ -499,6 +436,9 @@
     .modal { padding: 20px 16px; }
     .content-tabs { gap: 4px; }
     .content-tab { padding: 8px 12px; font-size: 12px; }
+    .tier-row .tier-input { padding: 6px 8px; font-size: 12px; }
+    .bonus-save-bar { padding: 12px; }
+    .bonus-save-bar .btn { padding: 10px 16px; font-size: 13px; }
   }
 </style>
 </head>
@@ -548,6 +488,9 @@
         <div class="nav-item" onclick="showPage('giftcodes')" data-page="giftcodes">
           <span class="icon">🎁</span> <span>Gift Codes</span>
         </div>
+        <div class="nav-item" onclick="showPage('bonuses')" data-page="bonuses">
+          <span class="icon">🎯</span> <span>Deposit Bonus</span>
+        </div>
         
         <div class="nav-group">System</div>
         <div class="nav-item" onclick="showPage('settings')" data-page="settings">
@@ -582,61 +525,23 @@
         <!-- OVERVIEW -->
         <div class="page active" id="page-overview">
           <div class="stats-grid">
-            <div class="stat-card">
-              <span class="stat-icon">📄</span>
-              <div class="stat-num" id="ovPages">0</div>
-              <div class="stat-label">Pages</div>
-            </div>
-            <div class="stat-card">
-              <span class="stat-icon">👁</span>
-              <div class="stat-num" id="ovViews">0</div>
-              <div class="stat-label">Total Views</div>
-            </div>
-            <div class="stat-card">
-              <span class="stat-icon">👥</span>
-              <div class="stat-num" id="ovUsers">0</div>
-              <div class="stat-label">Users</div>
-            </div>
-            <div class="stat-card">
-              <span class="stat-icon">📢</span>
-              <div class="stat-num" id="ovRefs">0</div>
-              <div class="stat-label">Referrals</div>
-            </div>
-            <div class="stat-card">
-              <span class="stat-icon">🛍</span>
-              <div class="stat-num" id="ovProducts">0</div>
-              <div class="stat-label">Products</div>
-            </div>
-            <div class="stat-card">
-              <span class="stat-icon">💰</span>
-              <div class="stat-num orange" id="ovPending">0</div>
-              <div class="stat-label">Pending Deposits</div>
-            </div>
-            <div class="stat-card">
-              <span class="stat-icon">📦</span>
-              <div class="stat-num" id="ovOrders">0</div>
-              <div class="stat-label">Orders</div>
-            </div>
-            <div class="stat-card">
-              <span class="stat-icon">🎁</span>
-              <div class="stat-num pink" id="ovGifts">0</div>
-              <div class="stat-label">Gift Codes</div>
-            </div>
-            <div class="stat-card">
-              <span class="stat-icon">💵</span>
-              <div class="stat-num green" id="ovRevenue">৳0</div>
-              <div class="stat-label">Total Revenue</div>
-            </div>
+            <div class="stat-card"><span class="stat-icon">📄</span><div class="stat-num" id="ovPages">0</div><div class="stat-label">Pages</div></div>
+            <div class="stat-card"><span class="stat-icon">👁</span><div class="stat-num" id="ovViews">0</div><div class="stat-label">Total Views</div></div>
+            <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-num" id="ovUsers">0</div><div class="stat-label">Users</div></div>
+            <div class="stat-card"><span class="stat-icon">📢</span><div class="stat-num" id="ovRefs">0</div><div class="stat-label">Referrals</div></div>
+            <div class="stat-card"><span class="stat-icon">🛍</span><div class="stat-num" id="ovProducts">0</div><div class="stat-label">Products</div></div>
+            <div class="stat-card"><span class="stat-icon">💰</span><div class="stat-num orange" id="ovPending">0</div><div class="stat-label">Pending Deposits</div></div>
+            <div class="stat-card"><span class="stat-icon">📦</span><div class="stat-num" id="ovOrders">0</div><div class="stat-label">Orders</div></div>
+            <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-num pink" id="ovGifts">0</div><div class="stat-label">Gift Codes</div></div>
+            <div class="stat-card"><span class="stat-icon">💵</span><div class="stat-num green" id="ovRevenue">৳0</div><div class="stat-label">Total Revenue</div></div>
           </div>
           
           <div class="section">
-            <div class="section-head">
-              <h2>⚡ Quick Actions</h2>
-            </div>
+            <div class="section-head"><h2>⚡ Quick Actions</h2></div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
               <button class="btn purple full" onclick="showPage('products')">🛍 Manage Products</button>
               <button class="btn purple full" onclick="showPage('deposits')">💰 Pending Deposits</button>
-              <button class="btn pink full" onclick="showPage('giftcodes')">🎁 Gift Codes</button>
+              <button class="btn pink full" onclick="showPage('bonuses')">🎯 Deposit Bonus</button>
               <button class="btn purple full" onclick="showPage('content')">🎨 Edit Content</button>
             </div>
           </div>
@@ -644,17 +549,13 @@
 
         <!-- PAGES -->
         <div class="page" id="page-pages">
-          <div class="search-bar">
-            <input id="searchPages" placeholder="🔍 Search pages..." oninput="filterPages()">
-          </div>
+          <div class="search-bar"><input id="searchPages" placeholder="🔍 Search pages..." oninput="filterPages()"></div>
           <div id="pagesList"><div class="empty">Loading...</div></div>
         </div>
 
         <!-- USERS -->
         <div class="page" id="page-users">
-          <div class="search-bar">
-            <input id="searchUsers" placeholder="🔍 Search users..." oninput="filterUsers()">
-          </div>
+          <div class="search-bar"><input id="searchUsers" placeholder="🔍 Search users..." oninput="filterUsers()"></div>
           <div id="usersList"><div class="empty">Loading...</div></div>
         </div>
 
@@ -682,15 +583,12 @@
 
         <!-- ORDERS -->
         <div class="page" id="page-orders">
-          <div class="search-bar">
-            <input id="searchOrders" placeholder="🔍 Search orders..." oninput="filterOrders()">
-          </div>
+          <div class="search-bar"><input id="searchOrders" placeholder="🔍 Search orders..." oninput="filterOrders()"></div>
           <div id="ordersList"><div class="empty">Loading...</div></div>
         </div>
 
         <!-- GIFT CODES -->
         <div class="page" id="page-giftcodes">
-          <!-- CREATE FORM -->
           <div class="create-gift-box">
             <h3>🎁 Create New Gift Code</h3>
             
@@ -700,7 +598,7 @@
                 <input id="giftCode" placeholder="SUMMER2026" style="text-transform:uppercase;">
                 <button onclick="generateRandomCode()">🎲 Random</button>
               </div>
-              <small>কমপক্ষে ৪ অক্ষর, ছোট হাতের হলে বড় হয়ে যাবে</small>
+              <small>কমপক্ষে ৪ অক্ষর</small>
             </div>
             
             <div class="form-row">
@@ -717,13 +615,11 @@
             <div class="form-group">
               <label>Expires At (ঐচ্ছিক)</label>
               <input id="giftExpires" type="date">
-              <small>খালি রাখলে কখনো expire হবে না</small>
             </div>
             
             <button class="btn pink full" onclick="createGiftCode()" style="padding:14px; font-size:14px;">💾 Create Gift Code</button>
           </div>
           
-          <!-- LIST -->
           <div class="section-head" style="margin-bottom:12px;">
             <h2 style="font-size:16px; font-weight:800;">📋 All Gift Codes</h2>
             <span id="giftCount" style="font-size:12px; color:#888;"></span>
@@ -731,76 +627,84 @@
           <div id="giftcodesList"><div class="empty">Loading...</div></div>
         </div>
 
+        <!-- DEPOSIT BONUSES -->
+        <div class="page" id="page-bonuses">
+          <div class="bonus-header">
+            <div class="bonus-header-info">
+              <h2>🎯 Deposit Bonus System</h2>
+              <p>প্রতিটা deposit এ tier অনুযায়ী bonus সেট করুন</p>
+            </div>
+            <div class="bonus-header-btns">
+              <button class="toggle-switch" id="bonusToggle" onclick="toggleBonusSystem()">⏳ Loading...</button>
+              <button class="btn orange" onclick="resetBonuses()">🔄 Reset Default</button>
+            </div>
+          </div>
+          
+          <div class="bonus-section">
+            <div class="bonus-section-head">
+              <h3><span class="num-badge">1</span> ১ম Deposit Bonus</h3>
+              <button class="btn small blue" onclick="addBonusTier(1)">➕ Add Tier</button>
+            </div>
+            <div id="deposit1Tiers"><div class="empty">Loading...</div></div>
+          </div>
+          
+          <div class="bonus-section">
+            <div class="bonus-section-head">
+              <h3><span class="num-badge">2</span> ২য় Deposit Bonus</h3>
+              <button class="btn small blue" onclick="addBonusTier(2)">➕ Add Tier</button>
+            </div>
+            <div id="deposit2Tiers"><div class="empty">Loading...</div></div>
+          </div>
+          
+          <div class="bonus-section">
+            <div class="bonus-section-head">
+              <h3><span class="num-badge">3</span> ৩য়+ Deposit Bonus</h3>
+              <button class="btn small blue" onclick="addBonusTier(3)">➕ Add Tier</button>
+            </div>
+            <div id="deposit3Tiers"><div class="empty">Loading...</div></div>
+          </div>
+          
+          <div class="bonus-save-bar">
+            <button class="btn purple primary" onclick="saveBonuses()">💾 Save All Bonus Settings</button>
+          </div>
+        </div>
+
         <!-- SETTINGS -->
         <div class="page" id="page-settings">
           <div class="section">
             <h2 style="margin-bottom:16px;">💳 bKash Settings</h2>
-            <div class="form-group">
-              <label>bKash Number</label>
-              <input id="setBkash" placeholder="01XXXXXXXXX">
-            </div>
-            <div class="form-group">
-              <label>bKash Type</label>
-              <select id="setBkashType">
-                <option value="Personal">Personal</option>
-                <option value="Merchant">Merchant</option>
-              </select>
+            <div class="form-group"><label>bKash Number</label><input id="setBkash" placeholder="01XXXXXXXXX"></div>
+            <div class="form-group"><label>bKash Type</label>
+              <select id="setBkashType"><option value="Personal">Personal</option><option value="Merchant">Merchant</option></select>
             </div>
           </div>
           
           <div class="section">
             <h2 style="margin-bottom:16px;">💳 Nagad Settings</h2>
-            <div class="form-group">
-              <label>Nagad Number</label>
-              <input id="setNagad" placeholder="01XXXXXXXXX">
-            </div>
-            <div class="form-group">
-              <label>Nagad Active</label>
-              <select id="setNagadActive">
-                <option value="false">❌ No</option>
-                <option value="true">✅ Yes</option>
-              </select>
+            <div class="form-group"><label>Nagad Number</label><input id="setNagad" placeholder="01XXXXXXXXX"></div>
+            <div class="form-group"><label>Nagad Active</label>
+              <select id="setNagadActive"><option value="false">❌ No</option><option value="true">✅ Yes</option></select>
             </div>
           </div>
 
           <div class="section">
             <h2 style="margin-bottom:16px;">🎁 Referral Bonuses</h2>
-            <div class="form-group">
-              <label>Welcome Bonus (৳)</label>
-              <input id="setWelcome" type="number" placeholder="20">
-            </div>
-            <div class="form-group">
-              <label>Referral Bonus (৳)</label>
-              <input id="setReferral" type="number" placeholder="10">
-            </div>
+            <div class="form-group"><label>Welcome Bonus (৳)</label><input id="setWelcome" type="number" placeholder="20"></div>
+            <div class="form-group"><label>Referral Bonus (৳)</label><input id="setReferral" type="number" placeholder="10"></div>
+            <div class="form-group"><label>Minimum Referral Deposit (৳)</label><input id="setMinRef" type="number" placeholder="50"></div>
           </div>
 
           <div class="section">
             <h2 style="margin-bottom:16px;">💵 Deposit Limits</h2>
-            <div class="form-group">
-              <label>Minimum Deposit (৳)</label>
-              <input id="setMin" type="number" placeholder="50">
-            </div>
-            <div class="form-group">
-              <label>Maximum Deposit (৳)</label>
-              <input id="setMax" type="number" placeholder="10000">
-            </div>
+            <div class="form-group"><label>Minimum Deposit (৳)</label><input id="setMin" type="number" placeholder="50"></div>
+            <div class="form-group"><label>Maximum Deposit (৳)</label><input id="setMax" type="number" placeholder="10000"></div>
           </div>
 
           <div class="section">
             <h2 style="margin-bottom:16px;">📞 Support Contact</h2>
-            <div class="form-group">
-              <label>Email</label>
-              <input id="setEmail" placeholder="support@freehost.com">
-            </div>
-            <div class="form-group">
-              <label>WhatsApp</label>
-              <input id="setWhatsapp" placeholder="+880 16XXXXXXXX">
-            </div>
-            <div class="form-group">
-              <label>Telegram</label>
-              <input id="setTelegram" placeholder="@freehost_support">
-            </div>
+            <div class="form-group"><label>Email</label><input id="setEmail" placeholder="support@freehost.com"></div>
+            <div class="form-group"><label>WhatsApp</label><input id="setWhatsapp" placeholder="+880 16XXXXXXXX"></div>
+            <div class="form-group"><label>Telegram</label><input id="setTelegram" placeholder="@freehost_support"></div>
           </div>
           
           <button class="btn purple full" style="padding:14px; font-size:15px;" onclick="saveSettings()">💾 Save All Settings</button>
@@ -818,10 +722,7 @@
             <button class="content-tab" onclick="showContentTab('home', this)">🏠 Home</button>
             <button class="content-tab" onclick="showContentTab('colors', this)">🎨 Colors</button>
           </div>
-          
-          <div id="contentPanels">
-            <div class="empty">Loading content...</div>
-          </div>
+          <div id="contentPanels"><div class="empty">Loading content...</div></div>
         </div>
 
       </div>
@@ -836,36 +737,17 @@
         <button class="modal-close" onclick="closeProductModal()">✕</button>
       </div>
       
-      <div class="form-group">
-        <label>Product Title <span class="required">*</span></label>
-        <input id="pTitle" placeholder="HTML Templates Pack" maxlength="100">
-      </div>
+      <div class="form-group"><label>Product Title <span class="required">*</span></label><input id="pTitle" placeholder="HTML Templates Pack" maxlength="100"></div>
+      <div class="form-group"><label>Description</label><textarea id="pDesc" placeholder="Product এর description..."></textarea></div>
       
-      <div class="form-group">
-        <label>Description</label>
-        <textarea id="pDesc" placeholder="Product এর description..."></textarea>
+      <div class="form-row">
+        <div class="form-group"><label>Category</label><input id="pCategory" placeholder="Templates, Code"></div>
+        <div class="form-group"><label>Stock</label><input id="pStock" type="number" placeholder="999"></div>
       </div>
       
       <div class="form-row">
-        <div class="form-group">
-          <label>Category</label>
-          <input id="pCategory" placeholder="Templates, Code">
-        </div>
-        <div class="form-group">
-          <label>Stock</label>
-          <input id="pStock" type="number" placeholder="999">
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Price (৳) <span class="required">*</span></label>
-          <input id="pPrice" type="number" placeholder="100">
-        </div>
-        <div class="form-group">
-          <label>Discount Price (৳)</label>
-          <input id="pDiscount" type="number" placeholder="80">
-        </div>
+        <div class="form-group"><label>Price (৳) <span class="required">*</span></label><input id="pPrice" type="number" placeholder="100"></div>
+        <div class="form-group"><label>Discount Price (৳)</label><input id="pDiscount" type="number" placeholder="80"></div>
       </div>
       
       <div class="form-group">
@@ -874,36 +756,26 @@
         <img id="photoPreview" class="photo-preview" onerror="this.classList.remove('show')">
       </div>
       
-      <!-- DELIVERY OPTIONS -->
       <div class="delivery-box">
-        <div class="delivery-box-title">
-          📦 Delivery Options <span style="color:#71717a; text-transform:none; font-weight:400;">(কমপক্ষে একটা দিতে হবে)</span>
-        </div>
+        <div class="delivery-box-title">📦 Delivery Options <span style="color:#71717a; text-transform:none; font-weight:400;">(কমপক্ষে একটা দিতে হবে)</span></div>
         
         <div class="form-group">
           <label>🔗 Link URL <span class="delivery-hint">(optional)</span></label>
           <input id="pLinkData" placeholder="https://drive.google.com/..." oninput="checkDeliveries()">
-          <small>External link (Google Drive, Mega, etc.)</small>
         </div>
         
         <div class="form-group">
           <label>📁 File URL <span class="delivery-hint">(optional)</span></label>
           <input id="pFileData" placeholder="https://example.com/file.zip" oninput="checkDeliveries()">
-          <small>Direct file download link</small>
         </div>
         
         <div class="form-group" style="margin-bottom:0;">
           <label>💻 Code <span class="delivery-hint">(optional)</span></label>
           <textarea id="pCodeData" placeholder="<html>...</html>" style="min-height:100px; font-family:monospace; font-size:12px;" oninput="checkDeliveries()"></textarea>
-          <small>HTML / CSS / JS source code</small>
         </div>
         
-        <div id="deliveryWarning" class="delivery-warning">
-          ⚠️ কমপক্ষে একটা Delivery option দিতে হবে
-        </div>
-        <div id="deliverySuccess" class="delivery-success">
-          ✅ Delivery option যোগ হয়েছে
-        </div>
+        <div id="deliveryWarning" class="delivery-warning">⚠️ কমপক্ষে একটা Delivery option দিতে হবে</div>
+        <div id="deliverySuccess" class="delivery-success">✅ Delivery option যোগ হয়েছে</div>
       </div>
       
       <div class="modal-btns">
@@ -916,22 +788,10 @@
   <!-- EDIT PAGE MODAL -->
   <div class="modal-overlay" id="editPageModal">
     <div class="modal">
-      <div class="modal-head">
-        <h2>📝 Edit Page</h2>
-        <button class="modal-close" onclick="closeEditPageModal()">✕</button>
-      </div>
-      <div class="form-group">
-        <label>Page Title</label>
-        <input id="editTitle">
-      </div>
-      <div class="form-group">
-        <label>HTML Code</label>
-        <textarea id="editHtml" style="min-height:300px; font-family:monospace; font-size:12px;"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Password (খালি রাখলে remove হবে)</label>
-        <input id="editPassword" type="password">
-      </div>
+      <div class="modal-head"><h2>📝 Edit Page</h2><button class="modal-close" onclick="closeEditPageModal()">✕</button></div>
+      <div class="form-group"><label>Page Title</label><input id="editTitle"></div>
+      <div class="form-group"><label>HTML Code</label><textarea id="editHtml" style="min-height:300px; font-family:monospace; font-size:12px;"></textarea></div>
+      <div class="form-group"><label>Password (খালি রাখলে remove হবে)</label><input id="editPassword" type="password"></div>
       <div class="modal-btns">
         <button class="btn" onclick="closeEditPageModal()">Cancel</button>
         <button class="btn blue" onclick="savePageEdit()">💾 Save</button>
@@ -942,10 +802,7 @@
   <!-- REDEEMS MODAL -->
   <div class="modal-overlay" id="redeemsModal">
     <div class="modal">
-      <div class="modal-head">
-        <h2 id="redeemsModalTitle">🎁 Redemptions</h2>
-        <button class="modal-close" onclick="closeRedeemsModal()">✕</button>
-      </div>
+      <div class="modal-head"><h2 id="redeemsModalTitle">🎁 Redemptions</h2><button class="modal-close" onclick="closeRedeemsModal()">✕</button></div>
       <div id="redeemsList"><div class="empty">Loading...</div></div>
     </div>
   </div>
@@ -958,6 +815,12 @@
     let editingProductId = null, editingPageId = null;
     let contentData = {};
     let activeContentSection = 'wallet';
+    let bonusData = {
+      enabled: true,
+      deposit1: [],
+      deposit2: [],
+      deposit3: []
+    };
 
     if (token) showApp();
 
@@ -1005,7 +868,7 @@
     const pageTitles = {
       overview: '📊 Overview', pages: '📄 Pages', users: '👥 Users',
       referrals: '📢 Referrals', products: '🛍 Products', deposits: '💰 Deposits',
-      orders: '📦 Orders', giftcodes: '🎁 Gift Codes',
+      orders: '📦 Orders', giftcodes: '🎁 Gift Codes', bonuses: '🎯 Deposit Bonus',
       settings: '⚙️ Settings', content: '🎨 Content Editor'
     };
 
@@ -1032,6 +895,7 @@
       if (name === 'deposits') loadDeposits('pending');
       if (name === 'orders') loadOrders();
       if (name === 'giftcodes') loadGiftCodes();
+      if (name === 'bonuses') loadBonuses();
       if (name === 'settings') loadSettings();
       if (name === 'content') loadContent();
     }
@@ -1097,27 +961,21 @@
     function filterPages() {
       const q = document.getElementById('searchPages').value.toLowerCase();
       if (!q) return renderPages(allPages);
-      renderPages(allPages.filter(p => 
-        (p.title || '').toLowerCase().includes(q) || (p._id || '').includes(q)
-      ));
+      renderPages(allPages.filter(p => (p.title || '').toLowerCase().includes(q) || (p._id || '').includes(q)));
     }
     function renderPages(pages) {
       const list = document.getElementById('pagesList');
       if (!pages.length) { list.innerHTML = '<div class="empty">কোনো page নেই</div>'; return; }
-      
       list.innerHTML = pages.map(p => {
         const badges = [];
         if (p.password) badges.push('<span class="badge locked">🔒 Locked</span>');
         if (p.banned) badges.push('<span class="badge banned">⛔ Banned</span>');
         else if (!p.password) badges.push('<span class="badge live">● Live</span>');
-        
         return '<div class="item-card">' +
-          '<div class="item-head">' +
-            '<div style="flex:1;min-width:0;">' +
-              '<div class="item-title">' + esc(p.title) + '</div>' +
-              '<div class="item-meta">👁 ' + (p.views||0) + ' · 📅 ' + new Date(p.createdAt).toLocaleDateString() + '</div>' +
-            '</div>' +
-          '</div>' +
+          '<div class="item-head"><div style="flex:1;min-width:0;">' +
+            '<div class="item-title">' + esc(p.title) + '</div>' +
+            '<div class="item-meta">👁 ' + (p.views||0) + ' · 📅 ' + new Date(p.createdAt).toLocaleDateString() + '</div>' +
+          '</div></div>' +
           '<div style="margin:8px 0;">' + badges.join(' ') + '</div>' +
           '<div style="margin:8px 0;"><a href="/p/' + p._id + '" target="_blank" style="color:#4ade80;font-size:12px;word-break:break-all;text-decoration:none;">/p/' + p._id + '</a></div>' +
           '<div class="item-actions">' +
@@ -1131,16 +989,11 @@
       }).join('');
     }
     function toggleCode(id) { document.getElementById('code-' + id).classList.toggle('show'); }
-    function copyLink(id) { 
-      navigator.clipboard.writeText(location.origin + '/p/' + id);
-      showToast('✅ Link copied!');
-    }
+    function copyLink(id) { navigator.clipboard.writeText(location.origin + '/p/' + id); showToast('✅ Link copied!'); }
     async function delPage(id) {
       if (!confirm('Page delete করবে?')) return;
       await fetch('/api/admin/delete/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
-      showToast('🗑 Deleted');
-      loadPages();
-      loadAll();
+      showToast('🗑 Deleted'); loadPages(); loadAll();
     }
     function openEditPage(id) {
       const p = allPages.find(x => x._id === id);
@@ -1151,10 +1004,7 @@
       document.getElementById('editPassword').value = '';
       document.getElementById('editPageModal').classList.add('show');
     }
-    function closeEditPageModal() {
-      editingPageId = null;
-      document.getElementById('editPageModal').classList.remove('show');
-    }
+    function closeEditPageModal() { editingPageId = null; document.getElementById('editPageModal').classList.remove('show'); }
     async function savePageEdit() {
       if (!editingPageId) return;
       const body = {
@@ -1163,19 +1013,13 @@
       };
       const pass = document.getElementById('editPassword').value;
       if (pass) body.password = pass;
-      
       const res = await fetch('/api/admin/page/' + editingPageId, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
         body: JSON.stringify(body)
       });
-      if (res.ok) {
-        showToast('✅ Saved!');
-        closeEditPageModal();
-        loadPages();
-      } else {
-        showToast('❌ Failed', true);
-      }
+      if (res.ok) { showToast('✅ Saved!'); closeEditPageModal(); loadPages(); }
+      else showToast('❌ Failed', true);
     }
 
     // ===== USERS =====
@@ -1188,19 +1032,16 @@
     function filterUsers() {
       const q = document.getElementById('searchUsers').value.toLowerCase();
       if (!q) return renderUsers(allUsers);
-      renderUsers(allUsers.filter(u => 
-        (u.email || '').toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q)
-      ));
+      renderUsers(allUsers.filter(u => (u.email || '').toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q)));
     }
     function renderUsers(users) {
       const list = document.getElementById('usersList');
       if (!users.length) { list.innerHTML = '<div class="empty">No users</div>'; return; }
-      
       list.innerHTML = users.map(u => 
         '<div class="item-card">' +
           '<div class="item-title">' + esc(u.name || 'User') + '</div>' +
           '<div class="item-meta">📧 ' + esc(u.email) + '</div>' +
-          '<div class="item-meta">💰 ৳' + (u.wallet || 0) + ' · 📢 ' + (u.referrals || 0) + ' referrals</div>' +
+          '<div class="item-meta">💰 ৳' + (u.wallet || 0) + ' · 📢 ' + (u.referrals || 0) + ' referrals · 💵 ' + (u.totalDeposits || 0) + ' deposits</div>' +
           '<div class="item-meta">📅 ' + new Date(u.createdAt).toLocaleDateString() + '</div>' +
           (u.banned ? '<div style="margin-top:6px;"><span class="badge banned">⛔ BANNED</span></div>' : '') +
           '<div class="item-actions">' +
@@ -1219,15 +1060,12 @@
         headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
         body: JSON.stringify({ banned: ban })
       });
-      showToast(ban ? '🚫 Banned' : '✅ Unbanned');
-      loadUsers();
+      showToast(ban ? '🚫 Banned' : '✅ Unbanned'); loadUsers();
     }
     async function delUser(id, email) {
       if (!confirm('"' + email + '" delete করবে?')) return;
       await fetch('/api/admin/user/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
-      showToast('🗑 Deleted');
-      loadUsers();
-      loadAll();
+      showToast('🗑 Deleted'); loadUsers(); loadAll();
     }
 
     // ===== REFERRALS =====
@@ -1236,12 +1074,12 @@
       allRefs = await res.json();
       const list = document.getElementById('refsList');
       if (!allRefs.length) { list.innerHTML = '<div class="empty">কোনো referral হয়নি</div>'; return; }
-      
       list.innerHTML = allRefs.map(r => 
         '<div class="item-card">' +
           '<div class="item-title">👤 ' + esc(r.name || 'User') + '</div>' +
           '<div class="item-meta">📧 ' + esc(r.email) + '</div>' +
           '<div class="item-meta" style="color:#c4b5fd;">Invited by → ' + esc(r.referrerName || '') + ' (' + esc(r.referrerEmail || '') + ')</div>' +
+          '<div class="item-meta">💵 Deposited: ' + (r.hasDeposited ? '✅ Yes' : '❌ No') + '</div>' +
           '<div class="item-meta">🕐 ' + new Date(r.createdAt).toLocaleString() + '</div>' +
         '</div>'
       ).join('');
@@ -1257,17 +1095,14 @@
     function renderProducts() {
       const list = document.getElementById('productsList');
       if (!allProducts.length) { list.innerHTML = '<div class="empty">কোনো product নেই</div>'; return; }
-      
       list.innerHTML = allProducts.map(p => {
         const photo = p.photo 
           ? '<img src="' + esc(p.photo) + '" class="product-img" onerror="this.outerHTML=\'<div class=&quot;product-img&quot;>📦</div>\'">'
           : '<div class="product-img">📦</div>';
-        
         const badges = [];
         if (p.linkData) badges.push('<span class="badge link">🔗 Link</span>');
         if (p.fileData) badges.push('<span class="badge file">📁 File</span>');
         if (p.codeData) badges.push('<span class="badge code">💻 Code</span>');
-        
         return '<div class="product-row">' + photo +
           '<div class="product-info">' +
             '<h4>' + esc(p.title) + '</h4>' +
@@ -1288,7 +1123,6 @@
     function openProductModal(id) {
       editingProductId = id || null;
       document.getElementById('productModalTitle').textContent = id ? '📝 Edit Product' : '➕ Add Product';
-      
       if (id) {
         const p = allProducts.find(x => x._id === id);
         if (p) {
@@ -1316,14 +1150,10 @@
       const file = document.getElementById('pFileData').value.trim();
       const code = document.getElementById('pCodeData').value.trim();
       const hasAny = link || file || code;
-      
       document.getElementById('deliveryWarning').style.display = hasAny ? 'none' : 'block';
       document.getElementById('deliverySuccess').style.display = hasAny ? 'block' : 'none';
     }
-    function closeProductModal() {
-      editingProductId = null;
-      document.getElementById('productModal').classList.remove('show');
-    }
+    function closeProductModal() { editingProductId = null; document.getElementById('productModal').classList.remove('show'); }
     function previewPhoto() {
       const url = document.getElementById('pPhoto').value.trim();
       const img = document.getElementById('photoPreview');
@@ -1335,7 +1165,6 @@
       const linkData = document.getElementById('pLinkData').value.trim();
       const fileData = document.getElementById('pFileData').value.trim();
       const codeData = document.getElementById('pCodeData').value.trim();
-      
       const body = {
         title: document.getElementById('pTitle').value.trim(),
         description: document.getElementById('pDesc').value.trim(),
@@ -1343,22 +1172,16 @@
         price: document.getElementById('pPrice').value,
         discountPrice: document.getElementById('pDiscount').value,
         photo: document.getElementById('pPhoto').value.trim(),
-        linkData,
-        fileData,
-        codeData,
+        linkData, fileData, codeData,
         stock: document.getElementById('pStock').value
       };
-      
       if (!body.title) return showToast('❌ Title দিন', true);
       if (!body.price) return showToast('❌ Price দিন', true);
       if (!linkData && !fileData && !codeData) return showToast('❌ কমপক্ষে একটা Delivery option দিন', true);
-      
       btn.disabled = true;
       btn.textContent = '💾 Saving...';
-      
       const url = editingProductId ? '/api/admin/product/' + editingProductId : '/api/admin/product';
       const method = editingProductId ? 'PUT' : 'POST';
-      
       try {
         const res = await fetch(url, {
           method,
@@ -1371,21 +1194,15 @@
           closeProductModal();
           loadProducts();
           loadAll();
-        } else {
-          showToast('❌ ' + (data.error || 'Failed'), true);
-        }
-      } catch (e) {
-        showToast('❌ ' + e.message, true);
-      }
+        } else showToast('❌ ' + (data.error || 'Failed'), true);
+      } catch (e) { showToast('❌ ' + e.message, true); }
       btn.disabled = false;
       btn.textContent = '💾 Save';
     }
     async function delProduct(id) {
       if (!confirm('Product delete করবে?')) return;
       await fetch('/api/admin/product/' + id, { method: 'DELETE', headers: { 'x-admin-token': token } });
-      showToast('🗑 Deleted');
-      loadProducts();
-      loadAll();
+      showToast('🗑 Deleted'); loadProducts(); loadAll();
     }
 
     // ===== DEPOSITS =====
@@ -1402,13 +1219,15 @@
     function renderDeposits() {
       const list = document.getElementById('depositsList');
       if (!allDeposits.length) { list.innerHTML = '<div class="empty">কোনো deposit নেই</div>'; return; }
-      
       list.innerHTML = allDeposits.map(d => 
         '<div class="item-card">' +
           '<div class="item-head">' +
-            '<div class="item-title">💰 ৳' + d.amount + '</div>' +
+            '<div class="item-title">💰 ৳' + d.amount + 
+              (d.bonusAmount ? ' <span class="badge bonus">+৳' + d.bonusAmount + ' bonus</span>' : '') +
+            '</div>' +
             '<span class="badge ' + d.status + '">' + d.status + '</span>' +
           '</div>' +
+          (d.depositNumber ? '<div class="item-meta">📊 Deposit #' + d.depositNumber + '</div>' : '') +
           '<div class="item-meta">👤 ' + esc(d.userEmail || '') + '</div>' +
           '<div class="item-meta">📱 From: ' + esc(d.senderNumber || 'N/A') + '</div>' +
           (d.transactionId ? '<div class="item-meta">🆔 TRX: ' + esc(d.transactionId) + '</div>' : '') +
@@ -1424,7 +1243,7 @@
       ).join('');
     }
     async function reviewDep(id, action) {
-      if (!confirm(action === 'approve' ? 'Approve করলে wallet এ ৳ যোগ হবে। ঠিক আছে?' : 'Reject করবে?')) return;
+      if (!confirm(action === 'approve' ? 'Approve করলে wallet এ ৳ + bonus যোগ হবে। ঠিক আছে?' : 'Reject করবে?')) return;
       try {
         const res = await fetch('/api/admin/deposit/' + id, {
           method: 'PUT',
@@ -1435,12 +1254,8 @@
           showToast(action === 'approve' ? '✅ Approved!' : '❌ Rejected');
           loadDeposits('pending');
           loadAll();
-        } else {
-          showToast('❌ Failed', true);
-        }
-      } catch (e) {
-        showToast('❌ ' + e.message, true);
-      }
+        } else showToast('❌ Failed', true);
+      } catch (e) { showToast('❌ ' + e.message, true); }
     }
 
     // ===== ORDERS =====
@@ -1453,15 +1268,11 @@
     function filterOrders() {
       const q = document.getElementById('searchOrders').value.toLowerCase();
       if (!q) return renderOrders(allOrders);
-      renderOrders(allOrders.filter(o => 
-        (o.productTitle || '').toLowerCase().includes(q) || 
-        (o.userEmail || '').toLowerCase().includes(q)
-      ));
+      renderOrders(allOrders.filter(o => (o.productTitle || '').toLowerCase().includes(q) || (o.userEmail || '').toLowerCase().includes(q)));
     }
     function renderOrders(orders) {
       const list = document.getElementById('ordersList');
       if (!orders.length) { list.innerHTML = '<div class="empty">কোনো order নেই</div>'; return; }
-      
       list.innerHTML = orders.map(o => 
         '<div class="item-card">' +
           '<div class="item-title">📦 ' + esc(o.productTitle) + '</div>' +
@@ -1482,28 +1293,17 @@
     function renderGiftCodes() {
       const list = document.getElementById('giftcodesList');
       document.getElementById('giftCount').textContent = allGifts.length + ' total';
-      
-      if (!allGifts.length) {
-        list.innerHTML = '<div class="empty">কোনো Gift Code নেই</div>';
-        return;
-      }
-      
+      if (!allGifts.length) { list.innerHTML = '<div class="empty">কোনো Gift Code নেই</div>'; return; }
       list.innerHTML = allGifts.map(g => {
         const isExpired = g.expiresAt && new Date() > new Date(g.expiresAt);
         const isUsedUp = g.usedCount >= g.maxUses;
-        
         let statusBadge = '';
         if (isExpired) statusBadge = '<span class="badge gift-expired">⏰ Expired</span>';
         else if (!g.active) statusBadge = '<span class="badge gift-inactive">⏸ Inactive</span>';
         else if (isUsedUp) statusBadge = '<span class="badge gift-expired">✅ Fully Used</span>';
         else statusBadge = '<span class="badge gift-active">✅ Active</span>';
-        
-        const expiryText = g.expiresAt 
-          ? new Date(g.expiresAt).toLocaleDateString('bn-BD') 
-          : 'Never';
-        
+        const expiryText = g.expiresAt ? new Date(g.expiresAt).toLocaleDateString('bn-BD') : 'Never';
         const progress = Math.min(100, Math.round((g.usedCount / g.maxUses) * 100));
-        
         return '<div class="gift-card">' +
           '<div class="gift-code-big">🎁 ' + esc(g.code) + '</div>' +
           '<div class="gift-stats">' +
@@ -1524,111 +1324,62 @@
         '</div>';
       }).join('');
     }
-    
     function generateRandomCode() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let code = '';
-      for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
+      for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
       document.getElementById('giftCode').value = code;
     }
-    
     async function createGiftCode() {
       const code = document.getElementById('giftCode').value.trim().toUpperCase();
       const amount = document.getElementById('giftAmount').value;
       const maxUses = document.getElementById('giftMaxUses').value || 1;
       const expiresAt = document.getElementById('giftExpires').value;
-      
       if (!code) return showToast('❌ Code দিন', true);
       if (code.length < 4) return showToast('❌ Code কমপক্ষে ৪ অক্ষর', true);
       if (!amount) return showToast('❌ Amount দিন', true);
-      
       try {
         const res = await fetch('/api/admin/giftcode', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-          body: JSON.stringify({ 
-            code, 
-            amount: Number(amount), 
-            maxUses: Number(maxUses),
-            expiresAt: expiresAt || null
-          })
+          body: JSON.stringify({ code, amount: Number(amount), maxUses: Number(maxUses), expiresAt: expiresAt || null })
         });
         const data = await res.json();
         if (res.ok) {
-          showToast('✅ Gift Code তৈরি হয়েছে: ' + code);
+          showToast('✅ Gift Code তৈরি: ' + code);
           document.getElementById('giftCode').value = '';
           document.getElementById('giftAmount').value = '';
           document.getElementById('giftMaxUses').value = '1';
           document.getElementById('giftExpires').value = '';
           loadGiftCodes();
           loadAll();
-        } else {
-          showToast('❌ ' + (data.error || 'Failed'), true);
-        }
-      } catch (e) {
-        showToast('❌ ' + e.message, true);
-      }
+        } else showToast('❌ ' + (data.error || 'Failed'), true);
+      } catch (e) { showToast('❌ ' + e.message, true); }
     }
-    
-    function copyGiftCode(code) {
-      navigator.clipboard.writeText(code);
-      showToast('✅ Copied: ' + code);
-    }
-    
+    function copyGiftCode(code) { navigator.clipboard.writeText(code); showToast('✅ Copied: ' + code); }
     async function toggleGift(code) {
       try {
-        const res = await fetch('/api/admin/giftcode/' + code + '/toggle', {
-          method: 'PUT',
-          headers: { 'x-admin-token': token }
-        });
-        if (res.ok) {
-          showToast('✅ Updated');
-          loadGiftCodes();
-        } else {
-          showToast('❌ Failed', true);
-        }
-      } catch (e) {
-        showToast('❌ ' + e.message, true);
-      }
+        const res = await fetch('/api/admin/giftcode/' + code + '/toggle', { method: 'PUT', headers: { 'x-admin-token': token } });
+        if (res.ok) { showToast('✅ Updated'); loadGiftCodes(); }
+        else showToast('❌ Failed', true);
+      } catch (e) { showToast('❌ ' + e.message, true); }
     }
-    
     async function deleteGift(code) {
       if (!confirm('Gift Code "' + code + '" delete করবে?')) return;
       try {
-        const res = await fetch('/api/admin/giftcode/' + code, {
-          method: 'DELETE',
-          headers: { 'x-admin-token': token }
-        });
-        if (res.ok) {
-          showToast('🗑 Deleted');
-          loadGiftCodes();
-          loadAll();
-        } else {
-          showToast('❌ Failed', true);
-        }
-      } catch (e) {
-        showToast('❌ ' + e.message, true);
-      }
+        const res = await fetch('/api/admin/giftcode/' + code, { method: 'DELETE', headers: { 'x-admin-token': token } });
+        if (res.ok) { showToast('🗑 Deleted'); loadGiftCodes(); loadAll(); }
+        else showToast('❌ Failed', true);
+      } catch (e) { showToast('❌ ' + e.message, true); }
     }
-    
     async function viewRedeems(code) {
       document.getElementById('redeemsModalTitle').textContent = '🎁 ' + code + ' — Redemptions';
       document.getElementById('redeemsList').innerHTML = '<div class="empty">Loading...</div>';
       document.getElementById('redeemsModal').classList.add('show');
-      
       try {
-        const res = await fetch('/api/admin/giftcode/' + code + '/redeems', {
-          headers: { 'x-admin-token': token }
-        });
+        const res = await fetch('/api/admin/giftcode/' + code + '/redeems', { headers: { 'x-admin-token': token } });
         const list = await res.json();
-        
-        if (!list.length) {
-          document.getElementById('redeemsList').innerHTML = '<div class="empty">এখনো কেউ ব্যবহার করেনি</div>';
-          return;
-        }
-        
+        if (!list.length) { document.getElementById('redeemsList').innerHTML = '<div class="empty">এখনো কেউ ব্যবহার করেনি</div>'; return; }
         document.getElementById('redeemsList').innerHTML = list.map(r => 
           '<div class="item-card">' +
             '<div class="item-title">👤 ' + esc(r.userName || 'User') + '</div>' +
@@ -1641,8 +1392,124 @@
         document.getElementById('redeemsList').innerHTML = '<div class="empty">Failed to load</div>';
       }
     }
-    function closeRedeemsModal() {
-      document.getElementById('redeemsModal').classList.remove('show');
+    function closeRedeemsModal() { document.getElementById('redeemsModal').classList.remove('show'); }
+
+    // ===== DEPOSIT BONUSES =====
+    async function loadBonuses() {
+      try {
+        const res = await fetch('/api/admin/deposit-bonuses', { headers: { 'x-admin-token': token } });
+        if (res.status === 401) return logout();
+        const data = await res.json();
+        bonusData.enabled = data.enabled !== false;
+        bonusData.deposit1 = data.depositBonuses?.deposit1 || [];
+        bonusData.deposit2 = data.depositBonuses?.deposit2 || [];
+        bonusData.deposit3 = data.depositBonuses?.deposit3 || [];
+        renderBonuses();
+      } catch (e) {
+        console.error(e);
+        showToast('❌ Failed to load bonuses', true);
+      }
+    }
+    
+    function renderBonuses() {
+      // Toggle
+      const t = document.getElementById('bonusToggle');
+      if (bonusData.enabled) {
+        t.className = 'toggle-switch on';
+        t.innerHTML = '✅ Bonus Enabled';
+      } else {
+        t.className = 'toggle-switch off';
+        t.innerHTML = '⏸ Bonus Disabled';
+      }
+      
+      renderTiers(1);
+      renderTiers(2);
+      renderTiers(3);
+    }
+    
+    function renderTiers(num) {
+      const container = document.getElementById('deposit' + num + 'Tiers');
+      const tiers = bonusData['deposit' + num] || [];
+      
+      if (!tiers.length) {
+        container.innerHTML = '<div class="empty-tiers">কোনো tier নেই — [➕ Add Tier] চাপো</div>';
+        return;
+      }
+      
+      container.innerHTML = tiers.map((tier, idx) => 
+        '<div class="tier-row">' +
+          '<span class="tier-num">#' + (idx + 1) + '</span>' +
+          '<input type="number" class="tier-input" placeholder="50" value="' + tier.minAmount + '" onchange="updateTier(' + num + ',' + idx + ',\'minAmount\',this.value)">' +
+          '<span class="tier-arrow">→</span>' +
+          '<input type="number" class="tier-input" placeholder="10" value="' + tier.bonus + '" onchange="updateTier(' + num + ',' + idx + ',\'bonus\',this.value)">' +
+          '<button class="tier-del" onclick="deleteTier(' + num + ',' + idx + ')">🗑</button>' +
+        '</div>'
+      ).join('');
+    }
+    
+    function updateTier(num, idx, field, value) {
+      bonusData['deposit' + num][idx][field] = Number(value) || 0;
+    }
+    
+    function addBonusTier(num) {
+      bonusData['deposit' + num].push({ minAmount: 100, bonus: 10 });
+      renderTiers(num);
+      showToast('✅ Tier যোগ হয়েছে');
+    }
+    
+    function deleteTier(num, idx) {
+      if (!confirm('Tier delete করবে?')) return;
+      bonusData['deposit' + num].splice(idx, 1);
+      renderTiers(num);
+      showToast('🗑 Deleted');
+    }
+    
+    function toggleBonusSystem() {
+      bonusData.enabled = !bonusData.enabled;
+      renderBonuses();
+    }
+    
+    async function saveBonuses() {
+      try {
+        const body = {
+          enabled: bonusData.enabled,
+          depositBonuses: {
+            deposit1: bonusData.deposit1,
+            deposit2: bonusData.deposit2,
+            deposit3: bonusData.deposit3
+          }
+        };
+        
+        const res = await fetch('/api/admin/deposit-bonuses', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+          body: JSON.stringify(body)
+        });
+        
+        if (res.ok) {
+          showToast('✅ Bonus settings saved!');
+          loadBonuses();
+        } else {
+          const data = await res.json();
+          showToast('❌ ' + (data.error || 'Failed'), true);
+        }
+      } catch (e) {
+        showToast('❌ ' + e.message, true);
+      }
+    }
+    
+    async function resetBonuses() {
+      if (!confirm('সব Bonus default এ ফিরে যাবে। ঠিক আছে?')) return;
+      try {
+        const res = await fetch('/api/admin/deposit-bonuses/reset', {
+          method: 'PUT',
+          headers: { 'x-admin-token': token }
+        });
+        if (res.ok) {
+          showToast('🔄 Reset to default');
+          loadBonuses();
+        } else showToast('❌ Failed', true);
+      } catch (e) { showToast('❌ ' + e.message, true); }
     }
 
     // ===== SETTINGS =====
@@ -1655,6 +1522,7 @@
       document.getElementById('setNagadActive').value = s.nagadActive ? 'true' : 'false';
       document.getElementById('setWelcome').value = s.welcomeBonus || 20;
       document.getElementById('setReferral').value = s.referralBonus || 10;
+      document.getElementById('setMinRef').value = s.minRefDeposit || 50;
       document.getElementById('setMin').value = s.minDeposit || 50;
       document.getElementById('setMax').value = s.maxDeposit || 10000;
       document.getElementById('setEmail').value = s.supportEmail || '';
@@ -1669,6 +1537,7 @@
         nagadActive: document.getElementById('setNagadActive').value === 'true',
         welcomeBonus: Number(document.getElementById('setWelcome').value) || 20,
         referralBonus: Number(document.getElementById('setReferral').value) || 10,
+        minRefDeposit: Number(document.getElementById('setMinRef').value) || 50,
         minDeposit: Number(document.getElementById('setMin').value) || 50,
         maxDeposit: Number(document.getElementById('setMax').value) || 10000,
         supportEmail: document.getElementById('setEmail').value.trim(),
@@ -1683,15 +1552,13 @@
         });
         if (res.ok) showToast('✅ Settings Saved!');
         else showToast('❌ Failed', true);
-      } catch (e) {
-        showToast('❌ ' + e.message, true);
-      }
+      } catch (e) { showToast('❌ ' + e.message, true); }
     }
 
     // ===== CONTENT EDITOR =====
     const CONTENT_LABELS = {
       wallet: { title: "💰 Wallet Page", desc: "Wallet page এর সব লেখা", icon: "💰", fields: {
-        title: "Page Title", balanceLabel: "Balance Label", safeText: "Safe Text", giftTitle: "Gift Section Title", giftDesc: "Gift Description", giftPlaceholder: "Gift Placeholder", giftButton: "Gift Button", addMoneyTab: "Add Money Tab", historyTab: "History Tab", howToTitle: "How To Title", howToInfo: "How To Info", sendLabel: "Send Money Label", copyBtn: "Copy Button", amountLabel: "Amount Label", amountPlaceholder: "Amount Placeholder", bkashLabel: "bKash Label", bkashPlaceholder: "bKash Placeholder", trxLabel: "TRX Label", trxPlaceholder: "TRX Placeholder", screenshotLabel: "Screenshot Label", screenshotPlaceholder: "Screenshot Placeholder", submitBtn: "Submit Button", noHistory: "No History Text", loadingText: "Loading Text"
+        title: "Page Title", balanceLabel: "Balance Label", safeText: "Safe Text", giftTitle: "Gift Section Title", giftDesc: "Gift Description", giftPlaceholder: "Gift Placeholder", giftButton: "Gift Button", addMoneyTab: "Add Money Tab", historyTab: "History Tab", howToTitle: "How To Title", howToInfo: "How To Info", sendLabel: "Send Money Label", copyBtn: "Copy Button", amountLabel: "Amount Label", amountPlaceholder: "Amount Placeholder", bkashLabel: "bKash Label", bkashPlaceholder: "bKash Placeholder", trxLabel: "TRX Label", trxPlaceholder: "TRX Placeholder", screenshotLabel: "Screenshot Label", screenshotPlaceholder: "Screenshot Placeholder", submitBtn: "Submit Button", noHistory: "No History Text", loadingText: "Loading Text", bonusTitle: "Bonus Title", bonusDesc: "Bonus Description"
       }},
       referral: { title: "📢 Referral Section", desc: "Referral section এর লেখা", icon: "📢", fields: {
         title: "Section Heading", subtitle: "Section Subtitle", copyBtn: "Copy Button", referralsLabel: "Referrals Label", earnedLabel: "Earned Label", whatsappBtn: "WhatsApp Button", telegramBtn: "Telegram Button", facebookBtn: "Facebook Button", whoJoinedTitle: "Who Joined Title", shareMessage: "Share Message"
@@ -1730,11 +1597,9 @@
     function renderContentPanels() {
       const container = document.getElementById('contentPanels');
       let html = '';
-      
       for (const section in CONTENT_LABELS) {
         const config = CONTENT_LABELS[section];
         const data = contentData[section] || {};
-        
         let fieldsHtml = '';
         for (const fieldKey in config.fields) {
           const label = config.fields[fieldKey];
@@ -1745,15 +1610,11 @@
               '<input type="text" data-section="' + section + '" data-key="' + fieldKey + '" value="' + esc(value) + '">' +
             '</div>';
         }
-        
         html += 
           '<div class="content-panel' + (section === activeContentSection ? ' active' : '') + '" id="panel-' + section + '">' +
             '<div class="content-panel-head">' +
               '<div class="content-panel-head-icon">' + config.icon + '</div>' +
-              '<div>' +
-                '<h2>' + config.title + '</h2>' +
-                '<p>' + config.desc + '</p>' +
-              '</div>' +
+              '<div><h2>' + config.title + '</h2><p>' + config.desc + '</p></div>' +
             '</div>' +
             fieldsHtml +
             '<div class="content-actions">' +
@@ -1762,7 +1623,6 @@
             '</div>' +
           '</div>';
       }
-      
       container.innerHTML = html;
     }
 
@@ -1779,7 +1639,6 @@
       const inputs = document.querySelectorAll('input[data-section="' + section + '"]');
       const data = {};
       inputs.forEach(inp => { data[inp.dataset.key] = inp.value; });
-      
       try {
         const res = await fetch('/api/admin/content', {
           method: 'PUT',
@@ -1789,12 +1648,8 @@
         if (res.ok) {
           showToast('✅ ' + section + ' saved!');
           contentData[section] = { ...contentData[section], ...data };
-        } else {
-          showToast('❌ Failed to save', true);
-        }
-      } catch (e) {
-        showToast('❌ ' + e.message, true);
-      }
+        } else showToast('❌ Failed to save', true);
+      } catch (e) { showToast('❌ ' + e.message, true); }
     }
 
     async function resetContent(section) {
@@ -1804,15 +1659,9 @@
           method: 'PUT',
           headers: { 'x-admin-token': token }
         });
-        if (res.ok) {
-          showToast('🔄 Reset to default');
-          loadContent();
-        } else {
-          showToast('❌ Failed', true);
-        }
-      } catch (e) {
-        showToast('❌ ' + e.message, true);
-      }
+        if (res.ok) { showToast('🔄 Reset to default'); loadContent(); }
+        else showToast('❌ Failed', true);
+      } catch (e) { showToast('❌ ' + e.message, true); }
     }
   </script>
 </body>
